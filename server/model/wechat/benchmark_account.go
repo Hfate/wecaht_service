@@ -4,8 +4,8 @@ import "github.com/flipped-aurora/gin-vue-admin/server/global"
 
 type BenchmarkAccount struct {
 	global.GVA_MODEL
-	AccountName string `json:"account_name"`
-	AccountId   string `json:"account_id"`
+	AccountName string `json:"accountName"`
+	AccountId   string `json:"accountId"`
 	Topic       string `json:"topic"`
 }
 

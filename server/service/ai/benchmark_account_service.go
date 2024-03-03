@@ -67,7 +67,7 @@ func (exa *BenchmarkAccountService) GetBenchmarkAccountList(sysUserAuthorityID u
 	for _, v := range auth.DataAuthorityId {
 		dataId = append(dataId, v.AuthorityId)
 	}
-	var articleList []wechat.BenchmarkAccount
+	var benchmarkAccountList []wechat.BenchmarkAccount
 
 	db := global.GVA_DB.Model(&wechat.BenchmarkAccount{})
 
@@ -78,9 +78,9 @@ func (exa *BenchmarkAccountService) GetBenchmarkAccountList(sysUserAuthorityID u
 
 	err = db.Count(&total).Error
 	if err != nil {
-		return articleList, total, err
+		return benchmarkAccountList, total, err
 	} else {
-		err = db.Limit(limit).Offset(offset).Order("publish_time desc").Find(&articleList).Error
+		err = db.Limit(limit).Offset(offset).Find(&benchmarkAccountList).Error
 	}
-	return articleList, total, err
+	return benchmarkAccountList, total, err
 }

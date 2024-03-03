@@ -99,6 +99,7 @@ func Routers() *gin.Engine {
 		exampleRouter.InitFileUploadAndDownloadRouter(PrivateGroup) // 文件上传下载功能路由
 		aiRouter.InitPortalRouter(PrivateGroup)                     // 门户网站管理
 		aiRouter.InitArticleRouter(PrivateGroup)                    // 文章管理
+		aiRouter.InitBenchmarkAccountRouter(PrivateGroup)           // 对标账号管理
 	}
 
 	global.GVA_LOG.Info("router register success")

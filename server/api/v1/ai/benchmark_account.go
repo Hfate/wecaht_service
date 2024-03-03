@@ -21,8 +21,8 @@ type BenchmarkAccountApi struct{}
 // @Produce   application/json
 // @Param     data  body      wechat.BenchmarkAccount            true  "门户用户名, 门户手机号码"
 // @Success   200   {object}  response.Response{msg=string}  "创建对标账号"
-// @Router    /benchmarkAccount/benchmarkAccount [post]
-func (e *PortalApi) CreateBenchmarkAccount(c *gin.Context) {
+// @Router    /benchmark/benchmark [post]
+func (e *BenchmarkAccountApi) CreateBenchmarkAccount(c *gin.Context) {
 	var benchmarkAccount wechat.BenchmarkAccount
 	err := c.ShouldBindJSON(&benchmarkAccount)
 	if err != nil {
@@ -51,7 +51,7 @@ func (e *PortalApi) CreateBenchmarkAccount(c *gin.Context) {
 // @Produce   application/json
 // @Param     data  body      wechat.BenchmarkAccount            true  "对标账号ID"
 // @Success   200   {object}  response.Response{msg=string}  "删除对标账号"
-// @Router    /benchmarkAccount/benchmarkAccount [delete]
+// @Router    /benchmark/benchmark [delete]
 func (e *BenchmarkAccountApi) DeleteBenchmarkAccount(c *gin.Context) {
 	var benchmarkAccount wechat.BenchmarkAccount
 	err := c.ShouldBindJSON(&benchmarkAccount)

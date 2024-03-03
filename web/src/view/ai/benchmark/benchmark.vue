@@ -1,42 +1,14 @@
 <template>
   <div>
-    <div class="gva-search-box">
-      <el-form
-          :inline="true"
-          :model="searchInfo"
-      >
-        <el-form-item label="文章标题">
-          <el-input
-              v-model="searchInfo.Title"
-          />
-        </el-form-item>
-        <el-form-item label="门户">
-          <el-input
-              v-model="searchInfo.PortalName"
-          />
-        </el-form-item>
-        <el-form-item label="主题">
-          <el-input
-              v-model="searchInfo.Topic"
-              placeholder=""
-          />
-        </el-form-item>
-        <el-form-item>
-          <el-button
-              type="primary"
-              icon="search"
-              @click="onSubmit"
-          >查询
-          </el-button>
-          <el-button
-              icon="refresh"
-              @click="onReset"
-          >重置
-          </el-button>
-        </el-form-item>
-      </el-form>
-    </div>
     <div class="gva-table-box">
+      <div class="gva-btn-list">
+        <el-button
+            type="primary"
+            icon="plus"
+            @click="openDialog"
+        >新增
+        </el-button>
+      </div>
       <el-table
           ref="multipleTable"
           :data="tableData"
@@ -50,15 +22,15 @@
         />
         <el-table-column
             align="left"
-            label="文章标题"
-            prop="title"
+            label="公众号名称"
+            prop="accountName"
             width="300"
         >
         </el-table-column>
         <el-table-column
             align="left"
-            label="门户"
-            prop="portalName"
+            label="公众号ID"
+            prop="accountId"
             width="100"
         />
         <el-table-column
@@ -66,45 +38,6 @@
             label="主题"
             prop="topic"
             width="80"
-        />
-        <el-table-column
-            align="left"
-            label="作者"
-            prop="authorName"
-            width="200"
-        />
-        <el-table-column
-            align="left"
-            label="链接"
-            prop="link"
-            width="120"
-        />
-        <el-table-column
-            align="left"
-            label="发布时间"
-            width="180"
-        >
-          <template #default="scope">
-            <span>{{ formatDate(scope.row.publishTime) }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column
-            align="left"
-            label="阅读量"
-            prop="readNum"
-            width="120"
-        />
-        <el-table-column
-            align="left"
-            label="评论量"
-            prop="commentNum"
-            width="120"
-        />
-        <el-table-column
-            align="left"
-            label="点赞量"
-            prop="likeNum"
-            width="120"
         />
         <el-table-column
             align="left"
@@ -136,7 +69,7 @@
                 </el-button>
                 <el-button
                     type="primary"
-                    @click="deleteWechatArticle(scope.row)"
+                    @click="deleteWechatBenchmarkAccount(scope.row)"
                 >确定
                 </el-button>
               </div>
@@ -165,34 +98,76 @@
         />
       </div>
     </div>
+
+
+    <el-dialog
+        v-model="dialogFormVisible"
+        :before-close="closeDialog"
+        title="对标账号"
+    >
+      <el-scrollbar height="500px">
+        <el-form
+            :model="form"
+            label-position="right"
+            label-width="90px"
+        >
+          <el-form-item label="微信公众号全称">
+            <el-input
+                v-model="form.accountName"
+                autocomplete="off"
+            />
+          </el-form-item>
+          <el-form-item label="微信公众号Id">
+            <el-input
+                v-model="form.accountId"
+                autocomplete="off"
+            />
+          </el-form-item>
+          <el-form-item label="主题">
+            <el-input
+                v-model="form.topic"
+                autocomplete="off"
+            />
+          </el-form-item>
+        </el-form>
+      </el-scrollbar>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="closeDialog">取 消</el-button>
+          <el-button
+              type="primary"
+              @click="enterDialog"
+          >确 定
+          </el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import {deleteArticle, getArticleList} from '@/api/article'
+import {createBenchmark, deleteBenchmarkAccount, getBenchmarkAccountList} from '@/api/benchmarkAccount'
 import {ref} from 'vue'
 import {ElMessage} from 'element-plus'
 import {formatDate} from '@/utils/format'
+import {createPortal, updatePortal} from "@/api/portal";
 
 defineOptions({
-  name: 'Article'
+  name: 'Benchmark'
 })
 
+
+const form = ref({
+  accountName: '',
+  accountId: '',
+  topic: '',
+})
 
 const page = ref(1)
 const total = ref(0)
 const pageSize = ref(10)
 const tableData = ref([])
 const searchInfo = ref({})
-const onReset = () => {
-  searchInfo.value = {}
-}
-// 条件搜索前端看此方法
-const onSubmit = () => {
-  page.value = 1
-  pageSize.value = 10
-  getTableData()
-}
 
 
 // 分页
@@ -208,7 +183,7 @@ const handleCurrentChange = (val) => {
 
 // 查询
 const getTableData = async () => {
-  const table = await getArticleList({page: page.value, pageSize: pageSize.value, ...searchInfo.value,})
+  const table = await getBenchmarkAccountList({page: page.value, pageSize: pageSize.value, ...searchInfo.value,})
   if (table.code === 0) {
     tableData.value = table.data.list
     total.value = table.data.total
@@ -223,9 +198,9 @@ const dialogFormVisible = ref(false)
 const type = ref('')
 
 
-const deleteWechatArticle = async (row) => {
+const deleteWechatBenchmarkAccount = async (row) => {
   row.visible = false
-  const res = await deleteArticle({ID: row.ID})
+  const res = await deleteBenchmarkAccount({ID: row.ID})
   if (res.code === 0) {
     ElMessage({
       type: 'success',
@@ -238,6 +213,42 @@ const deleteWechatArticle = async (row) => {
   }
 }
 
+
+const enterDialog = async () => {
+  let res
+  switch (type.value) {
+    case 'create':
+      res = await createBenchmark(form.value)
+      break
+      // case 'update':
+      //   res = await updatePortal(form.value)
+      //   break
+    default:
+      res = await createBenchmark(form.value)
+      break
+  }
+
+  if (res.code === 0) {
+    closeDialog()
+    getTableData()
+  }
+}
+
+
+const openDialog = () => {
+  type.value = 'create'
+  dialogFormVisible.value = true
+}
+
+
+const closeDialog = () => {
+  dialogFormVisible.value = false
+  form.value = {
+    accountName: '',
+    accountId: '',
+    topic: '',
+  }
+}
 
 </script>
 
