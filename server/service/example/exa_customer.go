@@ -49,7 +49,7 @@ func (exa *CustomerService) UpdateExaCustomer(e *example.ExaCustomer) (err error
 //@param: id uint
 //@return: customer model.ExaCustomer, err error
 
-func (exa *CustomerService) GetExaCustomer(id uint) (customer example.ExaCustomer, err error) {
+func (exa *CustomerService) GetExaCustomer(id uint64) (customer example.ExaCustomer, err error) {
 	err = global.GVA_DB.Where("id = ?", id).First(&customer).Error
 	return
 }

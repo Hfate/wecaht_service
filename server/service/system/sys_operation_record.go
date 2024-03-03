@@ -49,7 +49,7 @@ func (operationRecordService *OperationRecordService) DeleteSysOperationRecord(s
 //@param: id uint
 //@return: sysOperationRecord system.SysOperationRecord, err error
 
-func (operationRecordService *OperationRecordService) GetSysOperationRecord(id uint) (sysOperationRecord system.SysOperationRecord, err error) {
+func (operationRecordService *OperationRecordService) GetSysOperationRecord(id uint64) (sysOperationRecord system.SysOperationRecord, err error) {
 	err = global.GVA_DB.Where("id = ?", id).First(&sysOperationRecord).Error
 	return
 }

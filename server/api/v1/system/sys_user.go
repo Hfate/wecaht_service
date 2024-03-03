@@ -324,7 +324,7 @@ func (b *BaseApi) DeleteUser(c *gin.Context) {
 		return
 	}
 	jwtId := utils.GetUserID(c)
-	if jwtId == uint(reqId.ID) {
+	if jwtId == uint64(reqId.ID) {
 		response.FailWithMessage("删除失败, 自杀失败", c)
 		return
 	}

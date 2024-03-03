@@ -39,12 +39,12 @@ type SetUserAuth struct {
 
 // Modify  user's auth structure
 type SetUserAuthorities struct {
-	ID           uint
+	ID           uint64
 	AuthorityIds []uint `json:"authorityIds"` // 角色ID
 }
 
 type ChangeUserInfo struct {
-	ID           uint                  `gorm:"primarykey"`                                                                           // 主键ID
+	ID           uint64                `gorm:"primarykey"`                                                                           // 主键ID
 	NickName     string                `json:"nickName" gorm:"default:系统用户;comment:用户昵称"`                                            // 用户昵称
 	Phone        string                `json:"phone"  gorm:"comment:用户手机号"`                                                          // 用户手机号
 	AuthorityIds []uint                `json:"authorityIds" gorm:"-"`                                                                // 角色ID

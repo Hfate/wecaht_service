@@ -17,7 +17,10 @@ func OtherInit() {
 		panic(err)
 	}
 
+	utils.Init("2024-02-29", 1)
+
 	global.BlackCache = local_cache.NewCache(
 		local_cache.SetDefaultExpire(dr),
 	)
+
 }

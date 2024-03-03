@@ -16,4 +16,7 @@ var (
 	OldAuthorityVerify     = Rules{"OldAuthorityId": {NotEmpty()}}
 	ChangePasswordVerify   = Rules{"Password": {NotEmpty()}, "NewPassword": {NotEmpty()}}
 	SetUserAuthorityVerify = Rules{"AuthorityId": {NotEmpty()}}
+
+	PortalVerify           = Rules{"PortalName": {NotEmpty()}}
+	BenchmarkAccountVerify = Rules{"AccountName": {NotEmpty()}}
 )

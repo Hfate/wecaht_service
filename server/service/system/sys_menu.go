@@ -56,7 +56,7 @@ func (menuService *MenuService) getMenuTreeMap(authorityId uint) (treeMap map[st
 	if err != nil {
 		return
 	}
-	var btnMap = make(map[uint]map[string]uint)
+	var btnMap = make(map[uint64]map[string]uint)
 	for _, v := range btns {
 		if btnMap[v.SysMenuID] == nil {
 			btnMap[v.SysMenuID] = make(map[string]uint)
@@ -218,6 +218,7 @@ func (menuService *MenuService) GetMenuAuthority(info *request.GetAuthorityId) (
 }
 
 // UserAuthorityDefaultRouter 用户角色默认路由检查
+//
 //	Author [SliverHorn](https://github.com/SliverHorn)
 func (menuService *MenuService) UserAuthorityDefaultRouter(user *system.SysUser) {
 	var menuIds []string

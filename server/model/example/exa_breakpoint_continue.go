@@ -18,7 +18,7 @@ type ExaFile struct {
 // file chunk struct, 切片结构体
 type ExaFileChunk struct {
 	global.GVA_MODEL
-	ExaFileID       uint
+	ExaFileID       uint64
 	FileChunkNumber int
 	FileChunkPath   string
 }

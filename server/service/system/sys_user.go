@@ -101,7 +101,7 @@ func (userService *UserService) GetUserInfoList(info request.PageInfo) (list int
 //@param: uuid uuid.UUID, authorityId string
 //@return: err error
 
-func (userService *UserService) SetUserAuthority(id uint, authorityId uint) (err error) {
+func (userService *UserService) SetUserAuthority(id uint64, authorityId uint) (err error) {
 	assignErr := global.GVA_DB.Where("sys_user_id = ? AND sys_authority_authority_id = ?", id, authorityId).First(&system.SysUserAuthority{}).Error
 	if errors.Is(assignErr, gorm.ErrRecordNotFound) {
 		return errors.New("该用户无此角色")
@@ -116,7 +116,7 @@ func (userService *UserService) SetUserAuthority(id uint, authorityId uint) (err
 //@param: id uint, authorityIds []string
 //@return: err error
 
-func (userService *UserService) SetUserAuthorities(id uint, authorityIds []uint) (err error) {
+func (userService *UserService) SetUserAuthorities(id uint64, authorityIds []uint) (err error) {
 	return global.GVA_DB.Transaction(func(tx *gorm.DB) error {
 		TxErr := tx.Delete(&[]system.SysUserAuthority{}, "sys_user_id = ?", id).Error
 		if TxErr != nil {
@@ -147,7 +147,7 @@ func (userService *UserService) SetUserAuthorities(id uint, authorityIds []uint)
 //@param: id float64
 //@return: err error
 
-func (userService *UserService) DeleteUser(id int) (err error) {
+func (userService *UserService) DeleteUser(id uint64) (err error) {
 	return global.GVA_DB.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Where("id = ?", id).Delete(&system.SysUser{}).Error; err != nil {
 			return err
@@ -241,7 +241,7 @@ func (userService *UserService) FindUserByUuid(uuid string) (user *system.SysUse
 //@param: ID uint
 //@return: err error
 
-func (userService *UserService) ResetPassword(ID uint) (err error) {
+func (userService *UserService) ResetPassword(ID uint64) (err error) {
 	err = global.GVA_DB.Model(&system.SysUser{}).Where("id = ?", ID).Update("password", utils.BcryptHash("123456")).Error
 	return err
 }
