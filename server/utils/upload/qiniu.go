@@ -15,7 +15,6 @@ import (
 
 type Qiniu struct{}
 
-//@author: [piexlmax](https://github.com/piexlmax)
 //@author: [ccfish86](https://github.com/ccfish86)
 //@author: [SliverHorn](https://github.com/SliverHorn)
 //@object: *Qiniu
@@ -49,7 +48,6 @@ func (*Qiniu) UploadFile(file *multipart.FileHeader) (string, string, error) {
 	return global.GVA_CONFIG.Qiniu.ImgPath + "/" + ret.Key, ret.Key, nil
 }
 
-//@author: [piexlmax](https://github.com/piexlmax)
 //@author: [ccfish86](https://github.com/ccfish86)
 //@author: [SliverHorn](https://github.com/SliverHorn)
 //@object: *Qiniu

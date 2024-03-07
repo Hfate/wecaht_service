@@ -19,7 +19,6 @@ import (
 type BenchmarkAccountService struct {
 }
 
-//@author: [piexlmax](https://github.com/piexlmax)
 //@function: CreatePortal
 //@description: 创建门户
 //@param: e model.Portal
@@ -219,7 +218,6 @@ func AnalyticArticle(portalName, resp string) []*wechat.Article {
 	return result
 }
 
-//@author: [piexlmax](https://github.com/piexlmax)
 //@function: DeleteFileChunk
 //@description: 删除对标账号
 //@param: e model.BenchmarkAccount
@@ -230,7 +228,6 @@ func (exa *BenchmarkAccountService) DeleteBenchmarkAccount(e wechat.BenchmarkAcc
 	return err
 }
 
-//@author: [piexlmax](https://github.com/piexlmax)
 //@function: GetBenchmarkAccount
 //@description: 获取对标账号信息
 //@param: id uint

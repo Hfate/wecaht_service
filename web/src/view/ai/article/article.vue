@@ -37,6 +37,69 @@
       </el-form>
     </div>
     <div class="gva-table-box">
+      <div class="gva-btn-list">
+        <el-icon
+            class="cursor-pointer"
+            @click="toDoc('https://www.bilibili.com/video/BV1kv4y1g7nT?p=7&vd_source=f2640257c21e3b547a790461ed94875e')"
+        >
+          <VideoCameraFilled/>
+        </el-icon>
+        <el-popover
+            v-model="deleteVisible"
+            placement="top"
+            width="160"
+        >
+          <p>确定要删除吗？</p>
+          <div style="text-align: right; margin-top: 8px;">
+            <el-button
+                type="primary"
+                link
+                @click="deleteVisible = false"
+            >取消
+            </el-button>
+            <el-button
+                type="primary"
+                @click="onDelete"
+            >确定
+            </el-button>
+          </div>
+          <template #reference>
+            <el-button
+                icon="delete"
+                :disabled="!articles.length"
+                @click="deleteVisible = true"
+            >删除
+            </el-button>
+          </template>
+        </el-popover>
+        <el-popover
+            v-model="downloadVisible"
+            placement="top"
+            width="160"
+        >
+          <p>确定要下载文章上次模板吗？</p>
+          <div style="text-align: right; margin-top: 8px;">
+            <el-button
+                type="primary"
+                link
+                @click="downloadVisible = false"
+            >取消
+            </el-button>
+            <el-button
+                type="primary"
+                @click="downloadTemplate"
+            >确定
+            </el-button>
+          </div>
+          <template #reference>
+            <el-button
+                icon="Download"
+                @click="downloadVisible = true"
+            >模板下载
+            </el-button>
+          </template>
+        </el-popover>
+      </div>
       <el-table
           ref="multipleTable"
           :data="tableData"
@@ -54,6 +117,9 @@
             prop="title"
             width="300"
         >
+          <template #default="scope">
+            <a :href="scope.row.link" target="_blank">{{ scope.row.title }}</a>
+          </template>
         </el-table-column>
         <el-table-column
             align="left"
@@ -72,12 +138,6 @@
             label="作者"
             prop="authorName"
             width="200"
-        />
-        <el-table-column
-            align="left"
-            label="链接"
-            prop="link"
-            width="120"
         />
         <el-table-column
             align="left"
@@ -169,15 +229,17 @@
 </template>
 
 <script setup>
-import {deleteArticle, getArticleList} from '@/api/article'
+import {deleteArticle, deleteArticlesByIds, getArticleList} from '@/api/article'
 import {ref} from 'vue'
 import {ElMessage} from 'element-plus'
 import {formatDate} from '@/utils/format'
+
 
 defineOptions({
   name: 'Article'
 })
 
+const articles = ref([])
 
 const page = ref(1)
 const total = ref(0)
@@ -222,6 +284,37 @@ getTableData()
 const dialogFormVisible = ref(false)
 const type = ref('')
 
+// 批量操作
+const handleSelectionChange = (val) => {
+  articles.value = val
+}
+
+const deleteVisible = ref(false)
+const onDelete = async () => {
+  const ids = articles.value.map(item => item.ID)
+  const res = await deleteArticlesByIds({ids})
+  if (res.code === 0) {
+    ElMessage({
+      type: 'success',
+      message: res.msg
+    })
+    if (tableData.value.length === ids.length && page.value > 1) {
+      page.value--
+    }
+    deleteVisible.value = false
+    getTableData()
+  }
+}
+const downloadVisible = ref(false)
+const downloadTemplate = async () => {
+  downloadVisible.value = false
+  const url = 'http://localhost:8888/article/template'
+  const link = document.createElement('a')
+  link.href = url;
+  link.target = '_blank'; // 在新标签页中打开
+  link.click();
+
+}
 
 const deleteWechatArticle = async (row) => {
   row.visible = false

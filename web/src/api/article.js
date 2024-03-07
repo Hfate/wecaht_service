@@ -18,6 +18,22 @@ export const deleteArticle = (data) => {
 }
 
 // @Tags ArticleApi
+// @Summary 删除文章集合
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data body dbModel.Article true "删除文章集合"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"获取成功"}"
+// @Router /article/deleteArticlesByIds [delete]
+export const deleteArticlesByIds = (data) => {
+    return service({
+        url: '/article/deleteArticlesByIds',
+        method: 'delete',
+        data
+    })
+}
+
+// @Tags ArticleApi
 // @Summary 获取单一文章信息
 // @Security ApiKeyAuth
 // @accept application/json
@@ -44,6 +60,23 @@ export const getArticle = (params) => {
 export const getArticleList = (params) => {
     return service({
         url: '/article/articleList',
+        method: 'get',
+        params
+    })
+}
+
+
+// @Tags ArticleApi
+// @Summary 获取文章导入模板
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data body modelInterface.PageInfo true "获取文章导入模板"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"获取成功"}"
+// @Router /article/template [get]
+export const getTemplate = (params) => {
+    return service({
+        url: '/article/template',
         method: 'get',
         params
     })

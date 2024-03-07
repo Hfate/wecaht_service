@@ -2,6 +2,7 @@ package ai
 
 import (
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
+	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/wechat"
 	aiReq "github.com/flipped-aurora/gin-vue-admin/server/model/wechat/request"
@@ -11,7 +12,6 @@ import (
 type ArticleService struct {
 }
 
-//@author: [piexlmax](https://github.com/piexlmax)
 //@function: DeleteFileChunk
 //@description: 删除文章
 //@param: e model.Article
@@ -22,7 +22,17 @@ func (exa *ArticleService) DeleteArticle(e wechat.Article) (err error) {
 	return err
 }
 
-//@author: [piexlmax](https://github.com/piexlmax)
+//@function: DeleteArticlesByIds
+//@description: 删除选中文章
+//@param: ids []wechat.Article
+//@return: err error
+
+func (exa *ArticleService) DeleteArticlesByIds(ids request.IdsReq) (err error) {
+	var articles []wechat.Article
+	err = global.GVA_DB.Find(&articles, "id in ?", ids.Ids).Delete(&articles).Error
+	return err
+}
+
 //@function: GetArticle
 //@description: 获取文章信息
 //@param: id uint

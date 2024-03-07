@@ -14,9 +14,11 @@ func (e *ArticleRouter) InitArticleRouter(Router *gin.RouterGroup) {
 	articleRouterWithoutRecord := Router.Group("article")
 	articleApi := v1.ApiGroupApp.AIApiGroup.ArticleApi
 	{
-		articleRouter.DELETE("article", articleApi.DeleteArticle) // 删除文章
+		articleRouter.DELETE("article", articleApi.DeleteArticle)                   // 删除文章
+		articleRouter.DELETE("deleteArticlesByIds", articleApi.DeleteArticlesByIds) // 删除文章
 	}
 	{
+		articleRouterWithoutRecord.GET("template", articleApi.Template)          // 获取单一文章信息
 		articleRouterWithoutRecord.GET("article", articleApi.GetArticle)         // 获取单一文章信息
 		articleRouterWithoutRecord.GET("articleList", articleApi.GetArticleList) // 获取文章列表
 	}

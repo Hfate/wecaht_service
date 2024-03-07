@@ -13,7 +13,6 @@ import (
 type OfficialAccountService struct {
 }
 
-//@author: [piexlmax](https://github.com/piexlmax)
 //@function: CreateOfficialAccount
 //@description: 创建门户
 //@param: e model.OfficialAccount
@@ -25,7 +24,6 @@ func (exa *OfficialAccountService) CreateOfficialAccount(e wechat.OfficialAccoun
 	return err
 }
 
-//@author: [piexlmax](https://github.com/piexlmax)
 //@function: DeleteFileChunk
 //@description: 删除门户
 //@param: e model.OfficialAccount
@@ -36,7 +34,6 @@ func (exa *OfficialAccountService) DeleteOfficialAccount(e wechat.OfficialAccoun
 	return err
 }
 
-//@author: [piexlmax](https://github.com/piexlmax)
 //@function: UpdateOfficialAccount
 //@description: 更新门户
 //@param: e *model.OfficialAccount
@@ -47,7 +44,6 @@ func (exa *OfficialAccountService) UpdateOfficialAccount(e *wechat.OfficialAccou
 	return err
 }
 
-//@author: [piexlmax](https://github.com/piexlmax)
 //@function: GetOfficialAccount
 //@description: 获取门户信息
 //@param: id uint

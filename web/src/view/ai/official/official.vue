@@ -115,7 +115,7 @@
     <el-dialog
         v-model="dialogFormVisible"
         :before-close="closeDialog"
-        title="门户"
+        title="微信公众号"
     >
       <el-scrollbar height="500px">
         <el-form

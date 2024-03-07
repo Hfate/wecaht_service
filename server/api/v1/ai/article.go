@@ -2,6 +2,7 @@ package ai
 
 import (
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
+	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/response"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/wechat"
 	aiReq "github.com/flipped-aurora/gin-vue-admin/server/model/wechat/request"
@@ -43,6 +44,31 @@ func (e *ArticleApi) DeleteArticle(c *gin.Context) {
 	response.OkWithMessage("删除成功", c)
 }
 
+// DeleteArticlesByIds
+// @Tags      Article
+// @Summary   删除选中文章
+// @Security  ApiKeyAuth
+// @accept    application/json
+// @Produce   application/json
+// @Param     data  body      request.IdsReq                 true  "ID"
+// @Success   200   {object}  response.Response{msg=string}  "删除选中文章"
+// @Router    /article/deleteArticlesByIds [delete]
+func (e *ArticleApi) DeleteArticlesByIds(c *gin.Context) {
+	var ids request.IdsReq
+	err := c.ShouldBindJSON(&ids)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	err = articleService.DeleteArticlesByIds(ids)
+	if err != nil {
+		global.GVA_LOG.Error("删除失败!", zap.Error(err))
+		response.FailWithMessage("删除失败", c)
+		return
+	}
+	response.OkWithMessage("删除成功", c)
+}
+
 // GetArticle
 // @Tags      Article
 // @Summary   获取单一文章信息
@@ -71,6 +97,24 @@ func (e *ArticleApi) GetArticle(c *gin.Context) {
 		return
 	}
 	response.OkWithDetailed(aiRes.ArticleResponse{Article: data}, "获取成功", c)
+}
+
+// Template
+// @Tags      Article
+// @Summary   获取文章上传模板
+// @Security  ApiKeyAuth
+// @accept    application/json
+// @Produce   application/json
+// @Success   200   {object}  response.Response{data=exampleRes.ArticleResponse,msg=string}  "获取文章上传模板"
+// @Router    /article/template [get]
+func (e *ArticleApi) Template(c *gin.Context) {
+	var filename = "article_template.xlsx"
+	var filePath = "./template/" + filename
+	//返回文件流
+	c.Header("Content-Type", "application/octet-stream")
+	c.Header("Content-Disposition", "attachment; filename="+filename)
+	c.Header("Content-Transfer-Encoding", "binary")
+	c.File(filePath)
 }
 
 // GetArticleList

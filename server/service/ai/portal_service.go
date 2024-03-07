@@ -13,7 +13,6 @@ import (
 type PortalService struct {
 }
 
-//@author: [piexlmax](https://github.com/piexlmax)
 //@function: CreatePortal
 //@description: 创建门户
 //@param: e model.Portal
@@ -25,7 +24,6 @@ func (exa *PortalService) CreatePortal(e wechat.Portal) (err error) {
 	return err
 }
 
-//@author: [piexlmax](https://github.com/piexlmax)
 //@function: DeleteFileChunk
 //@description: 删除门户
 //@param: e model.Portal
@@ -36,7 +34,6 @@ func (exa *PortalService) DeletePortal(e wechat.Portal) (err error) {
 	return err
 }
 
-//@author: [piexlmax](https://github.com/piexlmax)
 //@function: UpdatePortal
 //@description: 更新门户
 //@param: e *model.Portal
@@ -47,7 +44,6 @@ func (exa *PortalService) UpdatePortal(e *wechat.Portal) (err error) {
 	return err
 }
 
-//@author: [piexlmax](https://github.com/piexlmax)
 //@function: GetPortal
 //@description: 获取门户信息
 //@param: id uint
