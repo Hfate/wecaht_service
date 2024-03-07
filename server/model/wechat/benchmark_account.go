@@ -7,6 +7,9 @@ type BenchmarkAccount struct {
 	AccountName string `json:"accountName"`
 	AccountId   string `json:"accountId"`
 	Topic       string `json:"topic"`
+	InitNum     int    `json:"initNum"`
+	ArticleLink string `json:"articleLink"`
+	Key         string `json:"key"`
 }
 
 func (BenchmarkAccount) TableName() string {

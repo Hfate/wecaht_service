@@ -14,6 +14,7 @@ type Article struct {
 	ReadNum     int    `json:"readNum"`
 	CommentNum  int    `json:"commentNum"`
 	Content     string `json:"content"`
+	Tags        string `json:"tags"`
 }
 
 func (Article) TableName() string {
