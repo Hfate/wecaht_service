@@ -2,10 +2,10 @@ package ai
 
 import (
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
+	"github.com/flipped-aurora/gin-vue-admin/server/model/ai"
+	aiRes "github.com/flipped-aurora/gin-vue-admin/server/model/ai/response"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/response"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/wechat"
-	aiRes "github.com/flipped-aurora/gin-vue-admin/server/model/wechat/response"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -23,7 +23,7 @@ type OfficialAccountApi struct{}
 // @Success   200   {object}  response.Response{msg=string}  "创建门户"
 // @Router    /officialAccount/officialAccount [post]
 func (e *OfficialAccountApi) CreateOfficialAccount(c *gin.Context) {
-	var officialAccount wechat.OfficialAccount
+	var officialAccount ai.OfficialAccount
 	err := c.ShouldBindJSON(&officialAccount)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
@@ -53,7 +53,7 @@ func (e *OfficialAccountApi) CreateOfficialAccount(c *gin.Context) {
 // @Success   200   {object}  response.Response{msg=string}  "删除门户"
 // @Router    /officialAccount/officialAccount [delete]
 func (e *OfficialAccountApi) DeleteOfficialAccount(c *gin.Context) {
-	var officialAccount wechat.OfficialAccount
+	var officialAccount ai.OfficialAccount
 	err := c.ShouldBindJSON(&officialAccount)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
@@ -83,7 +83,7 @@ func (e *OfficialAccountApi) DeleteOfficialAccount(c *gin.Context) {
 // @Success   200   {object}  response.Response{msg=string}  "更新门户信息"
 // @Router    /officialAccount/officialAccount [put]
 func (e *OfficialAccountApi) UpdateOfficialAccount(c *gin.Context) {
-	var officialAccount wechat.OfficialAccount
+	var officialAccount ai.OfficialAccount
 	err := c.ShouldBindJSON(&officialAccount)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
@@ -118,7 +118,7 @@ func (e *OfficialAccountApi) UpdateOfficialAccount(c *gin.Context) {
 // @Success   200   {object}  response.Response{data=exampleRes.OfficialAccountResponse,msg=string}  "获取单一门户信息,返回包括门户详情"
 // @Router    /officialAccount/officialAccount [get]
 func (e *OfficialAccountApi) GetOfficialAccount(c *gin.Context) {
-	var officialAccount wechat.OfficialAccount
+	var officialAccount ai.OfficialAccount
 	err := c.ShouldBindQuery(&officialAccount)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)

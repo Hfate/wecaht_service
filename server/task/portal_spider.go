@@ -3,7 +3,7 @@ package task
 import (
 	"fmt"
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/wechat"
+	"github.com/flipped-aurora/gin-vue-admin/server/model/ai"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"github.com/spf13/cast"
 	"github.com/storyicon/graphquery"
@@ -15,8 +15,8 @@ import (
 )
 
 func PortalSpider(db *gorm.DB) error {
-	portalList := make([]*wechat.Portal, 0)
-	err := db.Model(wechat.Portal{}).Where("target_num>0").Find(&portalList).Error
+	portalList := make([]*ai.Portal, 0)
+	err := db.Model(ai.Portal{}).Where("target_num>0").Find(&portalList).Error
 	if err != nil {
 		return err
 	}
@@ -36,7 +36,7 @@ func PortalSpider(db *gorm.DB) error {
 	return nil
 }
 
-func spiderPortal(db *gorm.DB, portal *wechat.Portal) {
+func spiderPortal(db *gorm.DB, portal *ai.Portal) {
 
 	urlList := collectAllUrl(portal.Link, portal.PortalKey, portal.TargetNum)
 	notInDbUrls := findNotInDb(db, urlList)
@@ -70,7 +70,7 @@ func spiderPortal(db *gorm.DB, portal *wechat.Portal) {
 
 		articleResp.ReadNum = strings.ReplaceAll(articleResp.ReadNum, "阅读", "")
 
-		article := &wechat.Article{
+		article := &ai.Article{
 			GVA_MODEL:   global.GVA_MODEL{ID: utils.GenID(), CreatedAt: time.Now(), UpdatedAt: time.Now()},
 			PortalName:  portal.PortalName,
 			AuthorName:  articleResp.AuthorName,
@@ -84,12 +84,12 @@ func spiderPortal(db *gorm.DB, portal *wechat.Portal) {
 			LikeNum:     cast.ToInt(articleResp.LikeNum),
 		}
 
-		err := db.Model(&wechat.Article{}).Create(article).Error
+		err := db.Model(&ai.Article{}).Create(article).Error
 		if err != nil {
 			fmt.Println(err)
 		}
 
-		err = db.Model(&wechat.Url{}).Create(&wechat.Url{
+		err = db.Model(&ai.Url{}).Create(&ai.Url{
 			Url:       articleUrl,
 			GVA_MODEL: global.GVA_MODEL{ID: utils.GenID(), CreatedAt: time.Now(), UpdatedAt: time.Now()},
 		}).Error
@@ -102,7 +102,7 @@ func spiderPortal(db *gorm.DB, portal *wechat.Portal) {
 
 func findNotInDb(db *gorm.DB, urlList []string) []string {
 	dbUrls := make([]string, 0)
-	err := db.Model(&wechat.Url{}).Where("url in ?", urlList).Select("url").Find(&dbUrls).Error
+	err := db.Model(&ai.Url{}).Where("url in ?", urlList).Select("url").Find(&dbUrls).Error
 	if err != nil {
 		return urlList
 	}

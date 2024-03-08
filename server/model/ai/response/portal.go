@@ -5,5 +5,5 @@ import (
 )
 
 type PortalResponse struct {
-	Portal wechat.Portal `json:"portal"`
+	Portal ai.Portal `json:"portal"`
 }

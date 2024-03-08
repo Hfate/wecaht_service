@@ -17,7 +17,7 @@ type ArticleService struct {
 //@param: e model.Article
 //@return: err error
 
-func (exa *ArticleService) DeleteArticle(e wechat.Article) (err error) {
+func (exa *ArticleService) DeleteArticle(e ai.Article) (err error) {
 	err = global.GVA_DB.Delete(&e).Error
 	return err
 }
@@ -28,7 +28,7 @@ func (exa *ArticleService) DeleteArticle(e wechat.Article) (err error) {
 //@return: err error
 
 func (exa *ArticleService) DeleteArticlesByIds(ids request.IdsReq) (err error) {
-	var articles []wechat.Article
+	var articles []ai.Article
 	err = global.GVA_DB.Find(&articles, "id in ?", ids.Ids).Delete(&articles).Error
 	return err
 }
@@ -38,7 +38,7 @@ func (exa *ArticleService) DeleteArticlesByIds(ids request.IdsReq) (err error) {
 //@param: id uint
 //@return: customer model.Article, err error
 
-func (exa *ArticleService) GetArticle(id uint64) (portal wechat.Article, err error) {
+func (exa *ArticleService) GetArticle(id uint64) (portal ai.Article, err error) {
 	err = global.GVA_DB.Where("id = ?", id).First(&portal).Error
 	return
 }
@@ -63,9 +63,9 @@ func (exa *ArticleService) GetArticleList(sysUserAuthorityID uint, info aiReq.Ar
 	for _, v := range auth.DataAuthorityId {
 		dataId = append(dataId, v.AuthorityId)
 	}
-	var articleList []wechat.Article
+	var articleList []ai.Article
 
-	db := global.GVA_DB.Model(&wechat.Article{})
+	db := global.GVA_DB.Model(&ai.Article{})
 
 	// 如果有条件搜索 下方会自动创建搜索语句
 	if info.PortalName != "" {

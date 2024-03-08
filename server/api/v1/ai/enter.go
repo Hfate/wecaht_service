@@ -7,6 +7,7 @@ type ApiGroup struct {
 	ArticleApi
 	BenchmarkAccountApi
 	OfficialAccountApi
+	HotspotApi
 }
 
 var (
@@ -14,4 +15,5 @@ var (
 	articleService          = service.ServiceGroupApp.AIServiceGroup.ArticleService
 	benchmarkAccountService = service.ServiceGroupApp.AIServiceGroup.BenchmarkAccountService
 	officialAccountService  = service.ServiceGroupApp.AIServiceGroup.OfficialAccountService
+	hotspotService          = service.ServiceGroupApp.AIServiceGroup.HotspotService
 )

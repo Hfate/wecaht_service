@@ -20,4 +20,5 @@ var (
 	PortalVerify           = Rules{"PortalName": {NotEmpty()}, "PortalKey": {NotEmpty()}, "ArticleKey": {NotEmpty()}, "Link": {NotEmpty()}, "GraphQuery": {NotEmpty()}, "TargetNum": {NotEmpty()}}
 	OfficialAccountVerify  = Rules{"AccountName": {NotEmpty()}, "UserEmail": {NotEmpty()}, "Topic": {NotEmpty()}}
 	BenchmarkAccountVerify = Rules{"AccountName": {NotEmpty()}, "Topic": {NotEmpty()}, "ArticleLink": {NotEmpty()}}
+	HotspotVerify          = Rules{"PortalName": {NotEmpty()}, "Headlines": {NotEmpty()}, "Link": {NotEmpty()}}
 )

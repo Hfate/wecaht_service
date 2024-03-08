@@ -5,4 +5,5 @@ type ServiceGroup struct {
 	ArticleService
 	BenchmarkAccountService
 	OfficialAccountService
+	HotspotService
 }

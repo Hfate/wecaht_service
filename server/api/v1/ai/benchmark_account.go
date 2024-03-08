@@ -23,7 +23,7 @@ type BenchmarkAccountApi struct{}
 // @Success   200   {object}  response.Response{msg=string}  "创建对标账号"
 // @Router    /benchmark/benchmark [post]
 func (e *BenchmarkAccountApi) CreateBenchmarkAccount(c *gin.Context) {
-	var benchmarkAccount wechat.BenchmarkAccount
+	var benchmarkAccount ai.BenchmarkAccount
 	err := c.ShouldBindJSON(&benchmarkAccount)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
@@ -53,7 +53,7 @@ func (e *BenchmarkAccountApi) CreateBenchmarkAccount(c *gin.Context) {
 // @Success   200   {object}  response.Response{msg=string}  "删除对标账号"
 // @Router    /benchmark/benchmark [delete]
 func (e *BenchmarkAccountApi) DeleteBenchmarkAccount(c *gin.Context) {
-	var benchmarkAccount wechat.BenchmarkAccount
+	var benchmarkAccount ai.BenchmarkAccount
 	err := c.ShouldBindJSON(&benchmarkAccount)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
@@ -83,7 +83,7 @@ func (e *BenchmarkAccountApi) DeleteBenchmarkAccount(c *gin.Context) {
 // @Success   200   {object}  response.Response{data=exampleRes.BenchmarkAccountResponse,msg=string}  "获取单一对标账号信息,返回包括对标账号详情"
 // @Router    /benchmarkAccount/benchmarkAccount [get]
 func (e *BenchmarkAccountApi) GetBenchmarkAccount(c *gin.Context) {
-	var benchmarkAccount wechat.BenchmarkAccount
+	var benchmarkAccount ai.BenchmarkAccount
 	err := c.ShouldBindQuery(&benchmarkAccount)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)

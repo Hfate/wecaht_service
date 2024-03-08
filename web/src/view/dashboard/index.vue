@@ -15,7 +15,7 @@
                 <el-icon class="dashboard-icon">
                   <sort />
                 </el-icon>
-                今日流量 (1231231)
+                今日流量 (100000)
               </div>
             </el-col>
             <el-col
@@ -27,7 +27,7 @@
                 <el-icon class="dashboard-icon">
                   <avatar />
                 </el-icon>
-                总用户数 (24001)
+                总用户数 (3)
               </div>
             </el-col>
             <el-col
@@ -39,28 +39,11 @@
                 <el-icon class="dashboard-icon">
                   <comment />
                 </el-icon>
-                好评率 (99%)
+                好评率 (99.99%)
               </div>
             </el-col>
           </el-row>
-          <div>
-            <div class="gva-top-card-left-item">
-              使用教学：
-              <a
-                style="color:#409EFF"
-                target="view_window"
-                href="https://www.bilibili.com/video/BV1Rg411u7xH/"
-              >https://www.bilibili.com/video/BV1Rg411u7xH</a>
-            </div>
-            <div class="gva-top-card-left-item">
-              插件仓库：
-              <a
-                style="color:#409EFF"
-                target="view_window"
-                href="https://plugin.gin-vue-admin.com/#/layout/home"
-              >https://plugin.gin-vue-admin.com</a>
-            </div>
-          </div>
+
         </div>
         <img
           src="@/assets/dashboard.png"

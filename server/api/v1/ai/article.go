@@ -24,7 +24,7 @@ type ArticleApi struct{}
 // @Success   200   {object}  response.Response{msg=string}  "删除文章"
 // @Router    /article/article [delete]
 func (e *ArticleApi) DeleteArticle(c *gin.Context) {
-	var portal wechat.Article
+	var portal ai.Article
 	err := c.ShouldBindJSON(&portal)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
@@ -79,7 +79,7 @@ func (e *ArticleApi) DeleteArticlesByIds(c *gin.Context) {
 // @Success   200   {object}  response.Response{data=exampleRes.ArticleResponse,msg=string}  "获取单一文章信息,返回包括文章详情"
 // @Router    /article/article [get]
 func (e *ArticleApi) GetArticle(c *gin.Context) {
-	var portal wechat.Article
+	var portal ai.Article
 	err := c.ShouldBindQuery(&portal)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)

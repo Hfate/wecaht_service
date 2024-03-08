@@ -2,10 +2,10 @@ package ai
 
 import (
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
+	"github.com/flipped-aurora/gin-vue-admin/server/model/ai"
+	aiRes "github.com/flipped-aurora/gin-vue-admin/server/model/ai/response"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/response"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/wechat"
-	aiRes "github.com/flipped-aurora/gin-vue-admin/server/model/wechat/response"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -23,7 +23,7 @@ type PortalApi struct{}
 // @Success   200   {object}  response.Response{msg=string}  "创建门户"
 // @Router    /portal/portal [post]
 func (e *PortalApi) CreatePortal(c *gin.Context) {
-	var portal wechat.Portal
+	var portal ai.Portal
 	err := c.ShouldBindJSON(&portal)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
@@ -53,7 +53,7 @@ func (e *PortalApi) CreatePortal(c *gin.Context) {
 // @Success   200   {object}  response.Response{msg=string}  "删除门户"
 // @Router    /portal/portal [delete]
 func (e *PortalApi) DeletePortal(c *gin.Context) {
-	var portal wechat.Portal
+	var portal ai.Portal
 	err := c.ShouldBindJSON(&portal)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
@@ -83,7 +83,7 @@ func (e *PortalApi) DeletePortal(c *gin.Context) {
 // @Success   200   {object}  response.Response{msg=string}  "更新门户信息"
 // @Router    /portal/portal [put]
 func (e *PortalApi) UpdatePortal(c *gin.Context) {
-	var portal wechat.Portal
+	var portal ai.Portal
 	err := c.ShouldBindJSON(&portal)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
@@ -118,7 +118,7 @@ func (e *PortalApi) UpdatePortal(c *gin.Context) {
 // @Success   200   {object}  response.Response{data=exampleRes.PortalResponse,msg=string}  "获取单一门户信息,返回包括门户详情"
 // @Router    /portal/portal [get]
 func (e *PortalApi) GetPortal(c *gin.Context) {
-	var portal wechat.Portal
+	var portal ai.Portal
 	err := c.ShouldBindQuery(&portal)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)

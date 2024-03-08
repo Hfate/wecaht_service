@@ -24,7 +24,7 @@ type BenchmarkAccountService struct {
 //@param: e model.Portal
 //@return: err error
 
-func (exa *BenchmarkAccountService) CreateBenchmarkAccount(e wechat.BenchmarkAccount) (err error) {
+func (exa *BenchmarkAccountService) CreateBenchmarkAccount(e ai.BenchmarkAccount) (err error) {
 	// 拿到微信公众号id
 	articleLink := e.ArticleLink
 	link, _ := url.Parse(articleLink)
@@ -45,8 +45,8 @@ func (exa *BenchmarkAccountService) CreateBenchmarkAccount(e wechat.BenchmarkAcc
 	go func() {
 		temp := e
 
-		wxToken := &wechat.WxToken{}
-		er := global.GVA_DB.Model(&wechat.WxToken{}).Where("1=1").Last(&wxToken).Error
+		wxToken := &ai.WxToken{}
+		er := global.GVA_DB.Model(&ai.WxToken{}).Where("1=1").Last(&wxToken).Error
 		if er != nil {
 			fmt.Println(er)
 			return
@@ -63,7 +63,7 @@ func (exa *BenchmarkAccountService) CreateBenchmarkAccount(e wechat.BenchmarkAcc
 	return err
 }
 
-func (exa *BenchmarkAccountService) updateMoreInfo(wxToken *wechat.WxToken, e wechat.BenchmarkAccount, list []*wechat.Article) {
+func (exa *BenchmarkAccountService) updateMoreInfo(wxToken *ai.WxToken, e ai.BenchmarkAccount, list []*ai.Article) {
 	key := e.Key
 	pass_ticket := wxToken.PassTicket
 
@@ -112,7 +112,7 @@ func (exa *BenchmarkAccountService) updateMoreInfo(wxToken *wechat.WxToken, e we
 	}
 }
 
-func (exa *BenchmarkAccountService) spiderOfficialAccount(wxToken *wechat.WxToken, e wechat.BenchmarkAccount) []*wechat.Article {
+func (exa *BenchmarkAccountService) spiderOfficialAccount(wxToken *ai.WxToken, e ai.BenchmarkAccount) []*ai.Article {
 	tarGetNum := e.InitNum
 	accountId := e.AccountId
 	accountId = strings.ReplaceAll(accountId, "=", "%3D")
@@ -121,7 +121,7 @@ func (exa *BenchmarkAccountService) spiderOfficialAccount(wxToken *wechat.WxToke
 
 	curPage := 0
 
-	wechatArticleList := make([]*wechat.Article, 0)
+	wechatArticleList := make([]*ai.Article, 0)
 
 	for curPage < pages {
 		begin := cast.ToString(5 * curPage)
@@ -170,31 +170,31 @@ func (exa *BenchmarkAccountService) spiderOfficialAccount(wxToken *wechat.WxToke
 	return wechatArticleList
 }
 
-func AnalyticArticle(portalName, resp string) []*wechat.Article {
+func AnalyticArticle(portalName, resp string) []*ai.Article {
 	var officialAccountsResp OfficialAccountsResp
 
 	// 将 JSON 字符串解析到结构体中
 	err := json.Unmarshal([]byte(resp), &officialAccountsResp)
 	if err != nil {
 		fmt.Println("解析 JSON 失败:", err)
-		return []*wechat.Article{}
+		return []*ai.Article{}
 	}
 
 	var publishPageResp PublishPageResp
 	err = json.Unmarshal([]byte(officialAccountsResp.PublishPage), &publishPageResp)
 	if err != nil {
 		fmt.Println("解析 JSON 失败:", err)
-		return []*wechat.Article{}
+		return []*ai.Article{}
 	}
 
-	result := make([]*wechat.Article, 0)
+	result := make([]*ai.Article, 0)
 	for _, item := range publishPageResp.PublishList {
 		var publishInfo PublishInfo
 
 		err = json.Unmarshal([]byte(item.PublishInfo), &publishInfo)
 		if err != nil {
 			fmt.Println("解析 JSON 失败:", err)
-			return []*wechat.Article{}
+			return []*ai.Article{}
 		}
 
 		for _, appMsg := range publishInfo.AppMsgEx {
@@ -203,7 +203,7 @@ func AnalyticArticle(portalName, resp string) []*wechat.Article {
 				tags += tag.Title + ","
 			}
 
-			result = append(result, &wechat.Article{
+			result = append(result, &ai.Article{
 				GVA_MODEL:   global.GVA_MODEL{ID: utils.GenID(), CreatedAt: time.Now(), UpdatedAt: time.Now()},
 				Title:       appMsg.Title,
 				AuthorName:  appMsg.AuthorName,
@@ -223,7 +223,7 @@ func AnalyticArticle(portalName, resp string) []*wechat.Article {
 //@param: e model.BenchmarkAccount
 //@return: err error
 
-func (exa *BenchmarkAccountService) DeleteBenchmarkAccount(e wechat.BenchmarkAccount) (err error) {
+func (exa *BenchmarkAccountService) DeleteBenchmarkAccount(e ai.BenchmarkAccount) (err error) {
 	err = global.GVA_DB.Delete(&e).Error
 	return err
 }
@@ -233,7 +233,7 @@ func (exa *BenchmarkAccountService) DeleteBenchmarkAccount(e wechat.BenchmarkAcc
 //@param: id uint
 //@return: customer model.BenchmarkAccount, err error
 
-func (exa *BenchmarkAccountService) GetBenchmarkAccount(id uint64) (portal wechat.BenchmarkAccount, err error) {
+func (exa *BenchmarkAccountService) GetBenchmarkAccount(id uint64) (portal ai.BenchmarkAccount, err error) {
 	err = global.GVA_DB.Where("id = ?", id).First(&portal).Error
 	return
 }
@@ -258,9 +258,9 @@ func (exa *BenchmarkAccountService) GetBenchmarkAccountList(sysUserAuthorityID u
 	for _, v := range auth.DataAuthorityId {
 		dataId = append(dataId, v.AuthorityId)
 	}
-	var benchmarkAccountList []wechat.BenchmarkAccount
+	var benchmarkAccountList []ai.BenchmarkAccount
 
-	db := global.GVA_DB.Model(&wechat.BenchmarkAccount{})
+	db := global.GVA_DB.Model(&ai.BenchmarkAccount{})
 
 	// 如果有条件搜索 下方会自动创建搜索语句
 	if info.AccountName != "" {

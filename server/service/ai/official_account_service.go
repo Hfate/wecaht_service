@@ -18,7 +18,7 @@ type OfficialAccountService struct {
 //@param: e model.OfficialAccount
 //@return: err error
 
-func (exa *OfficialAccountService) CreateOfficialAccount(e wechat.OfficialAccount) (err error) {
+func (exa *OfficialAccountService) CreateOfficialAccount(e ai.OfficialAccount) (err error) {
 	e.GVA_MODEL = global.GVA_MODEL{ID: utils.GenID(), CreatedAt: time.Now(), UpdatedAt: time.Now()}
 	err = global.GVA_DB.Create(&e).Error
 	return err
@@ -29,7 +29,7 @@ func (exa *OfficialAccountService) CreateOfficialAccount(e wechat.OfficialAccoun
 //@param: e model.OfficialAccount
 //@return: err error
 
-func (exa *OfficialAccountService) DeleteOfficialAccount(e wechat.OfficialAccount) (err error) {
+func (exa *OfficialAccountService) DeleteOfficialAccount(e ai.OfficialAccount) (err error) {
 	err = global.GVA_DB.Delete(&e).Error
 	return err
 }
@@ -39,7 +39,7 @@ func (exa *OfficialAccountService) DeleteOfficialAccount(e wechat.OfficialAccoun
 //@param: e *model.OfficialAccount
 //@return: err error
 
-func (exa *OfficialAccountService) UpdateOfficialAccount(e *wechat.OfficialAccount) (err error) {
+func (exa *OfficialAccountService) UpdateOfficialAccount(e *ai.OfficialAccount) (err error) {
 	err = global.GVA_DB.Save(e).Error
 	return err
 }
@@ -49,7 +49,7 @@ func (exa *OfficialAccountService) UpdateOfficialAccount(e *wechat.OfficialAccou
 //@param: id uint
 //@return: customer model.OfficialAccount, err error
 
-func (exa *OfficialAccountService) GetOfficialAccount(id uint64) (officialAccount wechat.OfficialAccount, err error) {
+func (exa *OfficialAccountService) GetOfficialAccount(id uint64) (officialAccount ai.OfficialAccount, err error) {
 	err = global.GVA_DB.Where("id = ?", id).First(&officialAccount).Error
 	return
 }
@@ -74,9 +74,9 @@ func (exa *OfficialAccountService) GetOfficialAccountList(sysUserAuthorityID uin
 	for _, v := range auth.DataAuthorityId {
 		dataId = append(dataId, v.AuthorityId)
 	}
-	var officialAccountList []wechat.OfficialAccount
+	var officialAccountList []ai.OfficialAccount
 
-	db := global.GVA_DB.Model(&wechat.OfficialAccount{})
+	db := global.GVA_DB.Model(&ai.OfficialAccount{})
 	err = db.Count(&total).Error
 	if err != nil {
 		return officialAccountList, total, err

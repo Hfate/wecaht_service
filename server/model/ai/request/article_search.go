@@ -5,7 +5,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/model/wechat"
 )
 
-type BenchmarkAccountSearch struct {
-	wechat.BenchmarkAccount
+type ArticleSearch struct {
+	ai.Article
 	request.PageInfo
 }
