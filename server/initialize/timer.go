@@ -10,8 +10,7 @@ import (
 )
 
 func Timer() {
-
-	task.HotspotSpider(global.GVA_DB)
+	// spec 定时任务详细配置参考 https://pkg.go.dev/github.com/robfig/cron?utm_source=godoc
 
 	go func() {
 		var option []cron.Option
@@ -34,6 +33,17 @@ func Timer() {
 				fmt.Println("timer error:", err)
 			}
 		}, "定时爬取数据", option...)
+		if err != nil {
+			fmt.Println("add timer error:", err)
+		}
+
+		// 其他定时任务定在这里 参考上方使用方法
+		_, err = global.GVA_Timer.AddTaskByFunc("定时任务标识", "*/5 * * * *", func() {
+			err = task.HotspotSpider(global.GVA_DB)
+			if err != nil {
+				fmt.Println("timer error:", err)
+			}
+		}, "定时收集热点", option...)
 		if err != nil {
 			fmt.Println("add timer error:", err)
 		}

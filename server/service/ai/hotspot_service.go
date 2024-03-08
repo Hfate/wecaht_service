@@ -89,7 +89,7 @@ func (exa *HotspotService) GetHotspotList(sysUserAuthorityID uint, info aiReq.Ho
 	if err != nil {
 		return portalList, total, err
 	} else {
-		err = db.Limit(limit).Offset(offset).Order("created_at desc").Find(&portalList).Error
+		err = db.Limit(limit).Offset(offset).Order("trending desc").Find(&portalList).Error
 	}
 	return portalList, total, err
 }

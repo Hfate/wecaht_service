@@ -133,7 +133,13 @@ func GetWithHeaders(url string, params map[string]string, headers map[string]str
 
 func Post(url string, sJSON string) (statusCode int, body []byte, err error) {
 	// create new http request
-	req, err := http.NewRequest("POST", url, strings.NewReader(sJSON))
+	req := &http.Request{}
+	if sJSON != "" {
+		req, err = http.NewRequest("POST", url, strings.NewReader(sJSON))
+	} else {
+		req, err = http.NewRequest("POST", url, nil)
+	}
+
 	if err != nil {
 		return 0, nil, err
 	}

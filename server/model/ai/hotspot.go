@@ -8,6 +8,7 @@ type Hotspot struct {
 	PortalName string `json:"portalName"`
 	Link       string `json:"link"`
 	Trending   int    `json:"trending"`
+	Topic      string `json:"topic"`
 }
 
 func (Hotspot) TableName() string {

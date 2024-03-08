@@ -57,6 +57,12 @@
         </el-table-column>
         <el-table-column
             align="left"
+            label="主题"
+            prop="topic"
+            width="120"
+        />
+        <el-table-column
+            align="left"
             label="门户"
             prop="portalName"
             width="120"
