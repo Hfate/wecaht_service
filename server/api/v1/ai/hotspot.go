@@ -3,7 +3,7 @@ package ai
 import (
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/ai"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
+	aiReq "github.com/flipped-aurora/gin-vue-admin/server/model/ai/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/response"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"github.com/gin-gonic/gin"
@@ -28,7 +28,7 @@ func (e *HotspotApi) DeleteHotspot(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	err = utils.Verify(hotspot.GVA_MODEL, utils.IdVerify)
+	err = utils.Verify(hotspot.BASEMODEL, utils.IdVerify)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
@@ -52,7 +52,7 @@ func (e *HotspotApi) DeleteHotspot(c *gin.Context) {
 // @Success   200   {object}  response.Response{data=response.PageResult,msg=string}  "分页获取权限门户列表,返回包括列表,总数,页码,每页数量"
 // @Router    /hotspot/hotspotList [get]
 func (e *HotspotApi) GetHotspotList(c *gin.Context) {
-	var pageInfo request.PageInfo
+	var pageInfo aiReq.HotspotSearch
 	err := c.ShouldBindQuery(&pageInfo)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)

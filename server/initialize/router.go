@@ -101,6 +101,7 @@ func Routers() *gin.Engine {
 		aiRouter.InitArticleRouter(PrivateGroup)                    // 文章管理
 		aiRouter.InitBenchmarkAccountRouter(PrivateGroup)           // 对标账号管理
 		aiRouter.InitOfficialAccountRouter(PrivateGroup)            // 公众号管理
+		aiRouter.InitHotspotRouter(PrivateGroup)                    // 热点追踪
 	}
 
 	global.GVA_LOG.Info("router register success")

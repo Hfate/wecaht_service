@@ -181,7 +181,7 @@
           </el-form-item>
           <el-form-item label="目标网页数">
             <el-input
-                v-model="form.targetNum"
+                v-model.number="form.targetNum"
                 autocomplete="off"
             />
           </el-form-item>
@@ -224,7 +224,7 @@ const form = ref({
   link: '',
   topic: '',
   graphQuery: '',
-  targetNum: 0,
+  targetNum: 10,
   remark: '',
 })
 
@@ -232,6 +232,7 @@ const page = ref(1)
 const total = ref(0)
 const pageSize = ref(10)
 const tableData = ref([])
+
 
 // 分页
 const handleSizeChange = (val) => {

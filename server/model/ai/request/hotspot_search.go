@@ -5,7 +5,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
 )
 
-type BenchmarkAccountSearch struct {
-	ai.BenchmarkAccount
+type HotspotSearch struct {
+	ai.Hotspot
 	request.PageInfo
 }

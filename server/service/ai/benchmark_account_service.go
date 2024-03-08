@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
+	"github.com/flipped-aurora/gin-vue-admin/server/model/ai"
+	aiReq "github.com/flipped-aurora/gin-vue-admin/server/model/ai/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/wechat"
-	aiReq "github.com/flipped-aurora/gin-vue-admin/server/model/wechat/request"
 	systemService "github.com/flipped-aurora/gin-vue-admin/server/service/system"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"github.com/spf13/cast"
@@ -34,7 +34,7 @@ func (exa *BenchmarkAccountService) CreateBenchmarkAccount(e ai.BenchmarkAccount
 		return err
 	}
 	accountId := accountIds[0]
-	e.GVA_MODEL = global.GVA_MODEL{ID: utils.GenID(), CreatedAt: time.Now(), UpdatedAt: time.Now()}
+	e.BASEMODEL = BaseModel()
 	e.AccountId = accountId
 	err = global.GVA_DB.Create(&e).Error
 	if err != nil {
@@ -204,7 +204,7 @@ func AnalyticArticle(portalName, resp string) []*ai.Article {
 			}
 
 			result = append(result, &ai.Article{
-				GVA_MODEL:   global.GVA_MODEL{ID: utils.GenID(), CreatedAt: time.Now(), UpdatedAt: time.Now()},
+				BASEMODEL:   global.BASEMODEL{ID: utils.GenID(), CreatedAt: time.Now(), UpdatedAt: time.Now()},
 				Title:       appMsg.Title,
 				AuthorName:  appMsg.AuthorName,
 				PortalName:  portalName,

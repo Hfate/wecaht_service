@@ -59,7 +59,7 @@ func (e *PortalApi) DeletePortal(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	err = utils.Verify(portal.GVA_MODEL, utils.IdVerify)
+	err = utils.Verify(portal.BASEMODEL, utils.IdVerify)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
@@ -89,7 +89,7 @@ func (e *PortalApi) UpdatePortal(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	err = utils.Verify(portal.GVA_MODEL, utils.IdVerify)
+	err = utils.Verify(portal.BASEMODEL, utils.IdVerify)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
@@ -124,7 +124,7 @@ func (e *PortalApi) GetPortal(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	err = utils.Verify(portal.GVA_MODEL, utils.IdVerify)
+	err = utils.Verify(portal.BASEMODEL, utils.IdVerify)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return

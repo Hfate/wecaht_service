@@ -143,7 +143,7 @@
           </el-form-item>
           <el-form-item label="初始爬取文章数量">
             <el-input
-                v-model="form.initNum"
+                v-model.number="form.initNum"
                 autocomplete="off"
             />
           </el-form-item>

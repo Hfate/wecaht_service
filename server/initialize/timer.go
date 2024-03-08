@@ -11,6 +11,8 @@ import (
 
 func Timer() {
 
+	task.HotspotSpider(global.GVA_DB)
+
 	go func() {
 		var option []cron.Option
 		option = append(option, cron.WithSeconds())

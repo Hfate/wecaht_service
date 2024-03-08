@@ -3,7 +3,7 @@ package ai
 import "github.com/flipped-aurora/gin-vue-admin/server/global"
 
 type Portal struct {
-	global.GVA_MODEL
+	global.BASEMODEL
 	PortalName string `json:"portalName"`
 	PortalKey  string `json:"portalKey"`
 	ArticleKey string `json:"articleKey"`

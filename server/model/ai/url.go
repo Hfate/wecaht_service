@@ -3,7 +3,7 @@ package ai
 import "github.com/flipped-aurora/gin-vue-admin/server/global"
 
 type Url struct {
-	global.GVA_MODEL
+	global.BASEMODEL
 	Url string `json:"url"`
 }
 

@@ -2,10 +2,10 @@ package ai
 
 import (
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
+	"github.com/flipped-aurora/gin-vue-admin/server/model/ai"
+	aiReq "github.com/flipped-aurora/gin-vue-admin/server/model/ai/request"
+	aiRes "github.com/flipped-aurora/gin-vue-admin/server/model/ai/response"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/response"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/wechat"
-	aiReq "github.com/flipped-aurora/gin-vue-admin/server/model/wechat/request"
-	aiRes "github.com/flipped-aurora/gin-vue-admin/server/model/wechat/response"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -59,7 +59,7 @@ func (e *BenchmarkAccountApi) DeleteBenchmarkAccount(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	err = utils.Verify(benchmarkAccount.GVA_MODEL, utils.IdVerify)
+	err = utils.Verify(benchmarkAccount.BASEMODEL, utils.IdVerify)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
@@ -89,7 +89,7 @@ func (e *BenchmarkAccountApi) GetBenchmarkAccount(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	err = utils.Verify(benchmarkAccount.GVA_MODEL, utils.IdVerify)
+	err = utils.Verify(benchmarkAccount.BASEMODEL, utils.IdVerify)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return

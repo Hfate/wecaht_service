@@ -3,7 +3,7 @@ package ai
 import "github.com/flipped-aurora/gin-vue-admin/server/global"
 
 type OfficialAccount struct {
-	global.GVA_MODEL
+	global.BASEMODEL
 	AccountName string `json:"accountName"`
 	AccountId   string `json:"accountId"`
 	Topic       string `json:"topic"`

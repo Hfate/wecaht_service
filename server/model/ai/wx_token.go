@@ -3,7 +3,7 @@ package ai
 import "github.com/flipped-aurora/gin-vue-admin/server/global"
 
 type WxToken struct {
-	global.GVA_MODEL
+	global.BASEMODEL
 	SlaveUser  string `json:"slaveUser"`
 	SlaveSid   string `json:"slaveSid"`
 	BizUin     string `json:"bizUin"`

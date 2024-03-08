@@ -59,7 +59,7 @@ func (e *OfficialAccountApi) DeleteOfficialAccount(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	err = utils.Verify(officialAccount.GVA_MODEL, utils.IdVerify)
+	err = utils.Verify(officialAccount.BASEMODEL, utils.IdVerify)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
@@ -89,7 +89,7 @@ func (e *OfficialAccountApi) UpdateOfficialAccount(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	err = utils.Verify(officialAccount.GVA_MODEL, utils.IdVerify)
+	err = utils.Verify(officialAccount.BASEMODEL, utils.IdVerify)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
@@ -124,7 +124,7 @@ func (e *OfficialAccountApi) GetOfficialAccount(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	err = utils.Verify(officialAccount.GVA_MODEL, utils.IdVerify)
+	err = utils.Verify(officialAccount.BASEMODEL, utils.IdVerify)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return

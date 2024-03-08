@@ -5,4 +5,5 @@ type AIGroup struct {
 	ArticleRouter
 	BenchmarkAccountRouter
 	OfficialAccountRouter
+	HotspotRouter
 }

@@ -2,12 +2,10 @@ package ai
 
 import (
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
+	"github.com/flipped-aurora/gin-vue-admin/server/model/ai"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/wechat"
 	systemService "github.com/flipped-aurora/gin-vue-admin/server/service/system"
-	"github.com/flipped-aurora/gin-vue-admin/server/utils"
-	"time"
 )
 
 type PortalService struct {
@@ -19,7 +17,7 @@ type PortalService struct {
 //@return: err error
 
 func (exa *PortalService) CreatePortal(e ai.Portal) (err error) {
-	e.GVA_MODEL = global.GVA_MODEL{ID: utils.GenID(), CreatedAt: time.Now(), UpdatedAt: time.Now()}
+	e.BASEMODEL = BaseModel()
 	err = global.GVA_DB.Create(&e).Error
 	return err
 }

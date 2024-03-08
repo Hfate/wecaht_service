@@ -1,6 +1,37 @@
 <template>
   <div>
 
+    <div class="gva-search-box">
+      <el-form
+          :inline="true"
+          :model="searchInfo"
+      >
+        <el-form-item label="热点内容">
+          <el-input
+              v-model="searchInfo.Headline"
+          />
+        </el-form-item>
+        <el-form-item label="门户">
+          <el-input
+              v-model="searchInfo.PortalName"
+          />
+        </el-form-item>
+        <el-form-item>
+          <el-button
+              type="primary"
+              icon="search"
+              @click="onSubmit"
+          >查询
+          </el-button>
+          <el-button
+              icon="refresh"
+              @click="onReset"
+          >重置
+          </el-button>
+        </el-form-item>
+      </el-form>
+    </div>
+
     <div class="gva-table-box">
 
       <el-table
@@ -17,14 +48,23 @@
         <el-table-column
             align="left"
             label="头条"
-            prop="headlines"
-            width="180"
+            prop="headline"
+            width="600"
         >
+          <template #default="scope">
+            <a :href="scope.row.link" target="_blank">{{ scope.row.headline }}</a>
+          </template>
         </el-table-column>
         <el-table-column
             align="left"
             label="门户"
             prop="portalName"
+            width="120"
+        />
+        <el-table-column
+            align="left"
+            label="热度"
+            prop="trending"
             width="120"
         />
         <el-table-column
@@ -110,6 +150,17 @@ const page = ref(1)
 const total = ref(0)
 const pageSize = ref(10)
 const tableData = ref([])
+const searchInfo = ref({})
+
+const onReset = () => {
+  searchInfo.value = {}
+}
+// 条件搜索前端看此方法
+const onSubmit = () => {
+  page.value = 1
+  pageSize.value = 10
+  getTableData()
+}
 
 // 分页
 const handleSizeChange = (val) => {
@@ -124,7 +175,9 @@ const handleCurrentChange = (val) => {
 
 // 查询
 const getTableData = async () => {
-  const table = await getHotspotList({page: page.value, pageSize: pageSize.value})
+  const table = await getHotspotList({
+    page: page.value, pageSize: pageSize.value, ...searchInfo.value,
+  })
   if (table.code === 0) {
     tableData.value = table.data.list
     total.value = table.data.total

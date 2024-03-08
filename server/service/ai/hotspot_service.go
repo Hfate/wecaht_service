@@ -3,7 +3,7 @@ package ai
 import (
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/ai"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
+	aiReq "github.com/flipped-aurora/gin-vue-admin/server/model/ai/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
 	systemService "github.com/flipped-aurora/gin-vue-admin/server/service/system"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
@@ -19,7 +19,7 @@ type HotspotService struct {
 //@return: err error
 
 func (exa *HotspotService) CreateHotspot(e ai.Hotspot) (err error) {
-	e.GVA_MODEL = global.GVA_MODEL{ID: utils.GenID(), CreatedAt: time.Now(), UpdatedAt: time.Now()}
+	e.BASEMODEL = global.BASEMODEL{ID: utils.GenID(), CreatedAt: time.Now(), UpdatedAt: time.Now()}
 	err = global.GVA_DB.Create(&e).Error
 	return err
 }
@@ -60,7 +60,7 @@ func (exa *HotspotService) GetHotspot(id uint64) (portal ai.Hotspot, err error) 
 // @param: sysUserAuthorityID string, info request.PageInfo
 // @return: list interface{}, total int64, err error
 
-func (exa *HotspotService) GetHotspotList(sysUserAuthorityID uint, info request.PageInfo) (list interface{}, total int64, err error) {
+func (exa *HotspotService) GetHotspotList(sysUserAuthorityID uint, info aiReq.HotspotSearch) (list interface{}, total int64, err error) {
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
 
@@ -77,11 +77,19 @@ func (exa *HotspotService) GetHotspotList(sysUserAuthorityID uint, info request.
 	var portalList []ai.Hotspot
 
 	db := global.GVA_DB.Model(&ai.Hotspot{})
+	// 如果有条件搜索 下方会自动创建搜索语句
+	if info.Headline != "" {
+		db = db.Where("headline LIKE ?", "%"+info.Headline+"%")
+	}
+	if info.PortalName != "" {
+		db = db.Where("portal_name LIKE ?", "%"+info.PortalName+"%")
+	}
+
 	err = db.Count(&total).Error
 	if err != nil {
 		return portalList, total, err
 	} else {
-		err = db.Limit(limit).Offset(offset).Find(&portalList).Error
+		err = db.Limit(limit).Offset(offset).Order("created_at desc").Find(&portalList).Error
 	}
 	return portalList, total, err
 }

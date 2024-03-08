@@ -71,7 +71,7 @@ func spiderPortal(db *gorm.DB, portal *ai.Portal) {
 		articleResp.ReadNum = strings.ReplaceAll(articleResp.ReadNum, "阅读", "")
 
 		article := &ai.Article{
-			GVA_MODEL:   global.GVA_MODEL{ID: utils.GenID(), CreatedAt: time.Now(), UpdatedAt: time.Now()},
+			BASEMODEL:   global.BASEMODEL{ID: utils.GenID(), CreatedAt: time.Now(), UpdatedAt: time.Now()},
 			PortalName:  portal.PortalName,
 			AuthorName:  articleResp.AuthorName,
 			Topic:       articleResp.Topic,
@@ -91,7 +91,7 @@ func spiderPortal(db *gorm.DB, portal *ai.Portal) {
 
 		err = db.Model(&ai.Url{}).Create(&ai.Url{
 			Url:       articleUrl,
-			GVA_MODEL: global.GVA_MODEL{ID: utils.GenID(), CreatedAt: time.Now(), UpdatedAt: time.Now()},
+			BASEMODEL: global.BASEMODEL{ID: utils.GenID(), CreatedAt: time.Now(), UpdatedAt: time.Now()},
 		}).Error
 
 		fmt.Println(portal.PortalName + "[collectSize" + ":" + cast.ToString(collectSize) + "]")
@@ -162,11 +162,11 @@ func collectAllUrl(portalUrl string, portalKey string, targetNum int) []string {
 func collectUrlList(portalKey string, urlList []string) []string {
 	result := make([]string, 0)
 	urlSet := make(map[string]bool)
-	for _, url := range urlList {
-		if !strings.Contains(url, portalKey) {
+	for _, u := range urlList {
+		if !strings.Contains(u, portalKey) {
 			continue
 		}
-		subList := collectUrl(url)
+		subList := collectUrl(u)
 		for _, item := range subList {
 			if _, ok := urlSet[item]; !ok {
 				result = append(result, item)

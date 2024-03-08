@@ -2,10 +2,10 @@ package ai
 
 import (
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
+	"github.com/flipped-aurora/gin-vue-admin/server/model/ai"
+	aiReq "github.com/flipped-aurora/gin-vue-admin/server/model/ai/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/wechat"
-	aiReq "github.com/flipped-aurora/gin-vue-admin/server/model/wechat/request"
 	systemService "github.com/flipped-aurora/gin-vue-admin/server/service/system"
 )
 
