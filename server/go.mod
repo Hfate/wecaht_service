@@ -29,6 +29,7 @@ require (
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/shirou/gopsutil/v3 v3.23.6
 	github.com/songzhibin97/gkit v1.2.11
+	github.com/spf13/cast v1.5.1
 	github.com/spf13/viper v1.16.0
 	github.com/storyicon/graphquery v0.0.0-20190317074716-6a20a75cd98f
 	github.com/stretchr/testify v1.8.4
@@ -115,7 +116,6 @@ require (
 	github.com/richardlehane/msoleps v1.0.3 // indirect
 	github.com/shoenig/go-m1cpu v0.1.6 // indirect
 	github.com/spf13/afero v1.9.5 // indirect
-	github.com/spf13/cast v1.5.1 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/subosito/gotenv v1.4.2 // indirect

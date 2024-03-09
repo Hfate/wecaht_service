@@ -3,6 +3,7 @@ package utils
 import (
 	"fmt"
 	"math/rand"
+	"net/url"
 	"reflect"
 	"strings"
 )
@@ -77,4 +78,11 @@ func RandomString(n int) string {
 
 func RandomInt(min, max int) int {
 	return min + rand.Intn(max-min)
+}
+
+// EncodeFilename 中文编码
+func EncodeFilename(fileName string) string {
+	fileName = url.QueryEscape(fileName)
+	fileName = strings.ReplaceAll(fileName, "+", "%20")
+	return fileName
 }

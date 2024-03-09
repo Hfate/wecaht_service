@@ -238,6 +238,8 @@ import {deleteArticle, deleteArticlesByIds, getArticleList} from '@/api/article'
 import {ref} from 'vue'
 import {ElMessage} from 'element-plus'
 import {formatDate} from '@/utils/format'
+import axios from 'axios'
+import {saveAs} from 'file-saver'
 
 
 defineOptions({
@@ -265,8 +267,8 @@ const onSubmit = () => {
 // 条件搜索前端看此方法
 const onDownload = () => {
   page.value = 1
-  pageSize.value = 10
-  getTableData()
+  pageSize.value = 200
+  downloadArticle()
 }
 
 
@@ -280,6 +282,7 @@ const handleCurrentChange = (val) => {
   page.value = val
   getTableData()
 }
+
 
 // 查询
 const getTableData = async () => {
@@ -319,14 +322,31 @@ const onDelete = async () => {
   }
 }
 const downloadVisible = ref(false)
+
 const downloadTemplate = async () => {
   downloadVisible.value = false
-  const url = 'http://localhost:8888/article/template'
+  const url = import.meta.env.VITE_BASE_API + '/article/template'
   const link = document.createElement('a')
   link.href = url;
   link.target = '_blank'; // 在新标签页中打开
   link.click();
+}
 
+
+const downloadArticle = async () => {
+  // 发起 GET 请求并传递参数
+  axios.get(import.meta.env.VITE_BASE_API + '/article/download', {
+    params: {page: page.value, pageSize: pageSize.value, ...searchInfo.value,},
+    responseType: 'blob'
+  }).then(response => {
+    // 将服务器返回的二进制数据保存为 Blob 对象
+    const blob = new Blob([response.data], {type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+
+    // 使用 file-saver 库将 Blob 对象保存为本地文件
+    saveAs(blob, 'article.xlsx');
+  }).catch(error => {
+    console.error('Failed to download Excel file:', error);
+  });
 }
 
 const deleteWechatArticle = async (row) => {

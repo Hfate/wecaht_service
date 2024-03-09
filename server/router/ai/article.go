@@ -21,5 +21,6 @@ func (e *ArticleRouter) InitArticleRouter(Router *gin.RouterGroup) {
 		articleRouterWithoutRecord.GET("template", articleApi.Template)          // 获取单一文章信息
 		articleRouterWithoutRecord.GET("article", articleApi.GetArticle)         // 获取单一文章信息
 		articleRouterWithoutRecord.GET("articleList", articleApi.GetArticleList) // 获取文章列表
+		articleRouterWithoutRecord.GET("download", articleApi.Download)          // 下载文章
 	}
 }

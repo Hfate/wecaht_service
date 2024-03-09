@@ -65,18 +65,17 @@ export const getArticleList = (params) => {
     })
 }
 
-
 // @Tags ArticleApi
-// @Summary 获取文章导入模板
+// @Summary 下载文章
 // @Security ApiKeyAuth
 // @accept application/json
 // @Produce application/json
-// @Param data body modelInterface.PageInfo true "获取文章导入模板"
+// @Param data body modelInterface.PageInfo true "下载文章"
 // @Success 200 {string} string "{"success":true,"data":{},"msg":"获取成功"}"
-// @Router /article/template [get]
-export const getTemplate = (params) => {
+// @Router /article/download [get]
+export const download = (params) => {
     return service({
-        url: '/article/template',
+        url: '/article/download',
         method: 'get',
         params
     })

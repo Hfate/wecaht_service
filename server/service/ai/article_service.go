@@ -1,12 +1,16 @@
 package ai
 
 import (
+	"fmt"
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/ai"
 	aiReq "github.com/flipped-aurora/gin-vue-admin/server/model/ai/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
 	systemService "github.com/flipped-aurora/gin-vue-admin/server/service/system"
+	"github.com/flipped-aurora/gin-vue-admin/server/utils"
+	"github.com/gin-gonic/gin"
+	"github.com/xuri/excelize/v2"
 )
 
 type ArticleService struct {
@@ -85,4 +89,55 @@ func (exa *ArticleService) GetArticleList(sysUserAuthorityID uint, info aiReq.Ar
 		err = db.Limit(limit).Offset(offset).Order("publish_time desc").Find(&articleList).Error
 	}
 	return articleList, total, err
+}
+
+func (exa *ArticleService) Download(c *gin.Context, sysUserAuthorityID uint, info aiReq.ArticleSearch) {
+	list, _, err := exa.GetArticleList(sysUserAuthorityID, info)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	articleList := list.([]ai.Article)
+	result := make([]*ai.ArticleExcl, 0)
+	for _, item := range articleList {
+		result = append(result, &ai.ArticleExcl{
+			AuthorName: item.AuthorName,
+			PortalName: item.PortalName,
+			Topic:      item.Topic,
+			Title:      item.Title,
+			Link:       item.Link,
+			ReadNum:    item.ReadNum,
+			CommentNum: item.CommentNum,
+			LikeNum:    item.LikeNum,
+			Content:    item.Content,
+		})
+	}
+
+	excelFile := excelize.NewFile()
+
+	utils.WriteDefaultExcelSheet(excelFile, result)
+
+	fileName := "article.xlsx"
+	filePath := "./tmp/" + fileName
+
+	err = excelFile.SaveAs(filePath)
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	// 中文编码
+	fileName = utils.EncodeFilename(fileName)
+
+	//返回文件流
+	c.Header("Content-Type", "application/octet-stream")
+	c.Header("Content-Transfer-Encoding", "binary")
+	c.Header("Content-Disposition", "attachment; filename="+fileName)
+	c.Header("Expires", "0")
+	c.Header("Cache-Control", "must-revalidate")
+	c.Header("Pragma", "public")
+	c.File(filePath)
+
+	return
+
 }

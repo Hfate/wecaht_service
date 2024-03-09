@@ -20,3 +20,17 @@ type Article struct {
 func (Article) TableName() string {
 	return "wechat_article"
 }
+
+type ArticleExcl struct {
+	Title       string `json:"title"  xlsx:"Title"` //
+	PortalName  string `json:"portalName" xlsx:"PortalName"`
+	Topic       string `json:"topic" xlsx:"Topic"`           //
+	AuthorName  string `json:"authorName" xlsx:"AuthorName"` //
+	Link        string `json:"link" xlsx:"Link"`             //
+	PublishTime string `json:"publishTime" xlsx:"PublishTime"`
+	LikeNum     int    `json:"likeNum" xlsx:"LikeNum"`
+	ReadNum     int    `json:"readNum" xlsx:"ReadNum"`
+	CommentNum  int    `json:"commentNum" xlsx:"CommentNum"`
+	Content     string `json:"content" xlsx:"Content"`
+	Tags        string `json:"tags" xlsx:"Tags"`
+}

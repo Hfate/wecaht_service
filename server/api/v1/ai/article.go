@@ -151,3 +151,29 @@ func (e *ArticleApi) GetArticleList(c *gin.Context) {
 		PageSize: pageInfo.PageSize,
 	}, "获取成功", c)
 }
+
+// Download
+// @Tags      Article
+// @Summary   分页获取权限文章列表
+// @Security  ApiKeyAuth
+// @accept    application/json
+// @Produce   application/json
+// @Param     data  query     request.PageInfo                                        true  "页码, 每页大小"
+// @Success   200   {object}  response.Response{data=response.PageResult,msg=string}  "分页获取权限文章列表,返回包括列表,总数,页码,每页数量"
+// @Router    /article/download [get]
+func (e *ArticleApi) Download(c *gin.Context) {
+	var pageInfo aiReq.ArticleSearch
+	err := c.ShouldBindQuery(&pageInfo)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	err = utils.Verify(pageInfo, utils.PageInfoVerify)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+
+	pageInfo.PageSize = 200
+	articleService.Download(c, utils.GetUserAuthorityId(c), pageInfo)
+}
