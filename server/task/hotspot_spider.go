@@ -5,6 +5,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/model/ai"
 	ai2 "github.com/flipped-aurora/gin-vue-admin/server/service/ai"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
+	"github.com/spf13/cast"
 	"github.com/storyicon/graphquery"
 	"gorm.io/gorm"
 	"sync"
@@ -13,6 +14,9 @@ import (
 func HotspotSpider(db *gorm.DB) error {
 	// 微博热点爬取
 	spiderWeiboHeadline(db)
+
+	// 头条热点爬取
+	spiderToutiaoHeadline(db)
 
 	portalList := make([]*ai.Portal, 0)
 	err := db.Model(ai.Portal{}).Where("target_num>0").Find(&portalList).Error
@@ -109,6 +113,107 @@ func spiderWeiboHeadline(db *gorm.DB) {
 		fmt.Println(err)
 	}
 	return
+}
+
+func spiderToutiaoHeadline(db *gorm.DB) {
+	resp, err := utils.GetStr("https://www.toutiao.com/hot-event/hot-board/?origin=toutiao_pc")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	var toutiaoResp ToutiaoResp
+	err = utils.JsonStrToStruct(resp, &toutiaoResp)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	hotspotList := make([]*ai.Hotspot, 0)
+	urlList := make([]string, 0)
+	headlineList := make([]string, 0)
+	for _, item := range toutiaoResp.Data {
+		topic := ""
+		interestCategoryList := item.InterestCategory
+		if len(interestCategoryList) > 0 {
+			for _, i := range interestCategoryList {
+				topic += i + ","
+			}
+		} else {
+			topic = item.LabelDesc
+		}
+		hotspot := &ai.Hotspot{
+			PortalName: "头条",
+			BASEMODEL:  ai2.BaseModel(),
+			Link:       item.Url,
+			Headline:   item.Title,
+			Trending:   cast.ToInt(item.HotValue),
+			Topic:      topic,
+		}
+		urlList = append(urlList, hotspot.Link)
+		headlineList = append(headlineList, hotspot.Headline)
+		hotspotList = append(hotspotList, hotspot)
+	}
+
+	err = db.Where("link in ?", urlList).Unscoped().Delete(&ai.Hotspot{}).Error
+	if err != nil {
+		return
+	}
+	err = db.Where("headline in ?", headlineList).Unscoped().Delete(&ai.Hotspot{}).Error
+	if err != nil {
+		return
+	}
+
+	err = db.Create(&hotspotList).Error
+	if err != nil {
+		fmt.Println(err)
+	}
+	return
+}
+
+type ToutiaoResp struct {
+	Data []struct {
+		ClusterId int64  `json:"ClusterId"`
+		Title     string `json:"Title"`
+		LabelUrl  string `json:"LabelUrl"`
+		Label     string `json:"Label"`
+		Url       string `json:"Url"`
+		HotValue  string `json:"HotValue"`
+		Schema    string `json:"Schema"`
+		LabelUri  struct {
+			Uri     string `json:"uri"`
+			Url     string `json:"url"`
+			Width   int    `json:"width"`
+			Height  int    `json:"height"`
+			UrlList []struct {
+				Url string `json:"url"`
+			} `json:"url_list"`
+			ImageType int `json:"image_type"`
+		} `json:"LabelUri"`
+		ClusterIdStr string `json:"ClusterIdStr"`
+		ClusterType  int    `json:"ClusterType"`
+		QueryWord    string `json:"QueryWord"`
+		Image        struct {
+			Uri     string `json:"uri"`
+			Url     string `json:"url"`
+			Width   int    `json:"width"`
+			Height  int    `json:"height"`
+			UrlList []struct {
+				Url string `json:"url"`
+			} `json:"url_list"`
+			ImageType int `json:"image_type"`
+		} `json:"Image"`
+		LabelDesc        string   `json:"LabelDesc,omitempty"`
+		InterestCategory []string `json:"InterestCategory,omitempty"`
+	} `json:"data"`
+	FixedTopData []struct {
+		Id     int    `json:"Id"`
+		Title  string `json:"Title"`
+		Url    string `json:"Url"`
+		Schema string `json:"Schema"`
+	} `json:"fixed_top_data"`
+	FixedTopStyle string `json:"fixed_top_style"`
+	ImprId        string `json:"impr_id"`
+	Status        string `json:"status"`
 }
 
 type WebResp struct {

@@ -38,7 +38,7 @@ func Timer() {
 		}
 
 		// 其他定时任务定在这里 参考上方使用方法
-		_, err = global.GVA_Timer.AddTaskByFunc("定时任务标识", "*/5 * * * *", func() {
+		_, err = global.GVA_Timer.AddTaskByFunc("定时任务标识", "@every 5m", func() {
 			err = task.HotspotSpider(global.GVA_DB)
 			if err != nil {
 				fmt.Println("timer error:", err)

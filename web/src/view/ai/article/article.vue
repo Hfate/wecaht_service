@@ -33,6 +33,11 @@
               @click="onReset"
           >重置
           </el-button>
+          <el-button
+              icon="download"
+              @click="onDownload"
+          >下载
+          </el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -251,6 +256,14 @@ const onReset = () => {
 }
 // 条件搜索前端看此方法
 const onSubmit = () => {
+  page.value = 1
+  pageSize.value = 10
+
+  getTableData()
+}
+
+// 条件搜索前端看此方法
+const onDownload = () => {
   page.value = 1
   pageSize.value = 10
   getTableData()
