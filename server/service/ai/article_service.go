@@ -16,6 +16,8 @@ import (
 type ArticleService struct {
 }
 
+var ArticleServiceApp = new(ArticleService)
+
 //@function: DeleteFileChunk
 //@description: 删除文章
 //@param: e model.Article
@@ -45,6 +47,31 @@ func (exa *ArticleService) DeleteArticlesByIds(ids request.IdsReq) (err error) {
 func (exa *ArticleService) GetArticle(id uint64) (portal ai.Article, err error) {
 	err = global.GVA_DB.Where("id = ?", id).First(&portal).Error
 	return
+}
+
+func (exa *ArticleService) Recreation(id uint64) error {
+	article := ai.Article{}
+	err := global.GVA_DB.Where("id = ?", id).First(&article).Error
+	if err != nil {
+		return err
+	}
+
+	recreationTitle, recreationContent := QianfanServiceApp.Recreation(article.Title, article.Content)
+
+	aiArticle := ai.AIArticle{
+		OriginId:   article.ID,
+		Title:      recreationTitle,
+		PortalName: article.PortalName,
+		Topic:      article.Topic,
+		AuthorName: article.AuthorName,
+		Tags:       article.Tags,
+		Content:    recreationContent,
+	}
+	aiArticle.BASEMODEL = BaseModel()
+
+	err = AIArticleServiceApp.CreateAIArticle(aiArticle)
+
+	return err
 }
 
 // @author: [piexlmax](https://github.com/piexlmax)

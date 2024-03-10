@@ -99,6 +99,7 @@ func Routers() *gin.Engine {
 		exampleRouter.InitFileUploadAndDownloadRouter(PrivateGroup) // 文件上传下载功能路由
 		aiRouter.InitPortalRouter(PrivateGroup)                     // 门户网站管理
 		aiRouter.InitArticleRouter(PrivateGroup)                    // 文章管理
+		aiRouter.InitAIArticleRouter(PrivateGroup)                  // ai文章管理
 		aiRouter.InitBenchmarkAccountRouter(PrivateGroup)           // 对标账号管理
 		aiRouter.InitOfficialAccountRouter(PrivateGroup)            // 公众号管理
 		aiRouter.InitHotspotRouter(PrivateGroup)                    // 热点追踪

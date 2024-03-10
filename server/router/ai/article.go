@@ -16,6 +16,7 @@ func (e *ArticleRouter) InitArticleRouter(Router *gin.RouterGroup) {
 	{
 		articleRouter.DELETE("article", articleApi.DeleteArticle)                   // 删除文章
 		articleRouter.DELETE("deleteArticlesByIds", articleApi.DeleteArticlesByIds) // 删除文章
+		articleRouter.POST("recreation", articleApi.Recreation)                     // 改写文章
 	}
 	{
 		articleRouterWithoutRecord.GET("template", articleApi.Template)          // 获取单一文章信息

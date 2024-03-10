@@ -1,99 +1,85 @@
 import service from '@/utils/request'
 
 
-// @Tags ArticleApi
+// @Tags AIArticleApi
 // @Summary 删除文章
 // @Security ApiKeyAuth
 // @accept application/json
 // @Produce application/json
-// @Param data body dbModel.Article true "删除文章"
+// @Param data body dbModel.AIArticle true "删除文章"
 // @Success 200 {string} string "{"success":true,"data":{},"msg":"获取成功"}"
-// @Router /article/article [delete]
-export const deleteArticle = (data) => {
+// @Router /aiArticle/aiArticle [delete]
+export const deleteAIArticle = (data) => {
     return service({
-        url: '/article/article',
+        url: '/aiArticle/aiArticle',
         method: 'delete',
         data
     })
 }
 
 
-// @Tags ArticleApi
+// @Tags AIArticleApi
 // @Summary 改写文章
 // @Security ApiKeyAuth
 // @accept application/json
 // @Produce application/json
-// @Param data body dbModel.Article true "改写文章"
+// @Param data body dbModel.AIArticle true "改写文章"
 // @Success 200 {string} string "{"success":true,"data":{},"msg":"获取成功"}"
-// @Router /article/recreation [delete]
-export const recreationArticle = (data) => {
+// @Router /aiArticle/recreation [delete]
+export const recreationAIArticle = (data) => {
     return service({
-        url: '/article/recreation',
+        url: '/aiArticle/recreation',
         method: 'post',
         data
     })
 }
 
-// @Tags ArticleApi
+// @Tags AIArticleApi
 // @Summary 删除文章集合
 // @Security ApiKeyAuth
 // @accept application/json
 // @Produce application/json
-// @Param data body dbModel.Article true "删除文章集合"
+// @Param data body dbModel.AIArticle true "删除文章集合"
 // @Success 200 {string} string "{"success":true,"data":{},"msg":"获取成功"}"
-// @Router /article/deleteArticlesByIds [delete]
-export const deleteArticlesByIds = (data) => {
+// @Router /aiArticle/deleteAIArticlesByIds [delete]
+export const deleteAIArticlesByIds = (data) => {
     return service({
-        url: '/article/deleteArticlesByIds',
+        url: '/aiArticle/deleteAIArticlesByIds',
         method: 'delete',
         data
     })
 }
 
-// @Tags ArticleApi
+// @Tags AIArticleApi
 // @Summary 获取单一文章信息
 // @Security ApiKeyAuth
 // @accept application/json
 // @Produce application/json
-// @Param data body dbModel.Article true "获取单一文章信息"
+// @Param data body dbModel.AIArticle true "获取单一文章信息"
 // @Success 200 {string} string "{"success":true,"data":{},"msg":"获取成功"}"
-// @Router /article/article [get]
-export const getArticle = (params) => {
+// @Router /aiArticle/aiArticle [get]
+export const getAIArticle = (params) => {
     return service({
-        url: '/article/article',
+        url: '/aiArticle/aiArticle',
         method: 'get',
         params
     })
 }
 
-// @Tags ArticleApi
+// @Tags AIArticleApi
 // @Summary 获取权限文章列表
 // @Security ApiKeyAuth
 // @accept application/json
 // @Produce application/json
 // @Param data body modelInterface.PageInfo true "获取权限文章列表"
 // @Success 200 {string} string "{"success":true,"data":{},"msg":"获取成功"}"
-// @Router /article/articleList [get]
-export const getArticleList = (params) => {
+// @Router /aiArticle/aiArticleList [get]
+export const getAIArticleList = (params) => {
     return service({
-        url: '/article/articleList',
+        url: '/aiArticle/aiArticleList',
         method: 'get',
         params
     })
 }
 
-// @Tags ArticleApi
-// @Summary 下载文章
-// @Security ApiKeyAuth
-// @accept application/json
-// @Produce application/json
-// @Param data body modelInterface.PageInfo true "下载文章"
-// @Success 200 {string} string "{"success":true,"data":{},"msg":"获取成功"}"
-// @Router /article/download [get]
-export const download = (params) => {
-    return service({
-        url: '/article/download',
-        method: 'get',
-        params
-    })
-}
+

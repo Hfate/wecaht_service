@@ -10,6 +10,12 @@
               v-model="searchInfo.Title"
           />
         </el-form-item>
+        <el-form-item label="公众号">
+          <el-input
+              v-model="searchInfo.TargetAccountName"
+              placeholder=""
+          />
+        </el-form-item>
         <el-form-item label="门户">
           <el-input
               v-model="searchInfo.PortalName"
@@ -32,11 +38,6 @@
               icon="refresh"
               @click="onReset"
           >重置
-          </el-button>
-          <el-button
-              icon="download"
-              @click="onDownload"
-          >下载
           </el-button>
         </el-form-item>
       </el-form>
@@ -65,36 +66,9 @@
           <template #reference>
             <el-button
                 icon="delete"
-                :disabled="!articles.length"
+                :disabled="!aiAIArticles.length"
                 @click="deleteVisible = true"
             >删除
-            </el-button>
-          </template>
-        </el-popover>
-        <el-popover
-            v-model="downloadVisible"
-            placement="top"
-            width="160"
-        >
-          <p>确定要下载文章上次模板吗？</p>
-          <div style="text-align: right; margin-top: 8px;">
-            <el-button
-                type="primary"
-                link
-                @click="downloadVisible = false"
-            >取消
-            </el-button>
-            <el-button
-                type="primary"
-                @click="downloadTemplate"
-            >确定
-            </el-button>
-          </div>
-          <template #reference>
-            <el-button
-                icon="Download"
-                @click="downloadVisible = true"
-            >模板下载
             </el-button>
           </template>
         </el-popover>
@@ -134,8 +108,8 @@
         />
         <el-table-column
             align="left"
-            label="作者"
-            prop="authorName"
+            label="目标公众号"
+            prop="targetAccount"
             width="200"
         />
         <el-table-column
@@ -151,19 +125,19 @@
             align="left"
             label="阅读量"
             prop="readNum"
-            width="120"
+            width="100"
         />
         <el-table-column
             align="left"
             label="评论量"
             prop="commentNum"
-            width="120"
+            width="100"
         />
         <el-table-column
             align="left"
             label="点赞量"
             prop="likeNum"
-            width="120"
+            width="100"
         />
         <el-table-column
             align="left"
@@ -180,6 +154,13 @@
             min-width="160"
         >
           <template #default="scope">
+            <el-button
+                type="primary"
+                link
+                icon="edit"
+                @click="auditArticle(scope.row)"
+            >审核
+            </el-button>
             <el-popover
                 v-model="scope.row.visible"
                 placement="top"
@@ -195,7 +176,7 @@
                 </el-button>
                 <el-button
                     type="primary"
-                    @click="deleteWechatArticle(scope.row)"
+                    @click="deleteWechatAIArticle(scope.row)"
                 >确定
                 </el-button>
               </div>
@@ -214,7 +195,7 @@
                 placement="top"
                 width="160"
             >
-              <p>确定要改写吗？</p>
+              <p>确定要重写吗？</p>
               <div style="text-align: right; margin-top: 8px;">
                 <el-button
                     type="primary"
@@ -224,7 +205,7 @@
                 </el-button>
                 <el-button
                     type="primary"
-                    @click="recreationWechatArticle(scope.row)"
+                    @click="recreationWechatAIArticle(scope.row)"
                 >确定
                 </el-button>
               </div>
@@ -234,7 +215,7 @@
                     link
                     icon="delete"
                     @click="scope.row.visible = true"
-                >改写
+                >重写
                 </el-button>
               </template>
             </el-popover>
@@ -253,23 +234,119 @@
         />
       </div>
     </div>
+
+    <el-dialog
+        v-model="dialogFormVisible"
+        :before-close="closeDialog"
+        title="新创作的文章"
+    >
+      <el-scrollbar height="500px">
+        <el-form
+            :model="form"
+            label-position="right"
+            label-width="90px"
+        >
+          <el-form-item label="标题">
+            <el-input
+                v-model="form.title"
+                autocomplete="off"
+            />
+          </el-form-item>
+          <el-form-item label="主题">
+            <el-input
+                v-model="form.topic"
+                autocomplete="off"
+            />
+          </el-form-item>
+          <el-form-item label="目标公众号名字">
+            <el-input
+                v-model="form.targetAccountName"
+                autocomplete="off"
+            />
+          </el-form-item>
+          <el-form-item label="目标公众号ID">
+            <el-input
+                v-model="form.targetAccountId"
+                autocomplete="off"
+            />
+          </el-form-item>
+          <el-form-item label="内容">
+            <el-input
+                v-model="form.content"
+                type="textarea"
+                :rows="30"
+                autocomplete="off"
+            />
+          </el-form-item>
+          <el-form-item label="标签">
+            <el-input
+                v-model="form.tags"
+                autocomplete="off"
+            />
+          </el-form-item>
+        </el-form>
+      </el-scrollbar>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="closeDialog">取 消</el-button>
+          <el-button
+              type="primary"
+              @click="enterDialog"
+          >审核通过
+          </el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import {deleteArticle, deleteArticlesByIds, getArticleList, recreationArticle} from '@/api/article'
+import {
+  deleteAIArticle,
+  deleteAIArticlesByIds,
+  getAIArticle,
+  getAIArticleList,
+  recreationAIArticle
+} from '@/api/aiArticle'
 import {ref} from 'vue'
 import {ElMessage} from 'element-plus'
 import {formatDate} from '@/utils/format'
-import axios from 'axios'
-import {saveAs} from 'file-saver'
 
 
 defineOptions({
-  name: 'Article'
+  name: 'AIArticle'
 })
 
-const articles = ref([])
+const aiAIArticles = ref([])
+
+const form = ref({
+  title: '',
+  topic: '',
+  targetAccountName: '',
+  targetAccountId: '',
+  content: '',
+  tags: '',
+})
+
+const closeDialog = () => {
+  dialogFormVisible.value = false
+  form.value = {
+    title: '',
+    topic: '',
+    targetAccountName: '',
+    targetAccountId: '',
+    content: '',
+    tags: '',
+  }
+}
+
+const enterDialog = async () => {
+  let res = await auditArticle(form.value)
+  if (res.code === 0) {
+    closeDialog()
+    getTableData()
+  }
+}
 
 const page = ref(1)
 const total = ref(0)
@@ -287,13 +364,6 @@ const onSubmit = () => {
   getTableData()
 }
 
-// 条件搜索前端看此方法
-const onDownload = () => {
-  page.value = 1
-  pageSize.value = 200
-  downloadArticle()
-}
-
 
 // 分页
 const handleSizeChange = (val) => {
@@ -309,7 +379,7 @@ const handleCurrentChange = (val) => {
 
 // 查询
 const getTableData = async () => {
-  const table = await getArticleList({page: page.value, pageSize: pageSize.value, ...searchInfo.value,})
+  const table = await getAIArticleList({page: page.value, pageSize: pageSize.value, ...searchInfo.value,})
   if (table.code === 0) {
     tableData.value = table.data.list
     total.value = table.data.total
@@ -325,13 +395,13 @@ const type = ref('')
 
 // 批量操作
 const handleSelectionChange = (val) => {
-  articles.value = val
+  aiAIArticles.value = val
 }
 
 const deleteVisible = ref(false)
 const onDelete = async () => {
-  const ids = articles.value.map(item => item.ID)
-  const res = await deleteArticlesByIds({ids})
+  const ids = aiAIArticles.value.map(item => item.ID)
+  const res = await deleteAIArticlesByIds({ids})
   if (res.code === 0) {
     ElMessage({
       type: 'success',
@@ -344,37 +414,11 @@ const onDelete = async () => {
     getTableData()
   }
 }
-const downloadVisible = ref(false)
-
-const downloadTemplate = async () => {
-  downloadVisible.value = false
-  const url = import.meta.env.VITE_BASE_API + '/article/template'
-  const link = document.createElement('a')
-  link.href = url;
-  link.target = '_blank'; // 在新标签页中打开
-  link.click();
-}
 
 
-const downloadArticle = async () => {
-  // 发起 GET 请求并传递参数
-  axios.get(import.meta.env.VITE_BASE_API + '/article/download', {
-    params: {page: page.value, pageSize: pageSize.value, ...searchInfo.value,},
-    responseType: 'blob'
-  }).then(response => {
-    // 将服务器返回的二进制数据保存为 Blob 对象
-    const blob = new Blob([response.data], {type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
-
-    // 使用 file-saver 库将 Blob 对象保存为本地文件
-    saveAs(blob, 'article.xlsx');
-  }).catch(error => {
-    console.error('Failed to download Excel file:', error);
-  });
-}
-
-const deleteWechatArticle = async (row) => {
+const deleteWechatAIArticle = async (row) => {
   row.visible = false
-  const res = await deleteArticle({ID: row.ID})
+  const res = await deleteAIArticle({ID: row.ID})
   if (res.code === 0) {
     ElMessage({
       type: 'success',
@@ -387,10 +431,18 @@ const deleteWechatArticle = async (row) => {
   }
 }
 
+const auditArticle = async (row) => {
+  const res = await getAIArticle({ID: row.ID})
+  type.value = 'update'
+  if (res.code === 0) {
+    form.value = res.data.article
+    dialogFormVisible.value = true
+  }
+}
 
-const recreationWechatArticle = async (row) => {
+const recreationWechatAIArticle = async (row) => {
   row.visible = false
-  const res = await recreationArticle({ID: row.ID})
+  const res = await recreationAIArticle({ID: row.ID})
   if (res.code === 0) {
     ElMessage({
       type: 'success',
@@ -403,6 +455,10 @@ const recreationWechatArticle = async (row) => {
   }
 }
 
+const openDialog = () => {
+  type.value = 'create'
+  dialogFormVisible.value = true
+}
 
 </script>
 

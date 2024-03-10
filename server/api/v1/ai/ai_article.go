@@ -12,30 +12,30 @@ import (
 	"go.uber.org/zap"
 )
 
-type ArticleApi struct{}
+type AIArticleApi struct{}
 
-// DeleteArticle
-// @Tags      Article
+// DeleteAIArticle
+// @Tags      AIArticle
 // @Summary   删除文章
 // @Security  ApiKeyAuth
 // @accept    application/json
 // @Produce   application/json
-// @Param     data  body      wechat.Article            true  "文章ID"
+// @Param     data  body      wechat.AIArticle            true  "文章ID"
 // @Success   200   {object}  response.Response{msg=string}  "删除文章"
-// @Router    /article/article [delete]
-func (e *ArticleApi) DeleteArticle(c *gin.Context) {
-	var article ai.Article
-	err := c.ShouldBindJSON(&article)
+// @Router    /aiArticle/aiArticle [delete]
+func (e *AIArticleApi) DeleteAIArticle(c *gin.Context) {
+	var aiArticle ai.AIArticle
+	err := c.ShouldBindJSON(&aiArticle)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	err = utils.Verify(article.BASEMODEL, utils.IdVerify)
+	err = utils.Verify(aiArticle.BASEMODEL, utils.IdVerify)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	err = articleService.DeleteArticle(article)
+	err = aiArticleService.DeleteAIArticle(aiArticle)
 	if err != nil {
 		global.GVA_LOG.Error("删除失败!", zap.Error(err))
 		response.FailWithMessage("删除失败", c)
@@ -44,23 +44,23 @@ func (e *ArticleApi) DeleteArticle(c *gin.Context) {
 	response.OkWithMessage("删除成功", c)
 }
 
-// DeleteArticlesByIds
-// @Tags      Article
+// DeleteAIArticlesByIds
+// @Tags      AIArticle
 // @Summary   删除选中文章
 // @Security  ApiKeyAuth
 // @accept    application/json
 // @Produce   application/json
 // @Param     data  body      request.IdsReq                 true  "ID"
 // @Success   200   {object}  response.Response{msg=string}  "删除选中文章"
-// @Router    /article/deleteArticlesByIds [delete]
-func (e *ArticleApi) DeleteArticlesByIds(c *gin.Context) {
+// @Router    /aiArticle/deleteAIArticlesByIds [delete]
+func (e *AIArticleApi) DeleteAIArticlesByIds(c *gin.Context) {
 	var ids request.IdsReq
 	err := c.ShouldBindJSON(&ids)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	err = articleService.DeleteArticlesByIds(ids)
+	err = aiArticleService.DeleteAIArticlesByIds(ids)
 	if err != nil {
 		global.GVA_LOG.Error("删除失败!", zap.Error(err))
 		response.FailWithMessage("删除失败", c)
@@ -69,58 +69,58 @@ func (e *ArticleApi) DeleteArticlesByIds(c *gin.Context) {
 	response.OkWithMessage("删除成功", c)
 }
 
-// GetArticle
-// @Tags      Article
+// GetAIArticle
+// @Tags      AIArticle
 // @Summary   获取单一文章信息
 // @Security  ApiKeyAuth
 // @accept    application/json
 // @Produce   application/json
-// @Param     data  query     wechat.Article                                                true  "文章ID"
-// @Success   200   {object}  response.Response{data=exampleRes.ArticleResponse,msg=string}  "获取单一文章信息,返回包括文章详情"
-// @Router    /article/article [get]
-func (e *ArticleApi) GetArticle(c *gin.Context) {
-	var article ai.Article
-	err := c.ShouldBindQuery(&article)
+// @Param     data  query     wechat.AIArticle                                                true  "文章ID"
+// @Success   200   {object}  response.Response{data=exampleRes.AIArticleResponse,msg=string}  "获取单一文章信息,返回包括文章详情"
+// @Router    /aiArticle/aiArticle [get]
+func (e *AIArticleApi) GetAIArticle(c *gin.Context) {
+	var aiArticle ai.AIArticle
+	err := c.ShouldBindQuery(&aiArticle)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	err = utils.Verify(article.BASEMODEL, utils.IdVerify)
+	err = utils.Verify(aiArticle.BASEMODEL, utils.IdVerify)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	data, err := articleService.GetArticle(article.ID)
+	data, err := aiArticleService.GetAIArticle(aiArticle.ID)
 	if err != nil {
 		global.GVA_LOG.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败", c)
 		return
 	}
-	response.OkWithDetailed(aiRes.ArticleResponse{Article: data}, "获取成功", c)
+	response.OkWithDetailed(aiRes.AIArticleResponse{AIArticle: data}, "获取成功", c)
 }
 
 // Recreation
-// @Tags      Article
+// @Tags      AIArticle
 // @Summary   改写文章
 // @Security  ApiKeyAuth
 // @accept    application/json
 // @Produce   application/json
-// @Param     data  body      wechat.Article            true  "文章ID"
+// @Param     data  body      wechat.AIArticle            true  "文章ID"
 // @Success   200   {object}  response.Response{msg=string}  "改写文章"
-// @Router    /article/recreation [post]
-func (e *ArticleApi) Recreation(c *gin.Context) {
-	var article ai.Article
-	err := c.ShouldBindJSON(&article)
+// @Router    /aiArticle/recreation [post]
+func (e *AIArticleApi) Recreation(c *gin.Context) {
+	var aiArticle ai.AIArticle
+	err := c.ShouldBindJSON(&aiArticle)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	err = utils.Verify(article.BASEMODEL, utils.IdVerify)
+	err = utils.Verify(aiArticle.BASEMODEL, utils.IdVerify)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	err = articleService.Recreation(article.ID)
+	err = aiArticleService.Recreation(aiArticle.ID)
 	if err != nil {
 		global.GVA_LOG.Error("改写失败!", zap.Error(err))
 		response.FailWithMessage("改写失败", c)
@@ -129,35 +129,17 @@ func (e *ArticleApi) Recreation(c *gin.Context) {
 	response.OkWithMessage("改写成功", c)
 }
 
-// Template
-// @Tags      Article
-// @Summary   获取文章上传模板
-// @Security  ApiKeyAuth
-// @accept    application/json
-// @Produce   application/json
-// @Success   200   {object}  response.Response{data=exampleRes.ArticleResponse,msg=string}  "获取文章上传模板"
-// @Router    /article/template [get]
-func (e *ArticleApi) Template(c *gin.Context) {
-	var filename = "article_template.xlsx"
-	var filePath = "./template/" + filename
-	//返回文件流
-	c.Header("Content-Type", "application/octet-stream")
-	c.Header("Content-Disposition", "attachment; filename="+filename)
-	c.Header("Content-Transfer-Encoding", "binary")
-	c.File(filePath)
-}
-
-// GetArticleList
-// @Tags      Article
+// GetAIArticleList
+// @Tags      AIArticle
 // @Summary   分页获取权限文章列表
 // @Security  ApiKeyAuth
 // @accept    application/json
 // @Produce   application/json
 // @Param     data  query     request.PageInfo                                        true  "页码, 每页大小"
 // @Success   200   {object}  response.Response{data=response.PageResult,msg=string}  "分页获取权限文章列表,返回包括列表,总数,页码,每页数量"
-// @Router    /article/articleList [get]
-func (e *ArticleApi) GetArticleList(c *gin.Context) {
-	var pageInfo aiReq.ArticleSearch
+// @Router    /aiArticle/aiArticleList [get]
+func (e *AIArticleApi) GetAIArticleList(c *gin.Context) {
+	var pageInfo aiReq.AIArticleSearch
 	err := c.ShouldBindQuery(&pageInfo)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
@@ -168,42 +150,16 @@ func (e *ArticleApi) GetArticleList(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	articleList, total, err := articleService.GetArticleList(utils.GetUserAuthorityId(c), pageInfo)
+	aiArticleList, total, err := aiArticleService.GetAIArticleList(utils.GetUserAuthorityId(c), pageInfo)
 	if err != nil {
 		global.GVA_LOG.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败"+err.Error(), c)
 		return
 	}
 	response.OkWithDetailed(response.PageResult{
-		List:     articleList,
+		List:     aiArticleList,
 		Total:    total,
 		Page:     pageInfo.Page,
 		PageSize: pageInfo.PageSize,
 	}, "获取成功", c)
-}
-
-// Download
-// @Tags      Article
-// @Summary   分页获取权限文章列表
-// @Security  ApiKeyAuth
-// @accept    application/json
-// @Produce   application/json
-// @Param     data  query     request.PageInfo                                        true  "页码, 每页大小"
-// @Success   200   {object}  response.Response{data=response.PageResult,msg=string}  "分页获取权限文章列表,返回包括列表,总数,页码,每页数量"
-// @Router    /article/download [get]
-func (e *ArticleApi) Download(c *gin.Context) {
-	var pageInfo aiReq.ArticleSearch
-	err := c.ShouldBindQuery(&pageInfo)
-	if err != nil {
-		response.FailWithMessage(err.Error(), c)
-		return
-	}
-	err = utils.Verify(pageInfo, utils.PageInfoVerify)
-	if err != nil {
-		response.FailWithMessage(err.Error(), c)
-		return
-	}
-
-	pageInfo.PageSize = 200
-	articleService.Download(c, utils.GetUserAuthorityId(c), pageInfo)
 }
