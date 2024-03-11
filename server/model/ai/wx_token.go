@@ -9,6 +9,7 @@ type WxToken struct {
 	BizUin     string `json:"bizUin"`
 	DataTicket string `json:"dataTicket"`
 	RandInfo   string `json:"randInfo"`
+	Token      string `json:"token"`
 	PassTicket string `json:"passTicket"`
 }
 

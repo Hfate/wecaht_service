@@ -9,6 +9,14 @@
         >新增
         </el-button>
       </div>
+      <div class="gva-btn-list">
+        <el-button
+            type="primary"
+            icon="plus"
+            @click="openWxDialog"
+        >更新token
+        </el-button>
+      </div>
       <el-table
           ref="multipleTable"
           :data="tableData"
@@ -166,11 +174,67 @@
         </div>
       </template>
     </el-dialog>
+
+
+    <el-dialog
+        v-model="dialogWxFormVisible"
+        :before-close="closeWxDialog"
+        title="微信公众号token"
+    >
+      <el-scrollbar height="500px">
+        <el-form
+            :model="wxForm"
+            label-position="right"
+            label-width="90px"
+        >
+          <el-form-item label="token">
+            <el-input
+                v-model="wxForm.token"
+                autocomplete="off"
+            />
+          </el-form-item>
+          <el-form-item label="slaveSid">
+            <el-input
+                v-model="wxForm.slaveSid"
+                autocomplete="off"
+            />
+          </el-form-item>
+          <el-form-item label="bizUin">
+            <el-input
+                v-model="wxForm.bizUin"
+                autocomplete="off"
+            />
+          </el-form-item>
+          <el-form-item label="dataTicket">
+            <el-input
+                v-model="wxForm.dataTicket"
+                autocomplete="off"
+            />
+          </el-form-item>
+          <el-form-item label="randInfo">
+            <el-input
+                v-model="wxForm.randInfo"
+                autocomplete="off"
+            />
+          </el-form-item>
+        </el-form>
+      </el-scrollbar>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="closeWxDialog">取 消</el-button>
+          <el-button
+              type="primary"
+              @click="submitWxDialog"
+          >修改
+          </el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import {createBenchmark, deleteBenchmarkAccount, getBenchmarkAccountList} from '@/api/benchmarkAccount'
+import {createBenchmark, deleteBenchmarkAccount, getBenchmarkAccountList, updateWxToken} from '@/api/benchmarkAccount'
 import {ref} from 'vue'
 import {ElMessage} from 'element-plus'
 import {formatDate} from '@/utils/format'
@@ -186,6 +250,14 @@ const form = ref({
   initNum: 10,
   articleLink: '',
   key: ''
+})
+
+const wxForm = ref({
+  slaveSid: '',
+  bizUin: '',
+  dataTicket: '',
+  randInfo: '',
+  token: '',
 })
 
 const page = ref(1)
@@ -220,6 +292,7 @@ const getTableData = async () => {
 getTableData()
 
 const dialogFormVisible = ref(false)
+const dialogWxFormVisible = ref(false)
 const type = ref('')
 
 
@@ -240,25 +313,21 @@ const deleteWechatBenchmarkAccount = async (row) => {
 
 
 const enterDialog = async () => {
-  let res
-  switch (type.value) {
-    case 'create':
-      res = await createBenchmark(form.value)
-      break
-      // case 'update':
-      //   res = await updatePortal(form.value)
-      //   break
-    default:
-      res = await createBenchmark(form.value)
-      break
-  }
-
+  let res = await createBenchmark(form.value)
   if (res.code === 0) {
     closeDialog()
     getTableData()
   }
 }
 
+const submitWxDialog = async () => {
+  let res = await updateWxToken(wxForm.value)
+
+  if (res.code === 0) {
+    closeWxDialog()
+    getTableData()
+  }
+}
 
 const closeDialog = () => {
   dialogFormVisible.value = false
@@ -271,9 +340,26 @@ const closeDialog = () => {
   }
 }
 
+const closeWxDialog = () => {
+  dialogWxFormVisible.value = false
+  form.value = {
+    slaveSid: '',
+    bizUin: '',
+    dataTicket: '',
+    randInfo: '',
+    token: '',
+  }
+}
+
 const openDialog = () => {
   type.value = 'create'
   dialogFormVisible.value = true
+}
+
+
+const openWxDialog = () => {
+  type.value = 'create'
+  dialogWxFormVisible.value = true
 }
 
 

@@ -10,8 +10,8 @@ import (
 )
 
 func Timer() {
-	// spec 定时任务详细配置参考 https://pkg.go.dev/github.com/robfig/cron?utm_source=godoc
 
+	// spec 定时任务详细配置参考 https://pkg.go.dev/github.com/robfig/cron?utm_source=godoc
 	go func() {
 		var option []cron.Option
 		option = append(option, cron.WithSeconds())
@@ -26,24 +26,32 @@ func Timer() {
 			fmt.Println("add timer error:", err)
 		}
 
-		// 其他定时任务定在这里 参考上方使用方法
 		_, err = global.GVA_Timer.AddTaskByFunc("定时任务标识", "@hourly", func() {
 			err = task.PortalSpider(global.GVA_DB)
 			if err != nil {
 				fmt.Println("timer error:", err)
 			}
-		}, "定时爬取数据", option...)
+		}, "定时爬取门户数据", option...)
 		if err != nil {
 			fmt.Println("add timer error:", err)
 		}
 
-		// 其他定时任务定在这里 参考上方使用方法
 		_, err = global.GVA_Timer.AddTaskByFunc("定时任务标识", "@every 5m", func() {
 			err = task.HotspotSpider(global.GVA_DB)
 			if err != nil {
 				fmt.Println("timer error:", err)
 			}
 		}, "定时收集热点", option...)
+		if err != nil {
+			fmt.Println("add timer error:", err)
+		}
+
+		_, err = global.GVA_Timer.AddTaskByFunc("定时爬取微信公众号", "@hourly", func() {
+			err = task.WechatSpider(global.GVA_DB)
+			if err != nil {
+				fmt.Println("timer error:", err)
+			}
+		}, "定时爬取微信公众号", option...)
 		if err != nil {
 			fmt.Println("add timer error:", err)
 		}

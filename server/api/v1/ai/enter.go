@@ -17,5 +17,6 @@ var (
 	articleService          = service.ServiceGroupApp.AIServiceGroup.ArticleService
 	benchmarkAccountService = service.ServiceGroupApp.AIServiceGroup.BenchmarkAccountService
 	officialAccountService  = service.ServiceGroupApp.AIServiceGroup.OfficialAccountService
+	wxTokenService          = service.ServiceGroupApp.AIServiceGroup.WxTokenService
 	hotspotService          = service.ServiceGroupApp.AIServiceGroup.HotspotService
 )

@@ -19,6 +19,8 @@ import (
 type BenchmarkAccountService struct {
 }
 
+var BenchmarkAccountServiceApp = new(BenchmarkAccountService)
+
 //@function: CreatePortal
 //@description: 创建门户
 //@param: e model.Portal
@@ -53,7 +55,14 @@ func (exa *BenchmarkAccountService) CreateBenchmarkAccount(e ai.BenchmarkAccount
 		}
 
 		// 爬取微信公众号文章
-		articleList := exa.spiderOfficialAccount(wxToken, temp)
+		articleList := exa.SpiderOfficialAccount(wxToken, temp)
+
+		if len(articleList) > 0 {
+			err = global.GVA_DB.CreateInBatches(&articleList, 1000).Error
+			if err != nil {
+				fmt.Println(err)
+			}
+		}
 
 		// 再获取点赞数，评论数
 		exa.updateMoreInfo(wxToken, temp, articleList)
@@ -112,9 +121,10 @@ func (exa *BenchmarkAccountService) updateMoreInfo(wxToken *ai.WxToken, e ai.Ben
 	}
 }
 
-func (exa *BenchmarkAccountService) spiderOfficialAccount(wxToken *ai.WxToken, e ai.BenchmarkAccount) []*ai.Article {
+func (exa *BenchmarkAccountService) SpiderOfficialAccount(wxToken *ai.WxToken, e ai.BenchmarkAccount) []*ai.Article {
 	tarGetNum := e.InitNum
 	accountId := e.AccountId
+	token := wxToken.Token
 	accountId = strings.ReplaceAll(accountId, "=", "%3D")
 
 	pages := tarGetNum / 5
@@ -128,7 +138,7 @@ func (exa *BenchmarkAccountService) spiderOfficialAccount(wxToken *ai.WxToken, e
 
 		time.Sleep(10 * time.Second)
 
-		pageUrl := fmt.Sprintf("https://mp.weixin.qq.com/cgi-bin/appmsgpublish?sub=list&search_field=null&begin=%s&count=5&query=&fakeid=%s&type=101_1&free_publish_type=1&sub_action=list_ex&token=2067135357&lang=zh_CN&f=json&ajax=1", begin, accountId)
+		pageUrl := fmt.Sprintf("https://mp.weixin.qq.com/cgi-bin/appmsgpublish?sub=list&search_field=null&begin=%s&count=5&query=&fakeid=%s&type=101_1&free_publish_type=1&sub_action=list_ex&token=%s&lang=zh_CN&f=json&ajax=1", begin, accountId, token)
 
 		cookieList := make([]*http.Cookie, 0)
 		ck1 := &http.Cookie{Name: "slave_user", Value: wxToken.SlaveUser}
@@ -151,7 +161,7 @@ func (exa *BenchmarkAccountService) spiderOfficialAccount(wxToken *ai.WxToken, e
 			fmt.Println(err)
 		}
 
-		subList := AnalyticArticle(e.AccountName, gotBody)
+		subList := getArticle(e.AccountName, gotBody)
 
 		if len(subList) > 0 {
 			wechatArticleList = append(wechatArticleList, subList...)
@@ -160,17 +170,10 @@ func (exa *BenchmarkAccountService) spiderOfficialAccount(wxToken *ai.WxToken, e
 		curPage++
 	}
 
-	if len(wechatArticleList) > 0 {
-		err := global.GVA_DB.CreateInBatches(&wechatArticleList, 1000).Error
-		if err != nil {
-			fmt.Println(err)
-		}
-	}
-
 	return wechatArticleList
 }
 
-func AnalyticArticle(portalName, resp string) []*ai.Article {
+func getArticle(portalName, resp string) []*ai.Article {
 	var officialAccountsResp OfficialAccountsResp
 
 	// 将 JSON 字符串解析到结构体中

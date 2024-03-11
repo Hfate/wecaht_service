@@ -13,7 +13,8 @@ type QianfanService struct {
 var QianfanServiceApp = new(QianfanService)
 
 func init() {
-
+	qianfan.GetConfig().AccessKey = "ALTAK5HSinZtO6tas6f0l7und9"
+	qianfan.GetConfig().SecretKey = "d4d47be09aef4ff4bbe84564c37bfaa9"
 }
 
 func (*QianfanService) Recreation(title, content string) (string, string) {

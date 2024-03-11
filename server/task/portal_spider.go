@@ -154,7 +154,7 @@ func collectAllUrl(portalUrl string, portalKey string, targetNum int) []string {
 		loopNum++
 		urlList = newSubList
 
-		fmt.Println("loopNum->" + cast.ToString(loopNum) + ",resultNum->" + cast.ToString(len(result)))
+		fmt.Println(portalUrl + "loopNum->" + cast.ToString(loopNum) + ",resultNum->" + cast.ToString(len(result)))
 	}
 	return result
 }

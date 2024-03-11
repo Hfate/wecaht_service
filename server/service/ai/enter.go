@@ -7,4 +7,5 @@ type ServiceGroup struct {
 	OfficialAccountService
 	HotspotService
 	AIArticleService
+	WxTokenService
 }

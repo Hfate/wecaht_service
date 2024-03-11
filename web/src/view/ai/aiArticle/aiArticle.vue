@@ -240,11 +240,11 @@
         :before-close="closeDialog"
         title="新创作的文章"
     >
-      <el-scrollbar height="500px">
+      <el-scrollbar height="600px">
         <el-form
             :model="form"
             label-position="right"
-            label-width="90px"
+            label-width="110px"
         >
           <el-form-item label="标题">
             <el-input

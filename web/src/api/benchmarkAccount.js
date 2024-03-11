@@ -33,6 +33,23 @@ export const createBenchmark = (data) => {
     })
 }
 
+
+// @Tags BenchmarkAccountApi
+// @Summary 更新WX Token
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data body dbModel.Portal true "更新WX Token"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"更新WX Token"}"
+// @Router /wxToken/wxToken [post]
+export const updateWxToken = (data) => {
+    return service({
+        url: '/wxToken/wxToken',
+        method: 'put',
+        data
+    })
+}
+
 // @Tags BenchmarkAccountApi
 // @Summary 获取权限对标账号列表
 // @Security ApiKeyAuth
