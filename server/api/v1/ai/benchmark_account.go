@@ -59,7 +59,7 @@ func (e *BenchmarkAccountApi) UpdateWxToken(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	err = utils.Verify(wxToken, utils.BenchmarkAccountVerify)
+	err = utils.Verify(wxToken, utils.WxTokenVerify)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return

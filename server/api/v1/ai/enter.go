@@ -9,10 +9,12 @@ type ApiGroup struct {
 	OfficialAccountApi
 	HotspotApi
 	AIArticleApi
+	PromptApi
 }
 
 var (
 	portalService           = service.ServiceGroupApp.AIServiceGroup.PortalService
+	promptService           = service.ServiceGroupApp.AIServiceGroup.PromptService
 	aiArticleService        = service.ServiceGroupApp.AIServiceGroup.AIArticleService
 	articleService          = service.ServiceGroupApp.AIServiceGroup.ArticleService
 	benchmarkAccountService = service.ServiceGroupApp.AIServiceGroup.BenchmarkAccountService

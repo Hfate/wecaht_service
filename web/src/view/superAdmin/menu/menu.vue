@@ -7,10 +7,6 @@
           icon="plus"
           @click="addMenu('0')"
         >新增根菜单</el-button>
-        <el-icon
-          class="cursor-pointer"
-          @click="toDoc('https://www.bilibili.com/video/BV1kv4y1g7nT/?p=4&vd_source=f2640257c21e3b547a790461ed94875e')"
-        ><VideoCameraFilled /></el-icon>
       </div>
 
       <!-- 由于此处菜单跟左侧列表一一对应所以不需要分页 pageSize默认999 -->

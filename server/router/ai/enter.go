@@ -7,4 +7,5 @@ type AIGroup struct {
 	OfficialAccountRouter
 	HotspotRouter
 	AIArticleRouter
+	PromptRouter
 }

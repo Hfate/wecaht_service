@@ -21,4 +21,5 @@ var (
 	OfficialAccountVerify  = Rules{"AccountName": {NotEmpty()}, "UserEmail": {NotEmpty()}, "Topic": {NotEmpty()}}
 	BenchmarkAccountVerify = Rules{"AccountName": {NotEmpty()}, "Topic": {NotEmpty()}, "ArticleLink": {NotEmpty()}}
 	WxTokenVerify          = Rules{"SlaveSid": {NotEmpty()}, "BizUin": {NotEmpty()}, "DataTicket": {NotEmpty()}, "RandInfo": {NotEmpty()}, "Token": {NotEmpty()}}
+	PromptVerify           = Rules{"Topic": {NotEmpty()}, "PromptType": {NotEmpty()}, "Prompt": {NotEmpty()}, "Language": {NotEmpty()}}
 )

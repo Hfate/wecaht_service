@@ -1,6 +1,6 @@
 <template>
   <div>
-    <warning-bar title="在资源权限中将此角色的资源权限清空 或者不包含创建者的角色 即可屏蔽此客户资源的显示"/>
+
     <div class="gva-table-box">
       <div class="gva-btn-list">
         <el-button
@@ -23,7 +23,32 @@
         />
         <el-table-column
             align="left"
-            label="接入日期"
+            label="主题"
+            prop="topic"
+            width="180"
+        >
+        </el-table-column>
+        <el-table-column
+            align="left"
+            label="类型"
+            prop="promptType"
+            width="120"
+        />
+        <el-table-column
+            align="left"
+            label="Prompt"
+            prop="prompt"
+            width="300"
+        />
+        <el-table-column
+            align="left"
+            label="语言"
+            prop="language"
+            width="80"
+        />
+        <el-table-column
+            align="left"
+            label="创建时间"
             width="180"
         >
           <template #default="scope">
@@ -32,22 +57,13 @@
         </el-table-column>
         <el-table-column
             align="left"
-            label="姓名"
-            prop="customerName"
-            width="120"
-        />
-        <el-table-column
-            align="left"
-            label="电话"
-            prop="customerPhoneData"
-            width="120"
-        />
-        <el-table-column
-            align="left"
-            label="接入人ID"
-            prop="sysUserId"
-            width="120"
-        />
+            label="更新时间"
+            width="180"
+        >
+          <template #default="scope">
+            <span>{{ formatDate(scope.row.UpdatedAt) }}</span>
+          </template>
+        </el-table-column>
         <el-table-column
             align="left"
             label="操作"
@@ -58,7 +74,7 @@
                 type="primary"
                 link
                 icon="edit"
-                @click="updateCustomer(scope.row)"
+                @click="updateWechatPrompt(scope.row)"
             >变更
             </el-button>
             <el-popover
@@ -76,7 +92,7 @@
                 </el-button>
                 <el-button
                     type="primary"
-                    @click="deleteCustomer(scope.row)"
+                    @click="deleteWechatPrompt(scope.row)"
                 >确定
                 </el-button>
               </div>
@@ -108,26 +124,42 @@
     <el-dialog
         v-model="dialogFormVisible"
         :before-close="closeDialog"
-        title="客户"
+        title="Prompt"
     >
-      <el-form
-          :inline="true"
-          :model="form"
-          label-width="80px"
-      >
-        <el-form-item label="客户名">
-          <el-input
-              v-model="form.customerName"
-              autocomplete="off"
-          />
-        </el-form-item>
-        <el-form-item label="客户电话">
-          <el-input
-              v-model="form.customerPhoneData"
-              autocomplete="off"
-          />
-        </el-form-item>
-      </el-form>
+      <el-scrollbar height="500px">
+        <el-form
+            :model="form"
+            label-position="right"
+            label-width="90px"
+        >
+          <el-form-item label="主题">
+            <el-input
+                v-model="form.topic"
+                autocomplete="off"
+            />
+          </el-form-item>
+          <el-form-item label="类型">
+            <el-input
+                v-model="form.promptType"
+                autocomplete="off"
+            />
+          </el-form-item>
+          <el-form-item label="prompt">
+            <el-input
+                v-model="form.prompt"
+                type="textarea"
+                :rows="20"
+                autocomplete="off"
+            />
+          </el-form-item>
+          <el-form-item label="语言">
+            <el-input
+                v-model="form.language"
+                autocomplete="off"
+            />
+          </el-form-item>
+        </el-form>
+      </el-scrollbar>
       <template #footer>
         <div class="dialog-footer">
           <el-button @click="closeDialog">取 消</el-button>
@@ -143,31 +175,27 @@
 </template>
 
 <script setup>
-import {
-  createExaCustomer,
-  deleteExaCustomer,
-  getExaCustomer,
-  getExaCustomerList,
-  updateExaCustomer
-} from '@/api/customer'
-import WarningBar from '@/components/warningBar/warningBar.vue'
+import {createPrompt, deletePrompt, getPrompt, getPromptList, updatePrompt} from '@/api/prompt'
 import {ref} from 'vue'
 import {ElMessage} from 'element-plus'
 import {formatDate} from '@/utils/format'
 
 defineOptions({
-  name: 'Portal'
+  name: 'Prompt'
 })
 
 const form = ref({
-  customerName: '',
-  customerPhoneData: ''
+  topic: '',
+  promptType: '',
+  prompt: '',
+  language: '',
 })
 
 const page = ref(1)
 const total = ref(0)
 const pageSize = ref(10)
 const tableData = ref([])
+
 
 // 分页
 const handleSizeChange = (val) => {
@@ -182,7 +210,7 @@ const handleCurrentChange = (val) => {
 
 // 查询
 const getTableData = async () => {
-  const table = await getExaCustomerList({page: page.value, pageSize: pageSize.value})
+  const table = await getPromptList({page: page.value, pageSize: pageSize.value})
   if (table.code === 0) {
     tableData.value = table.data.list
     total.value = table.data.total
@@ -195,24 +223,26 @@ getTableData()
 
 const dialogFormVisible = ref(false)
 const type = ref('')
-const updateCustomer = async (row) => {
-  const res = await getExaCustomer({ID: row.ID})
+const updateWechatPrompt = async (row) => {
+  const res = await getPrompt({ID: row.ID})
   type.value = 'update'
   if (res.code === 0) {
-    form.value = res.data.customer
+    form.value = res.data.prompt
     dialogFormVisible.value = true
   }
 }
 const closeDialog = () => {
   dialogFormVisible.value = false
   form.value = {
-    customerName: '',
-    customerPhoneData: ''
+    topic: '',
+    promptType: '',
+    prompt: '',
+    language: '',
   }
 }
-const deleteCustomer = async (row) => {
+const deleteWechatPrompt = async (row) => {
   row.visible = false
-  const res = await deleteExaCustomer({ID: row.ID})
+  const res = await deletePrompt({ID: row.ID})
   if (res.code === 0) {
     ElMessage({
       type: 'success',
@@ -228,13 +258,13 @@ const enterDialog = async () => {
   let res
   switch (type.value) {
     case 'create':
-      res = await createExaCustomer(form.value)
+      res = await createPrompt(form.value)
       break
     case 'update':
-      res = await updateExaCustomer(form.value)
+      res = await updatePrompt(form.value)
       break
     default:
-      res = await createExaCustomer(form.value)
+      res = await createPrompt(form.value)
       break
   }
 
@@ -243,6 +273,8 @@ const enterDialog = async () => {
     getTableData()
   }
 }
+
+
 const openDialog = () => {
   type.value = 'create'
   dialogFormVisible.value = true

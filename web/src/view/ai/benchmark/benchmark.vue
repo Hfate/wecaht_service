@@ -8,8 +8,6 @@
             @click="openDialog"
         >新增
         </el-button>
-      </div>
-      <div class="gva-btn-list">
         <el-button
             type="primary"
             icon="plus"
@@ -17,6 +15,7 @@
         >更新token
         </el-button>
       </div>
+
       <el-table
           ref="multipleTable"
           :data="tableData"
@@ -125,11 +124,11 @@
         :before-close="closeDialog"
         title="对标账号"
     >
-      <el-scrollbar height="500px">
+      <el-scrollbar height="600px">
         <el-form
             :model="form"
             label-position="right"
-            label-width="90px"
+            label-width="150px"
         >
           <el-form-item label="微信公众号全称">
             <el-input
