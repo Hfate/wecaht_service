@@ -86,7 +86,7 @@ func (exa *TopicService) GetTopicPage(sysUserAuthorityID uint, info request.Page
 
 func (exa *TopicService) GetTopicList(sysUserAuthorityID uint, info request.PageInfo) (list interface{}, err error) {
 	info.PageSize = 10000
-
+	info.Page = 1
 	result := make([]string, 0)
 	list, _, err = exa.GetTopicPage(sysUserAuthorityID, info)
 

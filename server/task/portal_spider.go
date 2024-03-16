@@ -56,7 +56,7 @@ func spiderPortal(db *gorm.DB, portal *ai.Portal) {
 		urlSet[articleUrl] = true
 
 		fmt.Println(articleUrl)
-		fmt.Println(portal.PortalName + "[" + cast.ToString(index) + "/" + size + "]")
+		fmt.Println(portal.PortalName + "[" + cast.ToString(index+1) + "/" + size + "]")
 
 		time.Sleep(10 * time.Millisecond)
 
@@ -157,9 +157,11 @@ func collectAllUrl(portalUrl string, portalKey string, targetNum int) []string {
 
 		}
 		loopNum++
-		urlList = newSubList
+		if len(newSubList) > 0 {
+			urlList = newSubList
+		}
 
-		fmt.Println(portalUrl + "loopNum->" + cast.ToString(loopNum) + ",resultNum->" + cast.ToString(len(result)))
+		fmt.Println(portalUrl + "->loopNum->" + cast.ToString(loopNum) + ",resultNum->" + cast.ToString(len(result)))
 	}
 	return result
 }
