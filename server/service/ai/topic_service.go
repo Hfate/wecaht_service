@@ -79,7 +79,7 @@ func (exa *TopicService) GetTopicPage(sysUserAuthorityID uint, info request.Page
 	if err != nil {
 		return topicList, total, err
 	} else {
-		err = db.Limit(limit).Offset(offset).Order("updated_at desc").Find(&topicList).Error
+		err = db.Limit(limit).Offset(offset).Order("created_at").Find(&topicList).Error
 	}
 	return topicList, total, err
 }
