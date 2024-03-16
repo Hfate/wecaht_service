@@ -83,7 +83,7 @@ func spiderPortal(db *gorm.DB, portal *ai.Portal) {
 			Title:       strings.TrimSpace(articleResp.Title),
 			Link:        articleUrl,
 			Content:     strings.TrimSpace(articleResp.Content),
-			PublishTime: articleResp.PublishTime,
+			PublishTime: utils.RemoveChinese(articleResp.PublishTime),
 			ReadNum:     cast.ToInt(articleResp.ReadNum),
 			CommentNum:  cast.ToInt(articleResp.CommentNum),
 			LikeNum:     cast.ToInt(articleResp.LikeNum),

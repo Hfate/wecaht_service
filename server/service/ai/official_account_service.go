@@ -11,6 +11,8 @@ import (
 type OfficialAccountService struct {
 }
 
+var OfficialAccountServiceApp = new(OfficialAccountService)
+
 //@function: CreateOfficialAccount
 //@description: 创建门户
 //@param: e model.OfficialAccount
@@ -49,6 +51,16 @@ func (exa *OfficialAccountService) UpdateOfficialAccount(e *ai.OfficialAccount) 
 
 func (exa *OfficialAccountService) GetOfficialAccount(id uint64) (officialAccount ai.OfficialAccount, err error) {
 	err = global.GVA_DB.Where("id = ?", id).First(&officialAccount).Error
+	return
+}
+
+//@function: GetOfficialAccount
+//@description: 获取门户信息
+//@param: id uint
+//@return: customer model.OfficialAccount, err error
+
+func (exa *OfficialAccountService) GetLastOfficialAccount() (officialAccount ai.OfficialAccount, err error) {
+	err = global.GVA_DB.Where("1=1").Last(&officialAccount).Error
 	return
 }
 

@@ -76,6 +76,9 @@ email:
     is-ssl: true
 excel:
     dir: ./resource/excel/
+qianfan:
+    access-key: ALTAK5HSinZtO6tas6f0l7und9
+    secret-key: d4d47be09aef4ff4bbe84564c37bfaa9
 hua-wei-obs:
     path: you-path
     bucket: you-bucket

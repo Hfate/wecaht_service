@@ -28,6 +28,9 @@ func RunWindowsServer() {
 		system.LoadAll()
 	}
 
+	// 加载qianfan 配置
+	initialize.QianFan()
+
 	Router := initialize.Routers()
 	Router.Static("/form-generator", "./resource/page")
 

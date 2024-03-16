@@ -49,6 +49,7 @@ func Routers() *gin.Engine {
 	systemRouter := router.RouterGroupApp.System
 	exampleRouter := router.RouterGroupApp.Example
 	aiRouter := router.RouterGroupApp.AI
+	wechatRouter := router.RouterGroupApp.Wechat
 	// 如果想要不使用nginx代理前端网页，可以修改 web/.env.production 下的
 	// VUE_APP_BASE_API = /
 	// VUE_APP_BASE_PATH = http://localhost
@@ -105,6 +106,7 @@ func Routers() *gin.Engine {
 		aiRouter.InitOfficialAccountRouter(PrivateGroup)            // 公众号管理
 		aiRouter.InitHotspotRouter(PrivateGroup)                    // 热点追踪
 		aiRouter.InitTopicRouter(PrivateGroup)                      // 主题管理
+		wechatRouter.InitWeChatRouter(PublicGroup)                  // 微信公众号
 	}
 
 	global.GVA_LOG.Info("router register success")

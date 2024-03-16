@@ -1,6 +1,6 @@
 package ai
 
-type AIGroup struct {
+type RouterGroup struct {
 	PortalRouter
 	ArticleRouter
 	BenchmarkAccountRouter

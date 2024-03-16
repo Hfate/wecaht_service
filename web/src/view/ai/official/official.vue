@@ -130,10 +130,16 @@
             />
           </el-form-item>
           <el-form-item label="主题">
-            <el-input
+            <el-select
                 v-model="form.topic"
-                autocomplete="off"
-            />
+                class="w-56"
+            >
+              <el-option
+                  v-for="item in topicArr"
+                  :value="item"
+                  :label="item"
+              />
+            </el-select>
           </el-form-item>
           <el-form-item label="账号邮箱">
             <el-input
@@ -174,6 +180,7 @@ import {
 import {ref} from 'vue'
 import {ElMessage} from 'element-plus'
 import {formatDate} from '@/utils/format'
+import {getTopicList} from "@/api/topic";
 
 defineOptions({
   name: 'OfficialAccount'
@@ -190,6 +197,7 @@ const page = ref(1)
 const total = ref(0)
 const pageSize = ref(10)
 const tableData = ref([])
+const topicArr = ref([])
 
 // 分页
 const handleSizeChange = (val) => {
@@ -204,6 +212,11 @@ const handleCurrentChange = (val) => {
 
 // 查询
 const getTableData = async () => {
+  const topicSelect = await getTopicList({page: page.value, pageSize: pageSize.value})
+  if (topicSelect.code === 0) {
+    topicArr.value = topicSelect.data.list
+  }
+
   const table = await getOfficialAccountList({page: page.value, pageSize: pageSize.value})
   if (table.code === 0) {
     tableData.value = table.data.list

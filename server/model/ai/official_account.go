@@ -8,7 +8,9 @@ type OfficialAccount struct {
 	AccountId   string `json:"accountId"`
 	Topic       string `json:"topic"`
 	UserEmail   string `json:"userEmail"`
-	WxToken     string `json:"wxToken"`
+	AppId       string `json:"appId"`
+	AppSecret   string `json:"appSecret"`
+	Token       string `json:"token"`
 	Remark      string `json:"remark"`
 }
 
