@@ -21,6 +21,11 @@ type BenchmarkAccountService struct {
 
 var BenchmarkAccountServiceApp = new(BenchmarkAccountService)
 
+func (exa *BenchmarkAccountService) UpdateBenchmarkAccount(e ai.BenchmarkAccount) error {
+	err := global.GVA_DB.Save(e).Error
+	return err
+}
+
 //@function: CreatePortal
 //@description: 创建门户
 //@param: e model.Portal
@@ -274,7 +279,7 @@ func (exa *BenchmarkAccountService) GetBenchmarkAccountList(sysUserAuthorityID u
 	if err != nil {
 		return benchmarkAccountList, total, err
 	} else {
-		err = db.Limit(limit).Offset(offset).Find(&benchmarkAccountList).Error
+		err = db.Limit(limit).Offset(offset).Order("updated_at desc").Find(&benchmarkAccountList).Error
 	}
 	return benchmarkAccountList, total, err
 }

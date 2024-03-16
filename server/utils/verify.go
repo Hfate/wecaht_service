@@ -17,6 +17,7 @@ var (
 	ChangePasswordVerify   = Rules{"Password": {NotEmpty()}, "NewPassword": {NotEmpty()}}
 	SetUserAuthorityVerify = Rules{"AuthorityId": {NotEmpty()}}
 
+	TopicVerify            = Rules{"Topic": {NotEmpty()}}
 	PortalVerify           = Rules{"PortalName": {NotEmpty()}, "PortalKey": {NotEmpty()}, "ArticleKey": {NotEmpty()}, "Link": {NotEmpty()}, "GraphQuery": {NotEmpty()}, "TargetNum": {NotEmpty()}}
 	OfficialAccountVerify  = Rules{"AccountName": {NotEmpty()}, "UserEmail": {NotEmpty()}, "Topic": {NotEmpty()}}
 	BenchmarkAccountVerify = Rules{"AccountName": {NotEmpty()}, "Topic": {NotEmpty()}, "ArticleLink": {NotEmpty()}}

@@ -6,6 +6,7 @@ import (
 	"github.com/baidubce/bce-qianfan-sdk/go/qianfan"
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/ai"
+	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"go.uber.org/zap"
 	"strings"
 	"text/template"
@@ -21,7 +22,7 @@ func init() {
 	qianfan.GetConfig().SecretKey = "d4d47be09aef4ff4bbe84564c37bfaa9"
 }
 
-func (*QianfanService) Recreation(article ai.Article) (string, string) {
+func (*QianfanService) Recreation(article ai.Article) ChatGptResp {
 	// 可以通过 WithModel 指定模型
 	chat := qianfan.NewChatCompletion()
 
@@ -38,12 +39,21 @@ func (*QianfanService) Recreation(article ai.Article) (string, string) {
 
 	if err != nil {
 		global.GVA_LOG.Info("chat gpt响应失败", zap.Error(err))
-		return "", ""
+		return ChatGptResp{}
 	}
 
 	content := resp.Result
-	content = strings.ReplaceAll(content, "{}", "")
+	content = strings.ReplaceAll(content, "```json", "")
+	content = strings.ReplaceAll(content, "```", "")
+	content = strings.ReplaceAll(content, "\n", "")
+	content = strings.ReplaceAll(content, "”", "\"")
+	chatGptResp := ChatGptResp{}
 
+	err = utils.JsonStrToStruct(content, &chatGptResp)
+	if err != nil {
+		global.GVA_LOG.Info("chat gpt响应失败", zap.Error(err), zap.String("content", content))
+		return ChatGptResp{}
+	}
 	chatGptPrompt = QianfanServiceApp.parseTitlePrompt(article)
 	resp, err = chat.Do(
 		context.TODO(),
@@ -54,10 +64,11 @@ func (*QianfanService) Recreation(article ai.Article) (string, string) {
 		},
 	)
 
-	title := resp.Result
+	title := strings.TrimSpace(resp.Result)
 	title = strings.ReplaceAll(title, "{}", "")
+	chatGptResp.Title = title
 
-	return title, content
+	return chatGptResp
 }
 
 func (*QianfanService) parseContentPrompt(article ai.Article) string {
@@ -113,4 +124,11 @@ func (*QianfanService) parseTitlePrompt(article ai.Article) string {
 
 	chatGptPrompt := buf.String()
 	return chatGptPrompt
+}
+
+type ChatGptResp struct {
+	Title   string
+	Content string
+	Topic   string
+	Tags    string
 }

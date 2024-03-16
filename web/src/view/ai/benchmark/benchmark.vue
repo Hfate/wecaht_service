@@ -73,6 +73,13 @@
             min-width="160"
         >
           <template #default="scope">
+            <el-button
+                type="primary"
+                link
+                icon="edit"
+                @click="updateWechatBenchmark(scope.row)"
+            >变更
+            </el-button>
             <el-popover
                 v-model="scope.row.visible"
                 placement="top"
@@ -137,10 +144,16 @@
             />
           </el-form-item>
           <el-form-item label="主题">
-            <el-input
+            <el-select
                 v-model="form.topic"
-                autocomplete="off"
-            />
+                class="w-56"
+            >
+              <el-option
+                  v-for="item in topicArr"
+                  :value="item"
+                  :label="item"
+              />
+            </el-select>
           </el-form-item>
           <el-form-item label="该公众号任意微信文章链接">
             <el-input
@@ -235,10 +248,18 @@
 </template>
 
 <script setup>
-import {createBenchmark, deleteBenchmarkAccount, getBenchmarkAccountList, updateWxToken} from '@/api/benchmarkAccount'
+import {
+  createBenchmark,
+  deleteBenchmark,
+  getBenchmarkAccount,
+  getBenchmarkAccountList,
+  updateBenchmark,
+  updateWxToken
+} from '@/api/benchmarkAccount'
 import {ref} from 'vue'
 import {ElMessage} from 'element-plus'
 import {formatDate} from '@/utils/format'
+import {getTopicList} from "@/api/topic";
 
 defineOptions({
   name: 'Benchmark'
@@ -266,7 +287,7 @@ const total = ref(0)
 const pageSize = ref(10)
 const tableData = ref([])
 const searchInfo = ref({})
-
+const topicArr = ref([])
 
 // 分页
 const handleSizeChange = (val) => {
@@ -281,6 +302,11 @@ const handleCurrentChange = (val) => {
 
 // 查询
 const getTableData = async () => {
+  const topicSelect = await getTopicList({page: page.value, pageSize: pageSize.value})
+  if (topicSelect.code === 0) {
+    topicArr.value = topicSelect.data.list
+  }
+
   const table = await getBenchmarkAccountList({page: page.value, pageSize: pageSize.value, ...searchInfo.value,})
   if (table.code === 0) {
     tableData.value = table.data.list
@@ -299,7 +325,7 @@ const type = ref('')
 
 const deleteWechatBenchmarkAccount = async (row) => {
   row.visible = false
-  const res = await deleteBenchmarkAccount({ID: row.ID})
+  const res = await deleteBenchmark({ID: row.ID})
   if (res.code === 0) {
     ElMessage({
       type: 'success',
@@ -312,9 +338,30 @@ const deleteWechatBenchmarkAccount = async (row) => {
   }
 }
 
+const updateWechatBenchmark = async (row) => {
+  const res = await getBenchmarkAccount({ID: row.ID})
+  type.value = 'update'
+  if (res.code === 0) {
+    form.value = res.data.benchmarkAccount
+    dialogFormVisible.value = true
+  }
+}
+
 
 const enterDialog = async () => {
-  let res = await createBenchmark(form.value)
+  let res
+  switch (type.value) {
+    case 'create':
+      res = await createBenchmark(form.value)
+      break
+    case 'update':
+      res = await updateBenchmark(form.value)
+      break
+    default:
+      res = await createBenchmark(form.value)
+      break
+  }
+
   if (res.code === 0) {
     closeDialog()
     getTableData()

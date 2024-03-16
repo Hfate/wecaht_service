@@ -43,6 +43,36 @@ func (e *BenchmarkAccountApi) CreateBenchmarkAccount(c *gin.Context) {
 	response.OkWithMessage("创建成功", c)
 }
 
+// UpdateBenchmarkAccount
+// @Tags      Portal
+// @Summary   更新对标账号
+// @Security  ApiKeyAuth
+// @accept    application/json
+// @Produce   application/json
+// @Param     data  body      wechat.BenchmarkAccount            true  ""
+// @Success   200   {object}  response.Response{msg=string}  "更新对标账号"
+// @Router    /benchmark/benchmark [put]
+func (e *BenchmarkAccountApi) UpdateBenchmarkAccount(c *gin.Context) {
+	var benchmarkAccount ai.BenchmarkAccount
+	err := c.ShouldBindJSON(&benchmarkAccount)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	err = utils.Verify(benchmarkAccount, utils.BenchmarkAccountVerify)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	err = benchmarkAccountService.UpdateBenchmarkAccount(benchmarkAccount)
+	if err != nil {
+		global.GVA_LOG.Error("修改失败!", zap.Error(err))
+		response.FailWithMessage("修改失败", c)
+		return
+	}
+	response.OkWithMessage("修改成功", c)
+}
+
 // UpdateWxToken
 // @Tags      Portal
 // @Summary   创建对标账号

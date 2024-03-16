@@ -17,6 +17,7 @@ func (e *BenchmarkAccountRouter) InitBenchmarkAccountRouter(Router *gin.RouterGr
 	{
 		wxTokenRouterWithoutRecord.PUT("wxToken", benchmarkAccountApi.UpdateWxToken)           // 更新wx token
 		benchmarkAccountRouter.POST("benchmark", benchmarkAccountApi.CreateBenchmarkAccount)   // 创建对标账号
+		benchmarkAccountRouter.PUT("benchmark", benchmarkAccountApi.UpdateBenchmarkAccount)    // 更新对标账号
 		benchmarkAccountRouter.DELETE("benchmark", benchmarkAccountApi.DeleteBenchmarkAccount) // 删除对标账号
 	}
 	{

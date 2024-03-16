@@ -8,4 +8,5 @@ type AIGroup struct {
 	HotspotRouter
 	AIArticleRouter
 	PromptRouter
+	TopicRouter
 }

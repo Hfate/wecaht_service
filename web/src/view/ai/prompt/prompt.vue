@@ -34,9 +34,9 @@
             prop="promptType"
             width="120"
         >
-        <template #default="scope">
-          <span>{{ scope.row.promptType == 1 ? "内容改写" : "标题改写" }}</span>
-        </template>
+          <template #default="scope">
+            <span>{{ scope.row.promptType == 1 ? "内容改写" : "标题改写" }}</span>
+          </template>
         </el-table-column>
         <el-table-column
             align="left"
@@ -137,10 +137,16 @@
             label-width="90px"
         >
           <el-form-item label="主题">
-            <el-input
+            <el-select
                 v-model="form.topic"
-                autocomplete="off"
-            />
+                class="w-56"
+            >
+              <el-option
+                  v-for="item in topicArr"
+                  :value="item"
+                  :label="item"
+              />
+            </el-select>
           </el-form-item>
           <el-form-item label="类型" prop="promptType">
             <el-select
@@ -189,6 +195,7 @@
 
 <script setup>
 import {createPrompt, deletePrompt, getPrompt, getPromptList, updatePrompt} from '@/api/prompt'
+import {getTopicList} from '@/api/topic'
 import {ref} from 'vue'
 import {ElMessage} from 'element-plus'
 import {formatDate} from '@/utils/format'
@@ -208,6 +215,7 @@ const page = ref(1)
 const total = ref(0)
 const pageSize = ref(10)
 const tableData = ref([])
+const topicArr = ref([])
 
 
 // 分页
@@ -223,6 +231,11 @@ const handleCurrentChange = (val) => {
 
 // 查询
 const getTableData = async () => {
+  const topicSelect = await getTopicList({page: page.value, pageSize: pageSize.value})
+  if (topicSelect.code === 0) {
+    topicArr.value = topicSelect.data.list
+  }
+
   const table = await getPromptList({page: page.value, pageSize: pageSize.value})
   if (table.code === 0) {
     tableData.value = table.data.list
@@ -231,6 +244,7 @@ const getTableData = async () => {
     pageSize.value = table.data.pageSize
   }
 }
+
 
 getTableData()
 

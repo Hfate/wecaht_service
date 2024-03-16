@@ -56,16 +56,16 @@ func (exa *ArticleService) Recreation(id uint64) error {
 		return err
 	}
 
-	recreationTitle, recreationContent := QianfanServiceApp.Recreation(article)
+	chatGptResp := QianfanServiceApp.Recreation(article)
 
 	aiArticle := ai.AIArticle{
 		OriginId:   article.ID,
-		Title:      recreationTitle,
+		Title:      chatGptResp.Title,
 		PortalName: article.PortalName,
-		Topic:      article.Topic,
+		Topic:      chatGptResp.Topic,
 		AuthorName: article.AuthorName,
-		Tags:       article.Tags,
-		Content:    recreationContent,
+		Tags:       chatGptResp.Tags,
+		Content:    chatGptResp.Content,
 	}
 	aiArticle.BASEMODEL = BaseModel()
 

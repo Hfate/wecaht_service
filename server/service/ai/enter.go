@@ -9,4 +9,5 @@ type ServiceGroup struct {
 	AIArticleService
 	WxTokenService
 	PromptService
+	TopicService
 }

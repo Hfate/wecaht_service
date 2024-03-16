@@ -79,7 +79,7 @@ func (exa *PortalService) GetPortalList(sysUserAuthorityID uint, info request.Pa
 	if err != nil {
 		return portalList, total, err
 	} else {
-		err = db.Limit(limit).Offset(offset).Find(&portalList).Error
+		err = db.Limit(limit).Offset(offset).Order("updated_at desc").Find(&portalList).Error
 	}
 	return portalList, total, err
 }

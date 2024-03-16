@@ -79,7 +79,7 @@ func (exa *OfficialAccountService) GetOfficialAccountList(sysUserAuthorityID uin
 	if err != nil {
 		return officialAccountList, total, err
 	} else {
-		err = db.Limit(limit).Offset(offset).Find(&officialAccountList).Error
+		err = db.Limit(limit).Offset(offset).Order("updated_at desc").Find(&officialAccountList).Error
 	}
 	return officialAccountList, total, err
 }

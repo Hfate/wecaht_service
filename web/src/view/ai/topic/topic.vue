@@ -23,47 +23,11 @@
         />
         <el-table-column
             align="left"
-            label="门户"
-            prop="portalName"
+            label="主题"
+            prop="topic"
             width="180"
         >
         </el-table-column>
-        <el-table-column
-            align="left"
-            label="门户Key"
-            prop="portalKey"
-            width="120"
-        />
-        <el-table-column
-            align="left"
-            label="文章key"
-            prop="articleKey"
-            width="120"
-        />
-        <el-table-column
-            align="left"
-            label="门户主页"
-            prop="link"
-            width="200"
-        />
-        <el-table-column
-            align="left"
-            label="主题"
-            prop="topic"
-            width="120"
-        />
-        <el-table-column
-            align="left"
-            label="目标爬取网页数"
-            prop="targetNum"
-            width="160"
-        />
-        <el-table-column
-            align="left"
-            label="备注"
-            prop="remark"
-            width="120"
-        />
         <el-table-column
             align="left"
             label="创建时间"
@@ -79,13 +43,6 @@
             min-width="160"
         >
           <template #default="scope">
-            <el-button
-                type="primary"
-                link
-                icon="edit"
-                @click="updateWechatPortal(scope.row)"
-            >变更
-            </el-button>
             <el-popover
                 v-model="scope.row.visible"
                 placement="top"
@@ -101,7 +58,7 @@
                 </el-button>
                 <el-button
                     type="primary"
-                    @click="deleteWechatPortal(scope.row)"
+                    @click="deleteWechatTopic(scope.row)"
                 >确定
                 </el-button>
               </div>
@@ -133,7 +90,7 @@
     <el-dialog
         v-model="dialogFormVisible"
         :before-close="closeDialog"
-        title="门户"
+        title="主题"
     >
       <el-scrollbar height="500px">
         <el-form
@@ -141,59 +98,9 @@
             label-position="right"
             label-width="90px"
         >
-          <el-form-item label="门户名字">
-            <el-input
-                v-model="form.portalName"
-                autocomplete="off"
-            />
-          </el-form-item>
-          <el-form-item label="门户Key">
-            <el-input
-                v-model="form.portalKey"
-                autocomplete="off"
-            />
-          </el-form-item>
-          <el-form-item label="文章Key">
-            <el-input
-                v-model="form.articleKey"
-                autocomplete="off"
-            />
-          </el-form-item>
-          <el-form-item label="门户主页">
-            <el-input
-                v-model="form.link"
-                autocomplete="off"
-            />
-          </el-form-item>
           <el-form-item label="主题">
-            <el-select
+            <el-input
                 v-model="form.topic"
-                class="w-56"
-            >
-              <el-option
-                  v-for="item in topicArr"
-                  :value="item"
-                  :label="item"
-              />
-            </el-select>
-          </el-form-item>
-          <el-form-item label="GraphQuery">
-            <el-input
-                v-model="form.graphQuery"
-                type="textarea"
-                :rows="10"
-                autocomplete="off"
-            />
-          </el-form-item>
-          <el-form-item label="目标网页数">
-            <el-input
-                v-model.number="form.targetNum"
-                autocomplete="off"
-            />
-          </el-form-item>
-          <el-form-item label="备注">
-            <el-input
-                v-model="form.remark"
                 autocomplete="off"
             />
           </el-form-item>
@@ -214,32 +121,23 @@
 </template>
 
 <script setup>
-import {createPortal, deletePortal, getPortal, getPortalList, updatePortal} from '@/api/portal'
+import {createTopic, deleteTopic, getTopicPage, updateTopic} from '@/api/topic'
 import {ref} from 'vue'
 import {ElMessage} from 'element-plus'
 import {formatDate} from '@/utils/format'
-import {getTopicList} from "@/api/topic";
 
 defineOptions({
-  name: 'Portal'
+  name: 'Topic'
 })
 
 const form = ref({
-  portalName: '',
-  portalKey: '',
-  articleKey: '',
-  link: '',
   topic: '',
-  graphQuery: '',
-  targetNum: 10,
-  remark: '',
 })
 
 const page = ref(1)
 const total = ref(0)
 const pageSize = ref(10)
 const tableData = ref([])
-const topicArr = ref([])
 
 
 // 分页
@@ -255,12 +153,7 @@ const handleCurrentChange = (val) => {
 
 // 查询
 const getTableData = async () => {
-  const topicSelect = await getTopicList({page: page.value, pageSize: pageSize.value})
-  if (topicSelect.code === 0) {
-    topicArr.value = topicSelect.data.list
-  }
-
-  const table = await getPortalList({page: page.value, pageSize: pageSize.value})
+  const table = await getTopicPage({page: page.value, pageSize: pageSize.value})
   if (table.code === 0) {
     tableData.value = table.data.list
     total.value = table.data.total
@@ -274,23 +167,11 @@ getTableData()
 const dialogFormVisible = ref(false)
 const type = ref('')
 
-
-const updateWechatPortal = async (row) => {
-  const res = await getPortal({ID: row.ID})
-  type.value = 'update'
-  if (res.code === 0) {
-    form.value = res.data.portal
-    dialogFormVisible.value = true
-  }
-}
-
-
-
 const closeDialog = () => {
   dialogFormVisible.value = false
   form.value = {
-    portalName: '',
-    portalKey: '',
+    topicName: '',
+    topicKey: '',
     articleKey: '',
     link: '',
     topic: '',
@@ -299,9 +180,9 @@ const closeDialog = () => {
     remark: '',
   }
 }
-const deleteWechatPortal = async (row) => {
+const deleteWechatTopic = async (row) => {
   row.visible = false
-  const res = await deletePortal({ID: row.ID})
+  const res = await deleteTopic({ID: row.ID})
   if (res.code === 0) {
     ElMessage({
       type: 'success',
@@ -317,13 +198,13 @@ const enterDialog = async () => {
   let res
   switch (type.value) {
     case 'create':
-      res = await createPortal(form.value)
+      res = await createTopic(form.value)
       break
     case 'update':
-      res = await updatePortal(form.value)
+      res = await updateTopic(form.value)
       break
     default:
-      res = await createPortal(form.value)
+      res = await createTopic(form.value)
       break
   }
 
