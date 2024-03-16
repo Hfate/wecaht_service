@@ -4,17 +4,18 @@ import "github.com/flipped-aurora/gin-vue-admin/server/global"
 
 type Article struct {
 	global.BASEMODEL
-	Title       string `json:"title"` //
-	PortalName  string `json:"portalName"`
-	Topic       string `json:"topic"`       //
-	AuthorName  string `json:"authorName" ` //
-	Link        string `json:"link"`        //
-	PublishTime string `json:"publishTime"`
-	LikeNum     int    `json:"likeNum"`
-	ReadNum     int    `json:"readNum"`
-	CommentNum  int    `json:"commentNum"`
-	Content     string `json:"content"`
-	Tags        string `json:"tags"`
+	Title         string `json:"title"` //
+	PortalName    string `json:"portalName"`
+	Topic         string `json:"topic"`       //
+	AuthorName    string `json:"authorName" ` //
+	Link          string `json:"link"`        //
+	PublishTime   string `json:"publishTime"`
+	LikeNum       int    `json:"likeNum"`
+	ReadNum       int    `json:"readNum"`
+	CommentNum    int    `json:"commentNum"`
+	Content       string `json:"content"`
+	Tags          string `json:"tags"`
+	RecreationNum int    `json:"recreationNum"`
 }
 
 func (Article) TableName() string {

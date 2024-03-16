@@ -71,6 +71,12 @@ func (exa *ArticleService) Recreation(id uint64) error {
 
 	err = AIArticleServiceApp.CreateAIArticle(aiArticle)
 
+	if err != nil {
+		return err
+	}
+	article.RecreationNum++
+	err = global.GVA_DB.Save(&article).Error
+
 	return err
 }
 
