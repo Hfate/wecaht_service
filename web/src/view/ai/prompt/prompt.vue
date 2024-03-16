@@ -33,7 +33,11 @@
             label="类型"
             prop="promptType"
             width="120"
-        />
+        >
+        <template #default="scope">
+          <span>{{ scope.row.promptType == 1 ? "内容改写" : "标题改写" }}</span>
+        </template>
+        </el-table-column>
         <el-table-column
             align="left"
             label="Prompt"
@@ -138,11 +142,20 @@
                 autocomplete="off"
             />
           </el-form-item>
-          <el-form-item label="类型">
-            <el-input
+          <el-form-item label="类型" prop="promptType">
+            <el-select
                 v-model="form.promptType"
-                autocomplete="off"
-            />
+                style="width:100%"
+            >
+              <el-option
+                  :value="1"
+                  label="内容改写"
+              />
+              <el-option
+                  :value="2"
+                  label="标题改写"
+              />
+            </el-select>
           </el-form-item>
           <el-form-item label="prompt">
             <el-input

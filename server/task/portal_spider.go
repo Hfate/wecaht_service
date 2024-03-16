@@ -64,6 +64,11 @@ func spiderPortal(db *gorm.DB, portal *ai.Portal) {
 		if er != nil {
 			continue
 		}
+
+		if articleResp.Title == "" {
+			continue
+		}
+
 		if articleResp.Content == "" {
 			continue
 		}

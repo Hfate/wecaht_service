@@ -11,6 +11,8 @@ import (
 type PromptService struct {
 }
 
+var PromptServiceApp = new(PromptService)
+
 //@function: CreatePrompt
 //@description: 创建prompt
 //@param: e model.Prompt
@@ -79,7 +81,13 @@ func (exa *PromptService) GetPromptList(sysUserAuthorityID uint, info request.Pa
 	if err != nil {
 		return promptList, total, err
 	} else {
-		err = db.Limit(limit).Offset(offset).Find(&promptList).Error
+		err = db.Limit(limit).Offset(offset).Order("updated_at desc").Find(&promptList).Error
 	}
 	return promptList, total, err
+}
+
+func (exa *PromptService) FindPromptByTopicAndType(topic string, promptType int) (prompt ai.Prompt, err error) {
+	err = global.GVA_DB.Where("topic = ?", topic).Where("prompt_type=?", promptType).Last(&prompt).Error
+	return
+
 }

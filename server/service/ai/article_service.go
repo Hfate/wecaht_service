@@ -56,7 +56,7 @@ func (exa *ArticleService) Recreation(id uint64) error {
 		return err
 	}
 
-	recreationTitle, recreationContent := QianfanServiceApp.Recreation(article.Title, article.Content)
+	recreationTitle, recreationContent := QianfanServiceApp.Recreation(article)
 
 	aiArticle := ai.AIArticle{
 		OriginId:   article.ID,
