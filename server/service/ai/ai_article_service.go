@@ -47,7 +47,7 @@ func (exa *AIArticleService) CreateAIArticle(e ai.AIArticle) (err error) {
 //@return: customer model.Article, err error
 
 func (exa *AIArticleService) GetAIArticle(id uint64) (aiArticle ai.AIArticle, err error) {
-	err = global.GVA_DB.Where("id = ?", id).First(&aiArticle).Error
+	err = global.GVA_DB.Where("id = ?", id).Last(&aiArticle).Error
 	return
 }
 
@@ -103,7 +103,7 @@ func (exa *AIArticleService) GetAIArticleList(sysUserAuthorityID uint, info aiRe
 	if err != nil {
 		return articleList, total, err
 	} else {
-		err = db.Limit(limit).Offset(offset).Order("publish_time desc").Find(&articleList).Error
+		err = db.Limit(limit).Offset(offset).Order("updated_at desc").Find(&articleList).Error
 	}
 	return articleList, total, err
 }

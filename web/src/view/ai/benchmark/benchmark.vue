@@ -55,7 +55,7 @@
         <el-table-column
             align="left"
             label="已爬取文章数量"
-            prop="initNum"
+            prop="finishNum"
             width="100"
         />
         <el-table-column
@@ -128,7 +128,7 @@
         <el-form
             :model="form"
             label-position="right"
-            label-width="150px"
+            label-width="180px"
         >
           <el-form-item label="微信公众号全称">
             <el-input
@@ -152,12 +152,14 @@
             <el-input
                 v-model.number="form.initNum"
                 autocomplete="off"
+                placeholder="建议100篇以内"
             />
           </el-form-item>
           <el-form-item label="公众号key值">
             <el-input
                 v-model="form.key"
                 autocomplete="off"
+                placeholder="字段暂时无用可以随意填"
             />
           </el-form-item>
         </el-form>

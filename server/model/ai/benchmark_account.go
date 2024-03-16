@@ -8,6 +8,7 @@ type BenchmarkAccount struct {
 	AccountId   string `json:"accountId"`
 	Topic       string `json:"topic"`
 	InitNum     int    `json:"initNum"`
+	FinishNum   int    `json:"finishNum"`
 	ArticleLink string `json:"articleLink"`
 	Key         string `json:"key"`
 }

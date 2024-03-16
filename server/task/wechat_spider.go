@@ -34,9 +34,9 @@ func WechatSpider(db *gorm.DB) error {
 				var count int64
 				db.Model(&ai.Url{}).Where("url = ?", a.Link).Count(&count)
 
-				//if count > 0 {
-				//	continue
-				//}
+				if count > 0 {
+					continue
+				}
 
 				resp, _ := utils.GetStr(a.Link)
 				var content *WechatContent
@@ -47,8 +47,12 @@ func WechatSpider(db *gorm.DB) error {
 
 				db.Model(&ai.Article{}).Create(&a)
 			}
+
 		}
 	}
+
+	// 更新对标账号已爬取数目
+	db.Exec("update wechat_benchmark_account a inner join\n    (select portal_name, count(*) totalNum from wechat_article group by portal_name) b on a.account_name = b.portal_name\nset a.finish_num = b.totalNum\nwhere 1=1;")
 
 	return nil
 }
