@@ -121,7 +121,7 @@
         <el-form
             :model="form"
             label-position="right"
-            label-width="90px"
+            label-width="130px"
         >
           <el-form-item label="微信公众号">
             <el-input
@@ -144,6 +144,30 @@
           <el-form-item label="账号邮箱">
             <el-input
                 v-model="form.userEmail"
+                autocomplete="off"
+            />
+          </el-form-item>
+          <el-form-item label="AppId">
+            <el-input
+                v-model="form.appId"
+                autocomplete="off"
+            />
+          </el-form-item>
+          <el-form-item label="AppSecret">
+            <el-input
+                v-model="form.appSecret"
+                autocomplete="off"
+            />
+          </el-form-item>
+          <el-form-item label="Token">
+            <el-input
+                v-model="form.token"
+                autocomplete="off"
+            />
+          </el-form-item>
+          <el-form-item label="EncodingAESKey">
+            <el-input
+                v-model="form.encodingAesKey"
                 autocomplete="off"
             />
           </el-form-item>
@@ -191,6 +215,10 @@ const form = ref({
   topic: '',
   userEmail: '',
   remark: '',
+  appId: '',
+  appSecret: '',
+  token: '',
+  encodingAesKey: ''
 })
 
 const page = ref(1)
@@ -245,6 +273,10 @@ const closeDialog = () => {
     topic: '',
     userEmail: '',
     remark: '',
+    appId: '',
+    appSecret: '',
+    token: '',
+    encodingAesKey: ''
   }
 }
 const deleteWechatOfficialAccount = async (row) => {

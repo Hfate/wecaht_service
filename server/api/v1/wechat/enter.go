@@ -7,5 +7,5 @@ type ApiGroup struct {
 }
 
 var (
-	wechatService = service.ServiceGroupApp.WechatServiceGroup.WechatService
+	wechatService = service.ServiceGroupApp.AIServiceGroup.WechatService
 )

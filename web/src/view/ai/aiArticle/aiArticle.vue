@@ -109,7 +109,7 @@
         <el-table-column
             align="left"
             label="目标发送公众号"
-            prop="targetAccount"
+            prop="targetAccountName"
             width="250"
         />
         <el-table-column
@@ -158,8 +158,8 @@
                 type="primary"
                 link
                 icon="edit"
-                @click="auditArticle(scope.row)"
-            >审核
+                @click="updateArticle(scope.row)"
+            >发送草稿
             </el-button>
             <el-popover
                 v-model="scope.row.visible"
@@ -253,22 +253,28 @@
             />
           </el-form-item>
           <el-form-item label="主题">
-            <el-input
+            <el-select
                 v-model="form.topic"
-                autocomplete="off"
-            />
+                class="w-56"
+            >
+              <el-option
+                  v-for="item in topicArr"
+                  :value="item"
+                  :label="item"
+              />
+            </el-select>
           </el-form-item>
-          <el-form-item label="目标公众号名字">
-            <el-input
-                v-model="form.targetAccountName"
-                autocomplete="off"
-            />
-          </el-form-item>
-          <el-form-item label="目标公众号ID">
-            <el-input
+          <el-form-item label="目标公众号">
+            <el-select
                 v-model="form.targetAccountId"
-                autocomplete="off"
-            />
+                class="w-56"
+            >
+              <el-option
+                  v-for="item in accountArr"
+                  :value="item.appId"
+                  :label="item.accountName"
+              />
+            </el-select>
           </el-form-item>
           <el-form-item label="内容">
             <el-input
@@ -292,7 +298,7 @@
           <el-button
               type="primary"
               @click="enterDialog"
-          >审核通过
+          >发布文章
           </el-button>
         </div>
       </template>
@@ -306,11 +312,15 @@ import {
   deleteAIArticlesByIds,
   getAIArticle,
   getAIArticleList,
+  publishArticle,
   recreationAIArticle
 } from '@/api/aiArticle'
 import {ref} from 'vue'
 import {ElMessage} from 'element-plus'
 import {formatDate} from '@/utils/format'
+import {getTopicList} from "@/api/topic";
+
+import {getOfficialAccountList,} from '@/api/officialAccount'
 
 
 defineOptions({
@@ -341,7 +351,7 @@ const closeDialog = () => {
 }
 
 const enterDialog = async () => {
-  let res = await auditArticle(form.value)
+  let res = await publishArticle(form.value)
   if (res.code === 0) {
     closeDialog()
     getTableData()
@@ -353,6 +363,9 @@ const total = ref(0)
 const pageSize = ref(10)
 const tableData = ref([])
 const searchInfo = ref({})
+const topicArr = ref([])
+const accountArr = ref([])
+
 const onReset = () => {
   searchInfo.value = {}
 }
@@ -376,6 +389,22 @@ const handleCurrentChange = (val) => {
   getTableData()
 }
 
+// 查询所有topic
+const getTopicData = async () => {
+  const topicSelect = await getTopicList({page: page.value, pageSize: pageSize.value})
+  if (topicSelect.code === 0) {
+    topicArr.value = topicSelect.data.list
+  }
+}
+
+// 查询所有公众号
+const getAccountData = async () => {
+  const accountSelect = await getOfficialAccountList({page: 1, pageSize: 1000})
+  if (accountSelect.code === 0) {
+    accountArr.value = accountSelect.data.list
+  }
+}
+
 
 // 查询
 const getTableData = async () => {
@@ -388,6 +417,9 @@ const getTableData = async () => {
   }
 }
 
+
+getTopicData()
+getAccountData()
 getTableData()
 
 const dialogFormVisible = ref(false)
@@ -431,7 +463,7 @@ const deleteWechatAIArticle = async (row) => {
   }
 }
 
-const auditArticle = async (row) => {
+const updateArticle = async (row) => {
   const res = await getAIArticle({ID: row.ID})
   type.value = 'update'
   if (res.code === 0) {

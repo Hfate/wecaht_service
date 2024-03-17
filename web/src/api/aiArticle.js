@@ -83,3 +83,18 @@ export const getAIArticleList = (params) => {
 }
 
 
+// @Tags AIArticleApi
+// @Summary 获取权限文章列表
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data body modelInterface.PageInfo true "获取权限文章列表"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"获取成功"}"
+// @Router /aiArticle/aiArticleList [get]
+export const publishArticle = (data) => {
+    return service({
+        url: '/aiArticle/publish',
+        method: 'post',
+        data
+    })
+}

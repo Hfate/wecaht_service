@@ -14,7 +14,7 @@ type OfficialAccountService struct {
 var OfficialAccountServiceApp = new(OfficialAccountService)
 
 //@function: CreateOfficialAccount
-//@description: 创建门户
+//@description: 创建公众号
 //@param: e model.OfficialAccount
 //@return: err error
 
@@ -25,7 +25,7 @@ func (exa *OfficialAccountService) CreateOfficialAccount(e ai.OfficialAccount) (
 }
 
 //@function: DeleteFileChunk
-//@description: 删除门户
+//@description: 删除公众号
 //@param: e model.OfficialAccount
 //@return: err error
 
@@ -35,7 +35,7 @@ func (exa *OfficialAccountService) DeleteOfficialAccount(e ai.OfficialAccount) (
 }
 
 //@function: UpdateOfficialAccount
-//@description: 更新门户
+//@description: 更新公众号
 //@param: e *model.OfficialAccount
 //@return: err error
 
@@ -45,7 +45,7 @@ func (exa *OfficialAccountService) UpdateOfficialAccount(e *ai.OfficialAccount) 
 }
 
 //@function: GetOfficialAccount
-//@description: 获取门户信息
+//@description: 获取公众号信息
 //@param: id uint
 //@return: customer model.OfficialAccount, err error
 
@@ -54,19 +54,29 @@ func (exa *OfficialAccountService) GetOfficialAccount(id uint64) (officialAccoun
 	return
 }
 
-//@function: GetOfficialAccount
-//@description: 获取门户信息
+//@function: GetOfficialAccountByAppId
+//@description: 获取公众号信息
 //@param: id uint
 //@return: customer model.OfficialAccount, err error
 
-func (exa *OfficialAccountService) GetLastOfficialAccount() (officialAccount ai.OfficialAccount, err error) {
-	err = global.GVA_DB.Where("1=1").Last(&officialAccount).Error
+func (exa *OfficialAccountService) GetOfficialAccountByAppId(appId string) (officialAccount ai.OfficialAccount, err error) {
+	err = global.GVA_DB.Where("app_id = ?", appId).Last(&officialAccount).Error
+	return
+}
+
+//@function: GetOfficialAccount
+//@description: 获取公众号信息
+//@param: id uint
+//@return: customer model.OfficialAccount, err error
+
+func (exa *OfficialAccountService) List() (list []ai.OfficialAccount, err error) {
+	err = global.GVA_DB.Where("1=1").Find(&list).Error
 	return
 }
 
 // @author: [piexlmax](https://github.com/piexlmax)
 // @function: GetOfficialAccountList
-// @description: 分页获取门户列表
+// @description: 分页获取公众号列表
 // @param: sysUserAuthorityID string, info request.PageInfo
 // @return: list interface{}, total int64, err error
 

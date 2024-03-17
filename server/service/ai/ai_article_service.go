@@ -7,6 +7,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
 	systemService "github.com/flipped-aurora/gin-vue-admin/server/service/system"
+	"time"
 )
 
 type AIArticleService struct {
@@ -32,6 +33,33 @@ func (exa *AIArticleService) DeleteAIArticle(e ai.AIArticle) (err error) {
 func (exa *AIArticleService) DeleteAIArticlesByIds(ids request.IdsReq) (err error) {
 	var articles []ai.AIArticle
 	err = global.GVA_DB.Find(&articles, "id in ?", ids.Ids).Delete(&articles).Error
+	return err
+}
+
+// @function: ApprovalArticle
+// @description: 发布文章
+// @param: e model.AIArticle
+// @return: err error
+
+func (exa *AIArticleService) PublishArticle(aiArticle ai.AIArticle) (err error) {
+	officialAccount, err := OfficialAccountServiceApp.GetOfficialAccountByAppId(aiArticle.TargetAccountId)
+	if err != nil {
+		return err
+	}
+
+	// 发布文章
+	mediaID, publishID, err := WechatServiceApp.PublishArticle(officialAccount, aiArticle)
+	if err != nil {
+		return err
+	}
+
+	// 更新发布状态
+	aiArticle.TargetAccountName = officialAccount.AccountName
+	aiArticle.PublishTime = time.Now()
+	aiArticle.ArticleStatus = 3
+	aiArticle.MediaId = mediaID
+	aiArticle.PublishId = publishID
+	err = global.GVA_DB.Save(&aiArticle).Error
 	return err
 }
 

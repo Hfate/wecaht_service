@@ -17,6 +17,7 @@ func (e *AIArticleRouter) InitAIArticleRouter(Router *gin.RouterGroup) {
 		aiArticleRouter.DELETE("aiArticle", aiArticleApi.DeleteAIArticle)                   // 删除文章
 		aiArticleRouter.DELETE("deleteAIArticlesByIds", aiArticleApi.DeleteAIArticlesByIds) // 删除文章
 		aiArticleRouter.POST("recreation", aiArticleApi.Recreation)                         // 改写文章
+		aiArticleRouter.POST("publish", aiArticleApi.PublishArticle)                        // 发布文章
 	}
 	{
 

@@ -10,4 +10,5 @@ type ServiceGroup struct {
 	WxTokenService
 	PromptService
 	TopicService
+	WechatService
 }
