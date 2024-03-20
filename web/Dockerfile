@@ -3,7 +3,8 @@ FROM node:16
 WORKDIR /gva_web/
 COPY . .
 
-RUN yarn && yarn build
+RUN npm i
+RUN npm run build
 
 FROM nginx:alpine
 LABEL MAINTAINER="549398044@qq.com"
