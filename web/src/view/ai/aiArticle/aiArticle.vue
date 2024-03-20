@@ -159,7 +159,14 @@
                 link
                 icon="edit"
                 @click="updateArticle(scope.row)"
-            >发送草稿
+            >发布
+            </el-button>
+            <el-button
+                type="primary"
+                link
+                icon="edit"
+                @click="updateArticle(scope.row)"
+            >保存
             </el-button>
             <el-popover
                 v-model="scope.row.visible"

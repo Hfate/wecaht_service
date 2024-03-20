@@ -65,6 +65,8 @@ func (exa *AIArticleService) PublishArticle(aiArticle ai.AIArticle) (err error) 
 
 func (exa *AIArticleService) CreateAIArticle(e ai.AIArticle) (err error) {
 	err = global.GVA_DB.Where("origin_id=?", e.OriginId).Delete(&ai.AIArticle{}).Error
+
+	e.PublishTime = time.Now()
 	err = global.GVA_DB.Create(&e).Error
 	return err
 }
