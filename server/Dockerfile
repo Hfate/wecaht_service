@@ -18,7 +18,7 @@ WORKDIR /go/src/github.com/flipped-aurora/gin-vue-admin/server
 
 COPY --from=0 /go/src/github.com/flipped-aurora/gin-vue-admin/server/server ./
 COPY --from=0 /go/src/github.com/flipped-aurora/gin-vue-admin/server/resource ./resource/
-COPY --from=0 /go/src/github.com/flipped-aurora/gin-vue-admin/server/config.docker.yaml ./
+COPY --from=0 /go/src/github.com/flipped-aurora/gin-vue-admin/server/config.yaml ./
 
 EXPOSE 8888
-ENTRYPOINT ./server -c config.docker.yaml
+ENTRYPOINT ./server -c config.yaml
