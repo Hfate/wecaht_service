@@ -1,13 +1,5 @@
 version: "3"
 
-# 声明一个名为network的networks,subnet为network的子网地址,默认网关是177.7.0.1
-networks:
-  network:
-    ipam:
-      driver: default
-      config:
-        - subnet: '177.7.0.0/16'
-        
 # 设置mysql，redis持久化保存
 volumes:
   redis:
@@ -28,9 +20,6 @@ services:
     command: bash -c "yarn install && yarn serve"
     volumes:
       - ../../web:/web
-    networks:
-      network:
-        ipv4_address: 177.7.0.11
 
   server:
     image: golang:1.18
@@ -47,9 +36,6 @@ services:
     command: bash -c "go env -w GOPROXY=https://goproxy.cn,direct && go mod tidy && go run main.go"
     links:
       - redis
-    networks:
-      network:
-        ipv4_address: 177.7.0.12
 
 
 
@@ -62,6 +48,3 @@ services:
       - '16379:6379'
     volumes:
       - redis:/data
-    networks:
-      network:
-        ipv4_address: 177.7.0.14
