@@ -88,15 +88,15 @@ mysql:
 # pgsql connect configuration
 # 未初始化之前请勿手动修改数据库信息！！！如果一定要手动初始化请看（https://gin-vue-admin.com/docs/first_master）
 pgsql:
-  path: ""
-  port: ""
-  config: ""
-  db-name: ""
-  username: ""
-  password: ""
+  path: 177.7.0.13
+  port: "3306"
+  config: charset=utf8mb4&parseTime=True&loc=Local
+  db-name: wechat
+  username: root
+  password: qfc7!^T3uj!6
   max-idle-conns: 10
   max-open-conns: 100
-  log-mode: ""
+  log-mode: error
   log-zap: false
 
 db-list:
