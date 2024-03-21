@@ -128,7 +128,7 @@ mysql:
     config: charset=utf8mb4&parseTime=True&loc=Local
     db-name: wechat
     username: hcq
-    password: $rV3NRmUpVym
+    password: Fight2015.
     path: 127.0.0.1
     engine: ""
     log-mode: error
