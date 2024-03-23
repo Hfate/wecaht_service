@@ -24,6 +24,8 @@ type AIArticle struct {
 	ArticleStatus     int       `json:"articleStatus"`
 	MediaId           string    `json:"mediaId"`
 	PublishId         int64     `json:"publishId"`
+	MsgDataID         int64     `json:"msgDataId"`
+	MsgId             int64     `json:"msgId"`
 }
 
 func (AIArticle) TableName() string {

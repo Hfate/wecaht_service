@@ -2,6 +2,7 @@ package ai
 
 import (
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
+	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"github.com/silenceper/wechat/v2/officialaccount/server"
 
 	aiModel "github.com/flipped-aurora/gin-vue-admin/server/model/ai"
@@ -73,7 +74,7 @@ func (*WechatService) ServeList(rw http.ResponseWriter, req *http.Request) []*se
 	return result
 }
 
-func (*WechatService) PublishArticle(dbOfficialAccount aiModel.OfficialAccount, aiArticle aiModel.AIArticle) (mediaID string, publishID int64, err error) {
+func (*WechatService) PublishArticle(dbOfficialAccount aiModel.OfficialAccount, aiArticle aiModel.AIArticle) (mediaID string, msgId, msgDataID int64, err error) {
 
 	cfg := &offConfig.Config{
 		AppID:          dbOfficialAccount.AppId,
@@ -87,7 +88,7 @@ func (*WechatService) PublishArticle(dbOfficialAccount aiModel.OfficialAccount, 
 	m := officialAccount.GetMaterial()
 	imageId, url, err := m.AddMaterial(material.MediaTypeImage, "./template/test.jpg")
 	if err != nil {
-		return "", 0, err
+		return "", 0, 0, err
 	}
 	global.GVA_LOG.Info("PublishArticle AddMaterial:", zap.String("imageId", imageId), zap.String("url", url))
 
@@ -103,15 +104,16 @@ func (*WechatService) PublishArticle(dbOfficialAccount aiModel.OfficialAccount, 
 		Content:      aiArticle.Content,
 	}})
 	if err != nil {
-		return "", 0, err
+		return "", 0, 0, err
 	}
 	global.GVA_LOG.Info("PublishArticle AddDraft:", zap.String("mediaID", mediaID))
 
-	p := officialAccount.GetFreePublish()
-	publishID, err = p.Publish(mediaID)
-	global.GVA_LOG.Info("PublishArticle Publish:", zap.Int64("publishID", publishID))
+	p := officialAccount.GetBroadcast()
+	result, err := p.SendNews(nil, mediaID, false)
 
-	return mediaID, publishID, err
+	global.GVA_LOG.Info("PublishArticle Publish:", zap.String("result", utils.Parse2Json(result)))
+
+	return mediaID, result.MsgID, result.MsgDataID, err
 }
 
 func reply(msg *message.MixMessage) *message.Reply {
