@@ -8,9 +8,9 @@ networks:
       config:
         - subnet: '177.7.0.0/16'
 
-# 设置mysql，redis持久化保存
-volumes:
-  mysql:
+## 设置mysql，redis持久化保存
+#volumes:
+#  redis:
 
 services:
   # web服务
@@ -49,51 +49,44 @@ services:
     ports:
       - '8888:8888'
     # server服务依赖于mysql服务于redis服务
-    depends_on:
-      - mysql
-      - redis
     networks:
       network:
         # 在network网络下的容器内部的Ipv4地址
         ipv4_address: 177.7.0.12
 
-  mysql:
-    # 指定mysql镜像版本
-    # 如果您是 arm64 架构：如 MacOS 的 M1，请修改镜像为 image: mysql/mysql-server:8.0.21
-    image: mysql:8.0.21
-    # 自定义容器名
-    container_name: gva-mysql
-    # 设置utf8字符集
-    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
-    # 容器启动失败是否重启
-    restart: always
-    # 映射端口
-    ports:
-      - "3306:3306"  # host物理直接映射端口为13306
-    # 系统环境变量
-    environment:
-      MYSQL_DATABASE: 'wechat' # 初始化启动时要创建的数据库的名称
-      MYSQL_ROOT_PASSWORD: 'qfc7!^T3uj!6' # root管理员用户密码
-    # 映射数据卷到数据库
-    volumes:
-      - mysql:/var/lib/mysql
-    networks:
-      network:
-        # 在network网络下的容器内部的Ipv4地址
-        ipv4_address: 177.7.0.13
+#  mysql:
+#    # 指定mysql镜像版本
+#    # 如果您是 arm64 架构：如 MacOS 的 M1，请修改镜像为 image: mysql/mysql-server:8.0.21
+#    image: mysql:8.0.21
+#    # 自定义容器名
+#    container_name: gva-mysql
+#    # 设置utf8字符集
+#    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+#    # 容器启动失败是否重启
+#    restart: always
+#    # 映射端口
+#    ports:
+#      - "13306:3306"  # host物理直接映射端口为13306
+#    # 映射数据卷到数据库
+#    volumes:
+#      - mysql:/var/lib/mysql
+#    networks:
+#      network:
+#        # 在network网络下的容器内部的Ipv4地址
+#        ipv4_address: 177.7.0.13
 
   # redis服务
-  redis:
-    # 指定redis镜像版本
-    image: redis:6.0.6
-    # 自定义容器名
-    container_name: gva-redis # 容器名
-    # 容器启动失败是否重启
-    restart: always
-    # 映射端口
-    ports:
-      - '6379:6379'
-    networks:
-      network:
-        # 在network网络下的容器内部的Ipv4地址
-        ipv4_address: 177.7.0.14
+#  redis:
+#    # 指定redis镜像版本
+#    image: redis:6.0.6
+#    # 自定义容器名
+#    container_name: gva-redis # 容器名
+#    # 容器启动失败是否重启
+#    restart: always
+#    # 映射端口
+#    ports:
+#      - '6379:6379'
+#    networks:
+#      network:
+#        # 在network网络下的容器内部的Ipv4地址
+#        ipv4_address: 177.7.0.14

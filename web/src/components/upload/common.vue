@@ -1,24 +1,36 @@
 <template>
   <div>
-    <el-upload
-      :action="`${path}/fileUploadAndDownload/upload`"
-      :before-upload="checkFile"
-      :on-error="uploadError"
-      :on-success="uploadSuccess"
-      :show-file-list="false"
-      class="upload-btn"
-    >
-      <el-button type="primary">普通上传</el-button>
-    </el-upload>
+    <el-form>
+      <el-select v-model="script_model" style="float: left">
+        <el-option label="other脚本(低性能)" value="other"></el-option>
+        <el-option label="python脚本(中性能)" value="python"></el-option>
+        <el-option label="go脚本(高性能)" value="go"></el-option>
+      </el-select>
+      <br><br><br>
+      <el-upload
+          :data="{'script_model':script_model}"
+          accept=".jpg,.png"
+          ref="upload"
+          :action="`${path}/fileUploadAndDownload/upload`"
+          :limit="1"
+          :on-success="uploadSuccess"
+          :on-error="uploadError"
+          :show-file-list="false"
+          class="upload-btn"
+      >
+        <el-button type="primary">上传脚本</el-button>
+      </el-upload>
+    </el-form>
+
   </div>
 </template>
 
 <script setup>
 
-import { ref } from 'vue'
-import { ElMessage } from 'element-plus'
-import { useUserStore } from '@/pinia/modules/user'
-import { isVideoMime, isImageMime } from '@/utils/image'
+import {ref} from 'vue'
+import {ElMessage} from 'element-plus'
+import {useUserStore} from '@/pinia/modules/user'
+import {isImageMime, isVideoMime} from '@/utils/image'
 
 defineOptions({
   name: 'UploadCommon',
@@ -29,6 +41,14 @@ const path = ref(import.meta.env.VITE_BASE_API)
 
 const userStore = useUserStore()
 const fullscreenLoading = ref(false)
+
+const script_model = ref({
+  inputValue: '',
+})
+
+const uploadData = ref({
+  extraField: '',
+})
 
 const checkFile = (file) => {
   fullscreenLoading.value = true
@@ -58,8 +78,14 @@ const checkFile = (file) => {
   return pass
 }
 
+
+const submitUpload = (res) => {
+  this.uploadData.extraField = this.form.inputValue; // 在上传前将输入框的值赋给data对象的属性
+  this.$refs.upload.submit(); // 调用 el-upload 的 submit 方法来上传文件
+}
+
 const uploadSuccess = (res) => {
-  const { data } = res
+  const {data} = res
   if (data.file) {
     emit('on-success', data.file.url)
   }

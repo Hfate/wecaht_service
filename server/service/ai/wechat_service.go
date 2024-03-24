@@ -74,7 +74,22 @@ func (*WechatService) ServeList(rw http.ResponseWriter, req *http.Request) []*se
 	return result
 }
 
-func (*WechatService) PublishArticle(dbOfficialAccount aiModel.OfficialAccount, aiArticle aiModel.AIArticle) (mediaID string, msgId, msgDataID int64, err error) {
+func (*WechatService) AddMaterial(dbOfficialAccount aiModel.OfficialAccount, fileName string) (mediaID string, url string, err error) {
+	cfg := &offConfig.Config{
+		AppID:          dbOfficialAccount.AppId,
+		AppSecret:      dbOfficialAccount.AppSecret,
+		Token:          dbOfficialAccount.Token,
+		EncodingAESKey: dbOfficialAccount.EncodingAESKey,
+	}
+	officialAccount := wc.GetOfficialAccount(cfg)
+	// 获取素材API
+	m := officialAccount.GetMaterial()
+	mediaID, url, err = m.AddMaterial(material.MediaTypeImage, fileName)
+
+	return
+}
+
+func (*WechatService) PublishArticle(dbOfficialAccount aiModel.OfficialAccount, aiArticle aiModel.AIArticle) (publishId int64, mediaID string, msgId, msgDataID int64, err error) {
 
 	cfg := &offConfig.Config{
 		AppID:          dbOfficialAccount.AppId,
@@ -84,19 +99,13 @@ func (*WechatService) PublishArticle(dbOfficialAccount aiModel.OfficialAccount, 
 	}
 	officialAccount := wc.GetOfficialAccount(cfg)
 
-	// 获取素材API
-	m := officialAccount.GetMaterial()
-	imageId, url, err := m.AddMaterial(material.MediaTypeImage, "./template/test.jpg")
-	if err != nil {
-		return "", 0, 0, err
-	}
-	global.GVA_LOG.Info("PublishArticle AddMaterial:", zap.String("imageId", imageId), zap.String("url", url))
+	imageMedia := MediaServiceApp.RandomByAccountId(dbOfficialAccount.AppId)
 
 	// 获取草稿箱api
 	d := officialAccount.GetDraft()
 	mediaID, err = d.AddDraft([]*draft.Article{{
 		Title:        aiArticle.Title,
-		ThumbMediaID: imageId,
+		ThumbMediaID: imageMedia.MediaID,
 		//ThumbURL:     "https://mmbiz.qpic.cn/sz_mmbiz_jpg/uO29ibicRxJ0QfibQSCptBtjsyia61jSn4V7RRX8aLcMUwN7adJhfyaj788qibHVibnOicDyeTAWAor7GGDP6fz1N499A/640?wx_fmt=webp&amp",
 		Author: dbOfficialAccount.DefaultAuthorName,
 		//Digest:       "test",
@@ -104,16 +113,23 @@ func (*WechatService) PublishArticle(dbOfficialAccount aiModel.OfficialAccount, 
 		Content:      aiArticle.Content,
 	}})
 	if err != nil {
-		return "", 0, 0, err
+		return 0, "", 0, 0, err
 	}
 	global.GVA_LOG.Info("PublishArticle AddDraft:", zap.String("mediaID", mediaID))
 
 	p := officialAccount.GetBroadcast()
 	result, err := p.SendNews(nil, mediaID, false)
+	global.GVA_LOG.Info("PublishArticle SendNews:", zap.String("result", utils.Parse2Json(result)))
 
-	global.GVA_LOG.Info("PublishArticle Publish:", zap.String("result", utils.Parse2Json(result)))
+	if err != nil {
+		// 群发不行  试试单发
+		freePublish := officialAccount.GetFreePublish()
+		publishID, err := freePublish.Publish(mediaID)
+		global.GVA_LOG.Info("PublishArticle Publish:", zap.Int64("publishID", publishID), zap.Error(err))
+		return publishID, mediaID, result.MsgID, result.MsgDataID, err
+	}
 
-	return mediaID, result.MsgID, result.MsgDataID, err
+	return 0, mediaID, result.MsgID, result.MsgDataID, err
 }
 
 func reply(msg *message.MixMessage) *message.Reply {

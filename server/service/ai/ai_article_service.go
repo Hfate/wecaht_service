@@ -48,7 +48,7 @@ func (exa *AIArticleService) PublishArticle(aiArticle ai.AIArticle) (err error) 
 	}
 
 	// 发布文章
-	mediaID, msgId, msgDataID, err := WechatServiceApp.PublishArticle(officialAccount, aiArticle)
+	publishId, mediaID, msgId, msgDataID, err := WechatServiceApp.PublishArticle(officialAccount, aiArticle)
 	if err != nil {
 		return err
 	}
@@ -59,6 +59,7 @@ func (exa *AIArticleService) PublishArticle(aiArticle ai.AIArticle) (err error) 
 	aiArticle.ArticleStatus = 3
 	aiArticle.MediaId = mediaID
 	aiArticle.MsgId = msgId
+	aiArticle.PublishId = publishId
 	aiArticle.MsgDataID = msgDataID
 	err = global.GVA_DB.Save(&aiArticle).Error
 	return err

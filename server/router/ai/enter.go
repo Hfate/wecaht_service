@@ -9,4 +9,5 @@ type RouterGroup struct {
 	AIArticleRouter
 	PromptRouter
 	TopicRouter
+	MediaRouter
 }

@@ -11,6 +11,7 @@ type ApiGroup struct {
 	AIArticleApi
 	PromptApi
 	TopicApi
+	MediaApi
 }
 
 var (
@@ -23,4 +24,5 @@ var (
 	officialAccountService  = service.ServiceGroupApp.AIServiceGroup.OfficialAccountService
 	wxTokenService          = service.ServiceGroupApp.AIServiceGroup.WxTokenService
 	hotspotService          = service.ServiceGroupApp.AIServiceGroup.HotspotService
+	mediaService            = service.ServiceGroupApp.AIServiceGroup.MediaService
 )

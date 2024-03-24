@@ -11,4 +11,5 @@ type ServiceGroup struct {
 	PromptService
 	TopicService
 	WechatService
+	MediaService
 }
