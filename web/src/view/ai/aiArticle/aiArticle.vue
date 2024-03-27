@@ -29,6 +29,11 @@
         </el-form-item>
         <el-form-item>
           <el-button
+              icon="refresh"
+              @click="onGenerate"
+          >生成今日文章
+          </el-button>
+          <el-button
               type="primary"
               icon="search"
               @click="onSubmit"
@@ -72,6 +77,35 @@
             </el-button>
           </template>
         </el-popover>
+
+        <el-popover
+            v-model="publishVisible"
+            placement="top"
+            width="160"
+        >
+          <p>确定要发布吗？</p>
+          <div style="text-align: right; margin-top: 8px;">
+            <el-button
+                type="primary"
+                link
+                @click="publishVisible = false"
+            >取消
+            </el-button>
+            <el-button
+                type="primary"
+                @click="onPublish"
+            >确定
+            </el-button>
+          </div>
+          <template #reference>
+            <el-button
+                icon="delete"
+                :disabled="!aiAIArticles.length"
+                @click="publishVisible = true"
+            >发布
+            </el-button>
+          </template>
+        </el-popover>
       </div>
       <el-table
           ref="multipleTable"
@@ -79,6 +113,7 @@
           style="width: 100%"
           tooltip-effect="dark"
           row-key="ID"
+          @selection-change="handleSelectionChange"
       >
         <el-table-column
             type="selection"
@@ -158,15 +193,8 @@
                 type="primary"
                 link
                 icon="edit"
-                @click="updateArticle(scope.row)"
-            >发布
-            </el-button>
-            <el-button
-                type="primary"
-                link
-                icon="edit"
-                @click="updateArticle(scope.row)"
-            >保存
+                @click="updateWechatArticle(scope.row)"
+            >更新
             </el-button>
             <el-popover
                 v-model="scope.row.visible"
@@ -305,7 +333,7 @@
           <el-button
               type="primary"
               @click="enterDialog"
-          >发布文章
+          >更新
           </el-button>
         </div>
       </template>
@@ -316,11 +344,13 @@
 <script setup>
 import {
   deleteAIArticle,
+  publishAIArticles,
   deleteAIArticlesByIds,
+  generateAIArticle,
   getAIArticle,
   getAIArticleList,
-  publishArticle,
-  recreationAIArticle
+  recreationAIArticle,
+  updateArticle
 } from '@/api/aiArticle'
 import {ref} from 'vue'
 import {ElMessage} from 'element-plus'
@@ -358,7 +388,7 @@ const closeDialog = () => {
 }
 
 const enterDialog = async () => {
-  let res = await publishArticle(form.value)
+  let res = await updateArticle(form.value)
   if (res.code === 0) {
     closeDialog()
     getTableData()
@@ -380,6 +410,14 @@ const onReset = () => {
 const onSubmit = () => {
   page.value = 1
   pageSize.value = 10
+
+  getTableData()
+}
+
+
+// 条件搜索前端看此方法
+const onGenerate = () => {
+  generateAIArticle()
 
   getTableData()
 }
@@ -438,6 +476,8 @@ const handleSelectionChange = (val) => {
 }
 
 const deleteVisible = ref(false)
+const publishVisible = ref(false)
+
 const onDelete = async () => {
   const ids = aiAIArticles.value.map(item => item.ID)
   const res = await deleteAIArticlesByIds({ids})
@@ -455,6 +495,22 @@ const onDelete = async () => {
 }
 
 
+const onPublish = async () => {
+  const ids = aiAIArticles.value.map(item => item.ID)
+  const res = await publishAIArticles({ids})
+  if (res.code === 0) {
+    ElMessage({
+      type: 'success',
+      message: res.msg
+    })
+    if (tableData.value.length === ids.length && page.value > 1) {
+      page.value--
+    }
+    publishVisible.value = false
+    getTableData()
+  }
+}
+
 const deleteWechatAIArticle = async (row) => {
   row.visible = false
   const res = await deleteAIArticle({ID: row.ID})
@@ -470,7 +526,7 @@ const deleteWechatAIArticle = async (row) => {
   }
 }
 
-const updateArticle = async (row) => {
+const updateWechatArticle = async (row) => {
   const res = await getAIArticle({ID: row.ID})
   type.value = 'update'
   if (res.code === 0) {

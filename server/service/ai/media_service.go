@@ -76,12 +76,26 @@ func (exa *MediaService) FindByAccountId(targetAccountId string, seqNum int) *ai
 	return media
 }
 
+func (exa *MediaService) FindLast() *ai.Media {
+	var media *ai.Media
+
+	err := global.GVA_DB.Model(&ai.Media{}).Last(&media).Error
+	if err != nil {
+
+	}
+
+	return media
+}
+
 func (exa *MediaService) RandomByAccountId(targetAccountId string) *ai.Media {
 	count := exa.CountByAccountId(targetAccountId)
+	if count > 1 {
+		randomInt := utils.RandomInt(0, count)
+		return exa.FindByAccountId(targetAccountId, randomInt)
+	}
 
-	randomInt := utils.RandomInt(1, count)
+	return exa.FindLast()
 
-	return exa.FindByAccountId(targetAccountId, randomInt)
 }
 
 //@function: DeleteFileChunk

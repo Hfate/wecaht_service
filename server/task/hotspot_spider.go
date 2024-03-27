@@ -136,7 +136,7 @@ func spiderToutiaoHeadline(db *gorm.DB) {
 		interestCategoryList := item.InterestCategory
 		if len(interestCategoryList) > 0 {
 			for _, i := range interestCategoryList {
-				topic += i + ","
+				topic += TopicTranslateMap[i] + ","
 			}
 		} else {
 			topic = item.LabelDesc
@@ -168,6 +168,34 @@ func spiderToutiaoHeadline(db *gorm.DB) {
 		fmt.Println(err)
 	}
 	return
+}
+
+var TopicTranslateMap = map[string]string{
+	"sports":        "体育",
+	"entertainment": "娱乐",
+	"business":      "商业",
+	"technology":    "科技",
+	"finance":       "财经",
+	"health":        "健康",
+	"travel":        "旅游",
+	"music":         "音乐",
+	"lifestyle":     "生活",
+	"food":          "美食",
+	"car":           "汽车",
+	"science":       "科学",
+	"education":     "教育",
+	"game":          "游戏",
+	"anime":         "动漫",
+	"comic":         "漫画",
+	"news":          "新闻",
+	"military":      "军事",
+	"international": "国际",
+	"other":         "其他",
+	"stock":         "财经",
+	"estate":        "房产",
+	"taiwan":        "时事",
+	"tourism":       "旅游",
+	"culture":       "文化",
 }
 
 type ToutiaoResp struct {

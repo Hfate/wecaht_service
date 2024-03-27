@@ -6,7 +6,6 @@ import (
 	"github.com/baidubce/bce-qianfan-sdk/go/qianfan"
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/ai"
-	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"go.uber.org/zap"
 	"strings"
 	"text/template"
@@ -17,7 +16,99 @@ type QianfanService struct {
 
 var QianfanServiceApp = new(QianfanService)
 
-func (*QianfanService) Recreation(article ai.Article) ChatGptResp {
+func (*QianfanService) HotSpotWrite(topic string) (*ArticleContext, error) {
+	chat := qianfan.NewChatCompletion()
+
+	chatGptPrompt := "请以<" + topic + ">为主题写一篇1200字的文章，无需撰写标题"
+
+	resp, err := chat.Do(
+		context.TODO(),
+		&qianfan.ChatCompletionRequest{
+			Messages: []qianfan.ChatCompletionMessage{
+				qianfan.ChatCompletionUserMessage(chatGptPrompt),
+			},
+		},
+	)
+
+	result := &ArticleContext{}
+
+	if err != nil {
+		global.GVA_LOG.Info("chat gpt响应失败", zap.Error(err))
+		return result, err
+	}
+
+	result.Content = resp.Result
+
+	chatGptPrompt = "请给下文生成一个吸引人阅读的标题，直接回答标题即可无需补充说明。文章内容" + result.Content
+
+	resp, err = chat.Do(
+		context.TODO(),
+		&qianfan.ChatCompletionRequest{
+			Messages: []qianfan.ChatCompletionMessage{
+				qianfan.ChatCompletionUserMessage(chatGptPrompt),
+			},
+		},
+	)
+
+	result.Title = resp.Result
+
+	return result, nil
+}
+
+func (*QianfanService) TopicSpotWrite(topic string) (*ArticleContext, error) {
+
+	chat := qianfan.NewChatCompletion()
+
+	chatGptPrompt := "请以<" + topic + ">为主题提供一个写作话题，直接返回即可"
+
+	resp, err := chat.Do(
+		context.TODO(),
+		&qianfan.ChatCompletionRequest{
+			Messages: []qianfan.ChatCompletionMessage{
+				qianfan.ChatCompletionUserMessage(chatGptPrompt),
+			},
+		},
+	)
+
+	topic = resp.Result
+
+	chatGptPrompt = "请以<" + topic + ">为主题写一篇1200字的微信公众号文章"
+
+	resp, err = chat.Do(
+		context.TODO(),
+		&qianfan.ChatCompletionRequest{
+			Messages: []qianfan.ChatCompletionMessage{
+				qianfan.ChatCompletionUserMessage(chatGptPrompt),
+			},
+		},
+	)
+
+	result := &ArticleContext{}
+
+	if err != nil {
+		global.GVA_LOG.Info("chat gpt响应失败", zap.Error(err))
+		return result, err
+	}
+
+	result.Content = resp.Result
+
+	chatGptPrompt = "请给下文生成一个吸引人阅读的标题，直接回答标题即可无需补充说明.文章内容" + result.Content
+
+	resp, err = chat.Do(
+		context.TODO(),
+		&qianfan.ChatCompletionRequest{
+			Messages: []qianfan.ChatCompletionMessage{
+				qianfan.ChatCompletionUserMessage(chatGptPrompt),
+			},
+		},
+	)
+
+	result.Title = resp.Result
+
+	return result, nil
+}
+
+func (*QianfanService) Recreation(article ai.Article) (*ArticleContext, error) {
 	// 可以通过 WithModel 指定模型
 	chat := qianfan.NewChatCompletion()
 
@@ -34,21 +125,14 @@ func (*QianfanService) Recreation(article ai.Article) ChatGptResp {
 
 	if err != nil {
 		global.GVA_LOG.Info("chat gpt响应失败", zap.Error(err))
-		return ChatGptResp{}
+		return &ArticleContext{}, err
 	}
 
 	content := resp.Result
-	content = strings.ReplaceAll(content, "```json", "")
-	content = strings.ReplaceAll(content, "```", "")
-	content = strings.ReplaceAll(content, "\n", "")
-	content = strings.ReplaceAll(content, "”", "\"")
-	chatGptResp := ChatGptResp{}
 
-	err = utils.JsonStrToStruct(content, &chatGptResp)
-	if err != nil {
-		global.GVA_LOG.Info("chat gpt响应失败", zap.Error(err), zap.String("content", content))
-		return ChatGptResp{}
-	}
+	chatGptResp := &ArticleContext{}
+	chatGptResp.Content = content
+
 	chatGptPrompt = QianfanServiceApp.parseTitlePrompt(article)
 	resp, err = chat.Do(
 		context.TODO(),
@@ -63,7 +147,7 @@ func (*QianfanService) Recreation(article ai.Article) ChatGptResp {
 	title = strings.ReplaceAll(title, "{}", "")
 	chatGptResp.Title = title
 
-	return chatGptResp
+	return chatGptResp, nil
 }
 
 func (*QianfanService) parseContentPrompt(article ai.Article) string {

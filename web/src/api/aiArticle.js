@@ -6,6 +6,22 @@ import service from '@/utils/request'
 // @Security ApiKeyAuth
 // @accept application/json
 // @Produce application/json
+// @Param data body dbModel.AIArticle true "生成文章"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"获取成功"}"
+// @Router /aiArticle/generate [delete]
+export const generateAIArticle = (data) => {
+    return service({
+        url: '/aiArticle/generate',
+        method: 'post',
+    })
+}
+
+
+// @Tags AIArticleApi
+// @Summary 删除文章
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
 // @Param data body dbModel.AIArticle true "删除文章"
 // @Success 200 {string} string "{"success":true,"data":{},"msg":"获取成功"}"
 // @Router /aiArticle/aiArticle [delete]
@@ -50,6 +66,23 @@ export const deleteAIArticlesByIds = (data) => {
     })
 }
 
+
+// @Tags AIArticleApi
+// @Summary 删除文章集合
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data body dbModel.AIArticle true "删除文章集合"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"获取成功"}"
+// @Router /aiArticle/publish [delete]
+export const publishAIArticles = (data) => {
+    return service({
+        url: '/aiArticle/publish',
+        method: 'post',
+        data
+    })
+}
+
 // @Tags AIArticleApi
 // @Summary 获取单一文章信息
 // @Security ApiKeyAuth
@@ -90,10 +123,10 @@ export const getAIArticleList = (params) => {
 // @Produce application/json
 // @Param data body modelInterface.PageInfo true "获取权限文章列表"
 // @Success 200 {string} string "{"success":true,"data":{},"msg":"获取成功"}"
-// @Router /aiArticle/aiArticleList [get]
-export const publishArticle = (data) => {
+// @Router /aiArticle/update [get]
+export const updateArticle = (data) => {
     return service({
-        url: '/aiArticle/publish',
+        url: '/aiArticle/update',
         method: 'post',
         data
     })

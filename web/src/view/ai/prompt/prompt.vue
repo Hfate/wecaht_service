@@ -172,10 +172,20 @@
             />
           </el-form-item>
           <el-form-item label="语言">
-            <el-input
+            <el-select
+                class="w-56"
                 v-model="form.language"
-                autocomplete="off"
-            />
+            >
+              <el-option
+
+                  value="中文"
+                  label="中文"
+              />
+              <el-option
+                  value="英语"
+                  label="英语"
+              />
+            </el-select>
           </el-form-item>
         </el-form>
       </el-scrollbar>
@@ -208,7 +218,7 @@ const form = ref({
   topic: '',
   promptType: '',
   prompt: '',
-  language: '',
+  language: '中文',
 })
 
 const page = ref(1)

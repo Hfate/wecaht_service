@@ -2,7 +2,6 @@ package ai
 
 import (
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"github.com/silenceper/wechat/v2/officialaccount/server"
 
 	aiModel "github.com/flipped-aurora/gin-vue-admin/server/model/ai"
@@ -89,7 +88,8 @@ func (*WechatService) AddMaterial(dbOfficialAccount aiModel.OfficialAccount, fil
 	return
 }
 
-func (*WechatService) PublishArticle(dbOfficialAccount aiModel.OfficialAccount, aiArticle aiModel.AIArticle) (publishId int64, mediaID string, msgId, msgDataID int64, err error) {
+func (*WechatService) PublishArticle(dbOfficialAccount aiModel.OfficialAccount, aiArticle aiModel.AIArticle) (publishId int64,
+	mediaID string, msgId, msgDataID int64, err error) {
 
 	cfg := &offConfig.Config{
 		AppID:          dbOfficialAccount.AppId,
@@ -115,21 +115,21 @@ func (*WechatService) PublishArticle(dbOfficialAccount aiModel.OfficialAccount, 
 	if err != nil {
 		return 0, "", 0, 0, err
 	}
-	global.GVA_LOG.Info("PublishArticle AddDraft:", zap.String("mediaID", mediaID))
+	//global.GVA_LOG.Info("PublishArticle AddDraft:", zap.String("mediaID", mediaID))
+	//
+	//p := officialAccount.GetBroadcast()
+	//result, err := p.SendNews(nil, mediaID, false)
+	//global.GVA_LOG.Info("PublishArticle SendNews:", zap.String("result", utils.Parse2Json(result)))
+	//
+	//if err != nil {
+	//	// 群发不行  试试单发
+	//	freePublish := officialAccount.GetFreePublish()
+	//	publishID, err := freePublish.Publish(mediaID)
+	//	global.GVA_LOG.Info("PublishArticle Publish:", zap.Int64("publishID", publishID), zap.Error(err))
+	//	return publishID, mediaID, result.MsgID, result.MsgDataID, err
+	//}
 
-	p := officialAccount.GetBroadcast()
-	result, err := p.SendNews(nil, mediaID, false)
-	global.GVA_LOG.Info("PublishArticle SendNews:", zap.String("result", utils.Parse2Json(result)))
-
-	if err != nil {
-		// 群发不行  试试单发
-		freePublish := officialAccount.GetFreePublish()
-		publishID, err := freePublish.Publish(mediaID)
-		global.GVA_LOG.Info("PublishArticle Publish:", zap.Int64("publishID", publishID), zap.Error(err))
-		return publishID, mediaID, result.MsgID, result.MsgDataID, err
-	}
-
-	return 0, mediaID, result.MsgID, result.MsgDataID, err
+	return 0, mediaID, 0, 0, err
 }
 
 func reply(msg *message.MixMessage) *message.Reply {

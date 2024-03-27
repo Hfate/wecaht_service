@@ -1,12 +1,15 @@
 package ai
 
 import (
+	"fmt"
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/ai"
 	aiReq "github.com/flipped-aurora/gin-vue-admin/server/model/ai/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
 	systemService "github.com/flipped-aurora/gin-vue-admin/server/service/system"
+	"go.uber.org/zap"
+	"strings"
 	"time"
 )
 
@@ -36,12 +39,32 @@ func (exa *AIArticleService) DeleteAIArticlesByIds(ids request.IdsReq) (err erro
 	return err
 }
 
+func (exa *AIArticleService) PublishArticle(ids []int) error {
+	var articles []ai.AIArticle
+	err := global.GVA_DB.Model(&ai.AIArticle{}).Where("id in ?", ids).Find(&articles).Error
+
+	for _, item := range articles {
+		err = exa.Publish1Article(item)
+		if err != nil {
+			global.GVA_LOG.Error("发布失败!", zap.Error(err), zap.String("item", item.Title))
+		}
+	}
+	return err
+}
+
+func (exa *AIArticleService) UpdateArticle(aiArticle ai.AIArticle) (err error) {
+	// 更新
+	aiArticle.PublishTime = time.Now()
+	err = global.GVA_DB.Save(&aiArticle).Error
+	return err
+}
+
 // @function: ApprovalArticle
 // @description: 发布文章
 // @param: e model.AIArticle
 // @return: err error
 
-func (exa *AIArticleService) PublishArticle(aiArticle ai.AIArticle) (err error) {
+func (exa *AIArticleService) Publish1Article(aiArticle ai.AIArticle) (err error) {
 	officialAccount, err := OfficialAccountServiceApp.GetOfficialAccountByAppId(aiArticle.TargetAccountId)
 	if err != nil {
 		return err
@@ -66,8 +89,6 @@ func (exa *AIArticleService) PublishArticle(aiArticle ai.AIArticle) (err error) 
 }
 
 func (exa *AIArticleService) CreateAIArticle(e ai.AIArticle) (err error) {
-	err = global.GVA_DB.Where("origin_id=?", e.OriginId).Delete(&ai.AIArticle{}).Error
-
 	e.PublishTime = time.Now()
 	err = global.GVA_DB.Create(&e).Error
 	return err
@@ -83,13 +104,95 @@ func (exa *AIArticleService) GetAIArticle(id uint64) (aiArticle ai.AIArticle, er
 	return
 }
 
-func (exa *AIArticleService) Recreation(id uint64) (err error) {
-	article := ai.AIArticle{}
-	err = global.GVA_DB.Where("id = ?", id).First(&article).Error
+// GenerateDailyArticle 生成每日文章
+func (exa *AIArticleService) GenerateDailyArticle() error {
+	// 获取公众号列表
+	list, err := OfficialAccountServiceApp.List()
+
 	if err != nil {
 		return err
 	}
-	return ArticleServiceApp.Recreation(article.OriginId)
+
+	for _, account := range list {
+
+		item := account
+		go func() {
+			articleContext := ArticlePipelineApp.Run(item.Topic)
+			if articleContext.Content == "" {
+				return
+			}
+
+			aiArticle := ai.AIArticle{
+				Title:             exa.parseTitle(articleContext.Title),
+				TargetAccountName: item.AccountName,
+				TargetAccountId:   item.AppId,
+				Topic:             articleContext.Topic,
+				AuthorName:        item.DefaultAuthorName,
+				Tags:              strings.Join(articleContext.Tags, ","),
+				Content:           exa.parseContent(articleContext.Content),
+			}
+			aiArticle.BASEMODEL = BaseModel()
+
+			err = AIArticleServiceApp.CreateAIArticle(aiArticle)
+			fmt.Println(err)
+		}()
+
+	}
+
+	return nil
+}
+
+func (exa *AIArticleService) parseTitle(title string) string {
+	title = strings.ReplaceAll(title, "标题：", "")
+	return title
+}
+
+func (exa *AIArticleService) parseContent(content string) string {
+	// 以换行符为分隔符，将文章内容拆分成多行
+	lines := strings.Split(content, "\n")
+
+	// 排除标题行
+	var contentLines []string
+	for _, line := range lines {
+		if !strings.HasPrefix(line, "标题：") {
+			contentLines = append(contentLines, line)
+		}
+	}
+
+	// 将剩余的行重新连接成一篇文章
+	content = strings.Join(contentLines, "\n")
+
+	return content
+}
+
+func (exa *AIArticleService) Recreation(id uint64) (err error) {
+	aiArticle := ai.AIArticle{}
+	err = global.GVA_DB.Where("id = ?", id).First(&aiArticle).Error
+	if err != nil {
+		return err
+	}
+
+	article := ai.Article{
+		Title:      aiArticle.Title,
+		PortalName: aiArticle.PortalName,
+		Topic:      aiArticle.Topic,
+		AuthorName: aiArticle.AuthorName,
+		Content:    aiArticle.Content,
+	}
+
+	chatGptResp, err := QianfanServiceApp.Recreation(article)
+	if err != nil {
+		return err
+	}
+
+	aiArticle.Topic = chatGptResp.Topic
+	aiArticle.Content = chatGptResp.Content
+	aiArticle.Title = chatGptResp.Title
+	aiArticle.Tags = strings.Join(chatGptResp.Tags, ",")
+
+	global.GVA_DB.Save(&aiArticle)
+
+	return
 }
 
 // @function: GetArticleList

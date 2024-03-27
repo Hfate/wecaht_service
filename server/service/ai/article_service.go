@@ -11,6 +11,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/xuri/excelize/v2"
+	"strings"
 )
 
 type ArticleService struct {
@@ -56,7 +57,10 @@ func (exa *ArticleService) Recreation(id uint64) error {
 		return err
 	}
 
-	chatGptResp := QianfanServiceApp.Recreation(article)
+	chatGptResp, err := QianfanServiceApp.Recreation(article)
+	if err != nil {
+		return err
+	}
 
 	aiArticle := ai.AIArticle{
 		OriginId:   article.ID,
@@ -64,7 +68,7 @@ func (exa *ArticleService) Recreation(id uint64) error {
 		PortalName: article.PortalName,
 		Topic:      chatGptResp.Topic,
 		AuthorName: article.AuthorName,
-		Tags:       chatGptResp.Tags,
+		Tags:       strings.Join(chatGptResp.Tags, ","),
 		Content:    chatGptResp.Content,
 	}
 	aiArticle.BASEMODEL = BaseModel()
@@ -74,7 +78,7 @@ func (exa *ArticleService) Recreation(id uint64) error {
 	if err != nil {
 		return err
 	}
-	article.RecreationNum++
+	article.UseTimes++
 	err = global.GVA_DB.Save(&article).Error
 
 	return err

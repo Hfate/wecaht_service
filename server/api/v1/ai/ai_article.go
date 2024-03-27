@@ -99,7 +99,23 @@ func (e *AIArticleApi) GetAIArticle(c *gin.Context) {
 	response.OkWithDetailed(aiRes.AIArticleResponse{AIArticle: data}, "获取成功", c)
 }
 
-// PublishArticle
+func (e *AIArticleApi) PublishArticle(c *gin.Context) {
+	var ids request.IdsReq
+	err := c.ShouldBindJSON(&ids)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	err = aiArticleService.PublishArticle(ids.Ids)
+	if err != nil {
+		global.GVA_LOG.Error("发布失败!", zap.Error(err))
+		response.FailWithMessage("发布失败", c)
+		return
+	}
+	response.OkWithMessage("发布成功", c)
+}
+
+// UpdateArticle
 // @Tags      AIArticle
 // @Summary   审核文章
 // @Security  ApiKeyAuth
@@ -107,8 +123,8 @@ func (e *AIArticleApi) GetAIArticle(c *gin.Context) {
 // @Produce   application/json
 // @Param     data  body      wechat.AIArticle            true  "文章ID"
 // @Success   200   {object}  response.Response{msg=string}  "审核文章"
-// @Router    /aiArticle/publish [post]
-func (e *AIArticleApi) PublishArticle(c *gin.Context) {
+// @Router    /aiArticle/update [post]
+func (e *AIArticleApi) UpdateArticle(c *gin.Context) {
 	var aiArticle ai.AIArticle
 	err := c.ShouldBindJSON(&aiArticle)
 	if err != nil {
@@ -120,13 +136,32 @@ func (e *AIArticleApi) PublishArticle(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	err = aiArticleService.PublishArticle(aiArticle)
+	err = aiArticleService.UpdateArticle(aiArticle)
 	if err != nil {
-		global.GVA_LOG.Error("发布失败!", zap.Error(err))
-		response.FailWithMessage("发布失败", c)
+		global.GVA_LOG.Error("更新失败!", zap.Error(err))
+		response.FailWithMessage("更新失败", c)
 		return
 	}
-	response.OkWithMessage("发布成功", c)
+	response.OkWithMessage("更新成功", c)
+}
+
+// GenerateArticle
+// @Tags      AIArticle
+// @Summary   生成每日文章
+// @Security  ApiKeyAuth
+// @accept    application/json
+// @Produce   application/json
+// @Param     data  body      wechat.AIArticle            true  "文章ID"
+// @Success   200   {object}  response.Response{msg=string}  "生成每日文章"
+// @Router    /aiArticle/generate [post]
+func (e *AIArticleApi) GenerateArticle(c *gin.Context) {
+	err := aiArticleService.GenerateDailyArticle()
+	if err != nil {
+		global.GVA_LOG.Error("生成失败!", zap.Error(err))
+		response.FailWithMessage("生成失败", c)
+		return
+	}
+	response.OkWithMessage("生成成功", c)
 }
 
 // Recreation
