@@ -218,7 +218,3 @@ cors:
           expose-headers: Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers, Content-Type
           allow-credentials: true # 布尔值
 
-
-qianfan:
-    access-key: ALTAK5HSinZtO6tas6f0l7und9
-    secret-key: d4d47be09aef4ff4bbe84564c37bfaa9
