@@ -121,6 +121,9 @@ func (exa *AIArticleService) GenerateDailyArticle() error {
 		}
 
 		item := account
+
+		time.Sleep(500 * time.Millisecond)
+
 		go func() {
 			articleContext := ArticlePipelineApp.Run(item.AppId, item.Topic)
 			if articleContext.Content == "" {
@@ -150,6 +153,7 @@ func (exa *AIArticleService) GenerateDailyArticle() error {
 func (exa *AIArticleService) parseTitle(title string) string {
 	title = strings.ReplaceAll(title, "标题：", "")
 	title = utils.RemoveBookTitleBrackets(title)
+	title = strings.ReplaceAll(title, "标题建议：", "")
 	return title
 }
 
@@ -167,7 +171,6 @@ func (exa *AIArticleService) parseContent(content string) string {
 
 	// 将剩余的行重新连接成一篇文章
 	markdownContent := strings.Join(contentLines, "\n")
-	markdownContent = strings.ReplaceAll(markdownContent, "标题建议：", "")
 
 	htmlContent, _ := utils.RenderMarkdownContent(markdownContent)
 

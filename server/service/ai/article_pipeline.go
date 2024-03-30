@@ -152,6 +152,9 @@ func (r *RecreationArticle) Handle(context *ArticleContext) error {
 	if err != nil {
 		return err
 	}
+	// 更新使用次数
+	article.UseTimes = article.UseTimes + 1
+	err = global.GVA_DB.Save(&article).Error
 
 	result, err := ChatModelServiceApp.Recreation(article, AllModel)
 	if err != nil {
@@ -160,10 +163,6 @@ func (r *RecreationArticle) Handle(context *ArticleContext) error {
 
 	context.Content = result.Content
 	context.Title = result.Title
-
-	// 更新使用次数
-	article.UseTimes = article.UseTimes + 1
-	err = global.GVA_DB.Save(&article).Error
 
 	return err
 }
@@ -177,6 +176,9 @@ func (r *HotSpotWriteArticle) Handle(context *ArticleContext) error {
 	if err != nil {
 		return err
 	}
+	// 更新使用次数
+	hotspot.UseTimes = hotspot.UseTimes + 1
+	err = global.GVA_DB.Save(&hotspot).Error
 
 	result, err := ChatModelServiceApp.HotSpotWrite(hotspot.Headline, AllModel)
 	if err != nil {
@@ -186,10 +188,6 @@ func (r *HotSpotWriteArticle) Handle(context *ArticleContext) error {
 	context.Content = result.Content
 	context.Title = result.Title
 
-	// 更新使用次数
-	hotspot.UseTimes = hotspot.UseTimes + 1
-
-	err = global.GVA_DB.Save(&hotspot).Error
 	return err
 }
 
