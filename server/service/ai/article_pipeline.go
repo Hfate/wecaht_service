@@ -87,7 +87,7 @@ func (*BaiduAddImage) Handle(context *ArticleContext) error {
 			continue
 		}
 
-		wxImgFmt := "<img data-s=\\\"300,640\\\" data-galleryid=\\\"\\\"   class=\\\"rich_pages wxw-img\\\" href=\\\"%s\\\" style=\\\"\\\" data-ratio=\\\"0.8264840182648402\\\" data-w=\\\"438\\\">"
+		wxImgFmt := "<img src=\"%s\">"
 		wxImgUrl := fmt.Sprintf(wxImgFmt, link)
 
 		context.Content = strings.ReplaceAll(context.Content, match[1], "\n"+wxImgUrl+"\n")
