@@ -122,7 +122,7 @@ func (exa *AIArticleService) GenerateDailyArticle() error {
 
 		item := account
 		go func() {
-			articleContext := ArticlePipelineApp.Run(item.Topic)
+			articleContext := ArticlePipelineApp.Run(account.AppId, item.Topic)
 			if articleContext.Content == "" {
 				return
 			}

@@ -5,6 +5,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/ai"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
+	"go.uber.org/zap"
 	"regexp"
 	"strings"
 )
@@ -18,9 +19,11 @@ var ArticlePipelineApp = new(ArticlePipeline)
 type ArticlePipeline struct {
 }
 
-func (*ArticlePipeline) Run(topic string) *ArticleContext {
+func (*ArticlePipeline) Run(appId, topic string) *ArticleContext {
 	context := &ArticleContext{}
 	context.Topic = topic
+	context.AppId = appId
+
 	switch topic {
 	case "":
 
@@ -74,6 +77,8 @@ func (*BaiduAddImage) Handle(context *ArticleContext) error {
 		}
 
 		_, url, err := MediaServiceApp.CreateMediaByPath(context.AppId, filePath)
+
+		global.GVA_LOG.Info("公众号配图", zap.String("URL", url), zap.String("appId", context.AppId), zap.Error(err))
 
 		if err != nil {
 			fmt.Println(err)
