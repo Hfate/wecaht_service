@@ -48,7 +48,12 @@ func (exa *AIArticleService) PublishArticle(ids []int) error {
 		err = exa.Publish1Article(item)
 		if err != nil {
 			global.GVA_LOG.Error("发布失败!", zap.Error(err), zap.String("item", item.Title))
+			item.ArticleStatus = 4
+			item.ErrMessage = err.Error()
 		}
+
+		item.ArticleStatus = 2
+
 	}
 	return err
 }

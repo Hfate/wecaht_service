@@ -39,6 +39,10 @@ func (*ChatModelService) HotSpotWrite(topic string, chatModel string) (*ArticleC
 	case Kimi:
 
 	default:
+		result, err := KimiServiceApp.HotSpotWrite(topic)
+		if err == nil {
+			return result, nil
+		}
 		return QianfanServiceApp.HotSpotWrite(topic)
 	}
 
@@ -49,11 +53,15 @@ func (*ChatModelService) TopicWrite(topic, chatModel string) (*ArticleContext, e
 	// 可以通过 WithModel 指定模型
 	switch chatModel {
 	case QianfanChat:
-		return QianfanServiceApp.TopicSpotWrite(topic)
+		return QianfanServiceApp.TopicWrite(topic)
 	case Kimi:
 
 	default:
-		return QianfanServiceApp.TopicSpotWrite(topic)
+		result, err := KimiServiceApp.TopicWrite(topic)
+		if err == nil {
+			return result, nil
+		}
+		return QianfanServiceApp.TopicWrite(topic)
 	}
 	return nil, nil
 }

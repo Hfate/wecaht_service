@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"bytes"
 	"github.com/hashicorp/go-retryablehttp"
 	"io"
 	"net"
@@ -20,8 +19,9 @@ func init() {
 	retryClient.RetryWaitMin = 10 * time.Millisecond
 	retryClient.RetryWaitMax = 50 * time.Millisecond
 	httpClient = retryClient.StandardClient()
-	httpClient.Timeout = time.Millisecond * 500
+	httpClient.Timeout = time.Minute * 5
 	httpClient.Transport = &http.Transport{
+		MaxIdleConns:        10,
 		MaxIdleConnsPerHost: 50,
 		DisableKeepAlives:   false,
 	}
@@ -169,20 +169,6 @@ func Post(url string, sJSON string) (statusCode int, body []byte, err error) {
 	return doSend(req)
 }
 
-func PostBodyWithHeaders(url string, headers map[string]string, reqBody []byte) (statusCode int, body []byte, err error) {
-	// create new http request
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(reqBody))
-	if err != nil {
-		return 0, nil, err
-	}
-	// add headers
-	req.Header.Add("Content-type", "application/json")
-	for k, v := range headers {
-		req.Header.Add(k, v)
-	}
-	return doSend(req)
-}
-
 func PostWithHeaders(url string, sJSON string, headers map[string]string) (statusCode int, body []byte, err error) {
 	// create new http request
 	req, err := http.NewRequest("POST", url, strings.NewReader(sJSON))
@@ -191,6 +177,7 @@ func PostWithHeaders(url string, sJSON string, headers map[string]string) (statu
 	}
 	// add headers
 	req.Header.Add("Content-type", "application/json; charset=utf-8")
+
 	for k, v := range headers {
 		req.Header.Add(k, v)
 	}

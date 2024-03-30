@@ -90,7 +90,7 @@ func (*QianfanService) HotSpotWrite(topic string) (*ArticleContext, error) {
 	return result, nil
 }
 
-func (*QianfanService) TopicSpotWrite(topic string) (*ArticleContext, error) {
+func (*QianfanService) TopicWrite(topic string) (*ArticleContext, error) {
 
 	chat := qianfan.NewChatCompletion(qianfan.WithModel("ERNIE-Bot-4"))
 

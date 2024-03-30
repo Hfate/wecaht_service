@@ -37,7 +37,7 @@ func saveImage(imgUrlList []string) string {
 		filePath = global.GVA_CONFIG.Local.Path + "/" + cast.ToString(GenID()) + "." + strArr[len(strArr)-1]
 		err := downloadImage(imgUrl, filePath)
 		if err != nil {
-			fmt.Println(err)
+			global.GVA_LOG.Info("downloadImage failed", zap.Any("err", err.Error()))
 		} else {
 			break
 		}
@@ -57,6 +57,12 @@ func downloadImage(url string, filePath string) error {
 	// 检查响应状态码
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("failed to download image, status code: %d", resp.StatusCode)
+	}
+
+	// 计算文件大小
+	fileSize := resp.ContentLength
+	if fileSize > 1*1024*1024 { // 1MB
+		return errors.New("图片文件大小超过1MB:" + url)
 	}
 
 	// 尝试创建此路径
