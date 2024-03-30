@@ -3,6 +3,7 @@ package ai
 import (
 	"fmt"
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
+	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"github.com/silenceper/wechat/v2/officialaccount/server"
 
 	aiModel "github.com/flipped-aurora/gin-vue-admin/server/model/ai"
@@ -115,13 +116,30 @@ func (*WechatService) PublishArticle(dbOfficialAccount aiModel.OfficialAccount, 
 	}
 	officialAccount := wc.GetOfficialAccount(cfg)
 
-	imageMedia := MediaServiceApp.RandomByAccountId(dbOfficialAccount.AppId)
+	// 搜索封面托片
+	filePath := utils.SearchAndSave(aiArticle.Title)
+
+	if filePath == "" {
+		global.GVA_LOG.Error("没有找到封面图片", zap.String("title", aiArticle.Title),
+			zap.String("appId", dbOfficialAccount.AppId),
+			zap.String("appName", dbOfficialAccount.AccountName))
+
+		return 0, "", 0, 0, err
+	}
+
+	imgMediaID, _, err := MediaServiceApp.CreateMediaByPath(dbOfficialAccount.AppId, filePath)
+	if filePath == "" {
+		global.GVA_LOG.Error("上传封面图片失败", zap.String("title", aiArticle.Title),
+			zap.String("appId", dbOfficialAccount.AppId),
+			zap.String("appName", dbOfficialAccount.AccountName))
+		return 0, "", 0, 0, err
+	}
 
 	// 获取草稿箱api
 	d := officialAccount.GetDraft()
 	mediaID, err = d.AddDraft([]*draft.Article{{
 		Title:        aiArticle.Title,
-		ThumbMediaID: imageMedia.MediaID,
+		ThumbMediaID: imgMediaID,
 		//ThumbURL:     "https://mmbiz.qpic.cn/sz_mmbiz_jpg/uO29ibicRxJ0QfibQSCptBtjsyia61jSn4V7RRX8aLcMUwN7adJhfyaj788qibHVibnOicDyeTAWAor7GGDP6fz1N499A/640?wx_fmt=webp&amp",
 		Author: dbOfficialAccount.DefaultAuthorName,
 		//Digest:       "test",

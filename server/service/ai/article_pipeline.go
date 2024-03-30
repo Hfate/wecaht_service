@@ -90,7 +90,7 @@ func (*BaiduAddImage) Handle(context *ArticleContext) error {
 		wxImgFmt := "<img src=\"%s\">"
 		wxImgUrl := fmt.Sprintf(wxImgFmt, link)
 
-		context.Content = strings.ReplaceAll(context.Content, match[1], "\n"+wxImgUrl+"\n")
+		context.Content = strings.ReplaceAll(context.Content, match[1], "<p>"+wxImgUrl+"</p>")
 	}
 
 	return nil
@@ -106,11 +106,11 @@ func (da *DefaultArticlePipeline) Write(context *ArticleContext) error {
 		handle := da.ArticleWriteHandleList[i]
 		err := handle.Handle(context)
 		if err != nil {
-			fmt.Println("DefaultArticlePipeline Write", err)
 			continue
 		}
 		// 完成写作
 		if context.Content != "" && len(context.Content) > 500 {
+			global.GVA_LOG.Info("完成AI创作", zap.String("appID", context.AppId), zap.String("title", context.Title))
 			break
 		}
 	}
@@ -148,7 +148,7 @@ type RecreationArticle struct {
 
 func (r *RecreationArticle) Handle(context *ArticleContext) error {
 	article := ai.Article{}
-	err := global.GVA_DB.Where("topic like ?", "%"+context.Topic+"%").Where("use_times=0").Order("publish_time desc").Last(&article).Error
+	err := global.GVA_DB.Where("topic like ?", "%"+context.Topic).Where("use_times=0").Order("publish_time desc").Last(&article).Error
 	if err != nil {
 		return err
 	}
@@ -173,7 +173,7 @@ type HotSpotWriteArticle struct {
 
 func (r *HotSpotWriteArticle) Handle(context *ArticleContext) error {
 	hotspot := ai.Hotspot{}
-	err := global.GVA_DB.Where("topic like ?", "%"+context.Topic+"%").Where("use_times=0").Order("trending desc").Last(&hotspot).Error
+	err := global.GVA_DB.Where("topic like ?", "%"+context.Topic).Where("use_times=0").Order("trending desc").Last(&hotspot).Error
 	if err != nil {
 		return err
 	}

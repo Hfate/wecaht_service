@@ -6,7 +6,6 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
 	systemService "github.com/flipped-aurora/gin-vue-admin/server/service/system"
-	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils/upload"
 	"mime/multipart"
 	"strings"
@@ -129,17 +128,6 @@ func (exa *MediaService) FindLast() *ai.Media {
 	}
 
 	return media
-}
-
-func (exa *MediaService) RandomByAccountId(targetAccountId string) *ai.Media {
-	count := exa.CountByAccountId(targetAccountId)
-	if count > 1 {
-		randomInt := utils.RandomInt(0, count)
-		return exa.FindByAccountId(targetAccountId, randomInt)
-	}
-
-	return exa.FindLast()
-
 }
 
 //@function: DeleteFileChunk
