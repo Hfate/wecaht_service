@@ -6,6 +6,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/model/ai"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"go.uber.org/zap"
+	"net/url"
 	"regexp"
 	"strings"
 )
@@ -77,15 +78,34 @@ func (*BaiduAddImage) Handle(context *ArticleContext) error {
 			continue
 		}
 
-		_, url, err := MediaServiceApp.CreateMediaByPath(context.AppId, filePath)
+		mediaId, link, err := MediaServiceApp.CreateMediaByPath(context.AppId, filePath)
 
-		global.GVA_LOG.Info("公众号配图", zap.String("URL", url), zap.String("文案", match[1]), zap.String("appId", context.AppId), zap.Error(err))
+		global.GVA_LOG.Info("公众号配图", zap.String("URL", link), zap.String("文案", match[1]),
+			zap.String("mediaId", mediaId),
+			zap.String("appId", context.AppId), zap.Error(err))
 
 		if err != nil {
 			fmt.Println(err)
 			continue
 		}
-		context.Content = strings.ReplaceAll(context.Content, match[1], url)
+
+		// 解析URL
+		parsedURL, err := url.Parse(link)
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+
+		// 解析查询参数
+		queryParams := parsedURL.Query()
+
+		// 获取wx_fmt参数
+		wxFmt := queryParams.Get("wx_fmt")
+
+		wxImgFmt := "<img data-s=\\\"300,640\\\" data-galleryid=\\\"\\\" data-type=\\\"%s\\\"  class=\\\"rich_pages wxw-img\\\" data-src=\\\"%s\\\" style=\\\"\\\" data-ratio=\\\"0.8264840182648402\\\" data-w=\\\"438\\\">"
+		wxImgUrl := fmt.Sprintf(wxImgFmt, wxFmt, link)
+
+		context.Content = strings.ReplaceAll(context.Content, match[1], "\n"+wxImgUrl+"\n")
 	}
 
 	return nil
