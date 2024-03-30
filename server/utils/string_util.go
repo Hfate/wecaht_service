@@ -17,8 +17,6 @@ func RemoveChinese(s string) string {
 }
 
 func RenderMarkdownContent(markdown string) (string, error) {
-
-	return markdown, nil
 	// 渲染Markdown
 	html := blackfriday.MarkdownCommon([]byte(markdown))
 	return string(html), nil

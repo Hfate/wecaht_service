@@ -89,6 +89,21 @@ func (*WechatService) AddMaterial(dbOfficialAccount aiModel.OfficialAccount, fil
 	return
 }
 
+func (*WechatService) ImageUpload(dbOfficialAccount aiModel.OfficialAccount, fileName string) (url string, err error) {
+	cfg := &offConfig.Config{
+		AppID:          dbOfficialAccount.AppId,
+		AppSecret:      dbOfficialAccount.AppSecret,
+		Token:          dbOfficialAccount.Token,
+		EncodingAESKey: dbOfficialAccount.EncodingAESKey,
+	}
+	officialAccount := wc.GetOfficialAccount(cfg)
+	// 获取素材API
+	m := officialAccount.GetMaterial()
+	url, err = m.ImageUpload(fileName)
+
+	return
+}
+
 func (*WechatService) PublishArticle(dbOfficialAccount aiModel.OfficialAccount, aiArticle aiModel.AIArticle) (publishId int64,
 	mediaID string, msgId, msgDataID int64, err error) {
 

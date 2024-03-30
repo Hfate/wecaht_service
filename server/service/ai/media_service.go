@@ -59,6 +59,17 @@ func (exa *MediaService) CreateMedia(targetAccountId string, header *multipart.F
 	return err
 }
 
+func (exa *MediaService) ImageUpload(targetAccountId string, filePath string) (url string, err error) {
+	officialAccount, err := OfficialAccountServiceApp.GetOfficialAccountByAppId(targetAccountId)
+	if err != nil {
+		return "", err
+	}
+	url, err = WechatServiceApp.ImageUpload(officialAccount, filePath)
+
+	return
+
+}
+
 func (exa *MediaService) CreateMediaByPath(targetAccountId string, filePath string) (mediaID, url string, err error) {
 	officialAccount, err := OfficialAccountServiceApp.GetOfficialAccountByAppId(targetAccountId)
 	if err != nil {
