@@ -1,9 +1,11 @@
 package utils
 
 import (
+	"errors"
 	"fmt"
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/spf13/cast"
+	"go.uber.org/zap"
 	"io"
 	"net/http"
 	"os"
@@ -51,6 +53,13 @@ func downloadImage(url string, filePath string) error {
 	// 检查响应状态码
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("failed to download image, status code: %d", resp.StatusCode)
+	}
+
+	// 尝试创建此路径
+	mkdirErr := os.MkdirAll(global.GVA_CONFIG.Local.StorePath, os.ModePerm)
+	if mkdirErr != nil {
+		global.GVA_LOG.Error("function os.MkdirAll() failed", zap.Any("err", mkdirErr.Error()))
+		return errors.New("function os.MkdirAll() failed, err:" + mkdirErr.Error())
 	}
 
 	// 打开文件用于写入
