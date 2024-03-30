@@ -39,7 +39,7 @@ func (*QianfanService) GetKeyWord(title string) string {
 func (*QianfanService) HotSpotWrite(topic string) (*ArticleContext, error) {
 	chat := qianfan.NewChatCompletion(qianfan.WithModel("ERNIE-Bot-4"))
 
-	chatGptPrompt := "请以<" + topic + ">为主题写一篇1200字的文章，文章内容各处无需补充说明,要求返回文章格式为markdown格式"
+	chatGptPrompt := "请以<" + topic + ">为主题写一篇1200字的文章，文章内容各处无需补充说明,要求返回文章格式为markdown格式，且限定markdown仅支持字体加粗，下划线，斜体，有序列表等格式"
 	resp, err := chat.Do(
 		context.TODO(),
 		&qianfan.ChatCompletionRequest{
@@ -108,7 +108,7 @@ func (*QianfanService) TopicSpotWrite(topic string) (*ArticleContext, error) {
 
 	topic = resp.Result
 
-	chatGptPrompt = "请以<" + topic + ">为主题写一篇1200字的微信公众号文章，文章内容各处无需补充说明，要求返回文章格式为markdown格式"
+	chatGptPrompt = "请以<" + topic + ">为主题写一篇1200字的微信公众号文章，文章内容各处无需补充说明，要求返回文章格式为markdown格式，且限定markdown仅支持字体加粗，下划线，斜体，有序列表等格式"
 	resp, err = chat.Do(
 		context.TODO(),
 		&qianfan.ChatCompletionRequest{
