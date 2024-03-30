@@ -27,7 +27,7 @@ func saveImage(imgUrlList []string) string {
 	filePath := ""
 
 	for _, imgUrl := range imgUrlList {
-		if !strings.Contains(imgUrl, "jpg") && !strings.Contains(imgUrl, ".jepg") || !strings.Contains(imgUrl, ".png") || !strings.Contains(imgUrl, ".PNG") {
+		if !strings.Contains(imgUrl, "jpg") && !strings.Contains(imgUrl, ".jepg") && !strings.Contains(imgUrl, ".png") && !strings.Contains(imgUrl, ".PNG") {
 			continue
 		}
 

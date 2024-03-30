@@ -72,13 +72,14 @@ func (*BaiduAddImage) Handle(context *ArticleContext) error {
 	for _, match := range matches {
 		// 搜索图片
 		filePath := utils.SearchAndSave(match[1])
+
 		if filePath == "" {
 			continue
 		}
 
 		_, url, err := MediaServiceApp.CreateMediaByPath(context.AppId, filePath)
 
-		global.GVA_LOG.Info("公众号配图", zap.String("URL", url), zap.String("appId", context.AppId), zap.Error(err))
+		global.GVA_LOG.Info("公众号配图", zap.String("URL", url), zap.String("文案", match[1]), zap.String("appId", context.AppId), zap.Error(err))
 
 		if err != nil {
 			fmt.Println(err)
