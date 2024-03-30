@@ -16,10 +16,30 @@ type QianfanService struct {
 
 var QianfanServiceApp = new(QianfanService)
 
+func (*QianfanService) GetKeyWord(title string) string {
+	chat := qianfan.NewChatCompletion(qianfan.WithModel("ERNIE-Bot-4"))
+
+	chatGptPrompt := "我将给一个文章标题，需要你帮忙提取标题中的一个关键词用以做图片搜索。" +
+		"\n举例   " +
+		"\n文章标题：中瑙友谊再升华，开启双边合作新篇章。  关键词：友谊再升华" +
+		"\n文章标题：周处传奇：除三害、转人生，英雄之路的跌宕起伏  关键词：周处除三害" +
+		"\n文章标题：" + title
+	resp, _ := chat.Do(
+		context.TODO(),
+		&qianfan.ChatCompletionRequest{
+			System: "微信公众号爆款文写作专家",
+			Messages: []qianfan.ChatCompletionMessage{
+				qianfan.ChatCompletionUserMessage(chatGptPrompt),
+			},
+		},
+	)
+	return resp.Result
+}
+
 func (*QianfanService) HotSpotWrite(topic string) (*ArticleContext, error) {
 	chat := qianfan.NewChatCompletion(qianfan.WithModel("ERNIE-Bot-4"))
 
-	chatGptPrompt := "请以<" + topic + ">为主题写一篇1200字的文章，文章内容各处无需补充说明"
+	chatGptPrompt := "请以<" + topic + ">为主题写一篇1200字的文章，文章内容各处无需补充说明,要求返回文章格式为markdown格式"
 	resp, err := chat.Do(
 		context.TODO(),
 		&qianfan.ChatCompletionRequest{
@@ -53,8 +73,8 @@ func (*QianfanService) HotSpotWrite(topic string) (*ArticleContext, error) {
 	result.Title = resp.Result
 
 	chatGptPrompt = "你是一位微信公众号爆文写手，擅长创作爆款文章并为其配上合适的图片。现在，你需要基于提供的文章内容，在合适的位置添加配图占位符，以提升读者的阅读体验。" +
-		"占位符的格式要求为：[img]高中生放学[/img]。" +
-		"请确保图片与文章主题和内容紧密相连，让读者在阅读过程中能够更好地理解和感受文章所传达的信息和情感。" +
+		" 占位符的格式示例：[img]高中生放学[/img]。" +
+		" 请确保图片与文章主题和内容紧密相连，让读者在阅读过程中能够更好地理解和感受文章所传达的信息和情感。" +
 		" 原文如下:" + result.Content
 
 	resp, err = chat.Do(
@@ -74,7 +94,7 @@ func (*QianfanService) TopicSpotWrite(topic string) (*ArticleContext, error) {
 
 	chat := qianfan.NewChatCompletion(qianfan.WithModel("ERNIE-Bot-4"))
 
-	chatGptPrompt := "请以<" + topic + ">为主题随机提供一个有趣的写作话题，直接返回即可"
+	chatGptPrompt := "请以<" + topic + ">为主题随机提供一个有趣的不重复紧贴时事的写作话题，直接返回即可"
 
 	resp, err := chat.Do(
 		context.TODO(),
@@ -88,7 +108,7 @@ func (*QianfanService) TopicSpotWrite(topic string) (*ArticleContext, error) {
 
 	topic = resp.Result
 
-	chatGptPrompt = "请以<" + topic + ">为主题写一篇1200字微信公众号文章，文章内容各处无需补充说明"
+	chatGptPrompt = "请以<" + topic + ">为主题写一篇1200字的微信公众号文章，文章内容各处无需补充说明，要求返回文章格式为markdown格式"
 	resp, err = chat.Do(
 		context.TODO(),
 		&qianfan.ChatCompletionRequest{
@@ -123,8 +143,8 @@ func (*QianfanService) TopicSpotWrite(topic string) (*ArticleContext, error) {
 	result.Title = resp.Result
 
 	chatGptPrompt = "你是一位微信公众号爆文写手，擅长创作爆款文章并为其配上合适的图片。现在，你需要基于提供的文章内容，在合适的位置添加配图占位符，以提升读者的阅读体验。" +
-		"占位符的格式要求为：[img]高中生放学[/img]。" +
-		"请确保图片与文章主题和内容紧密相连，让读者在阅读过程中能够更好地理解和感受文章所传达的信息和情感。" +
+		" 占位符的格式示例：[img]高中生放学[/img]。" +
+		" 请确保图片与文章主题和内容紧密相连，让读者在阅读过程中能够更好地理解和感受文章所传达的信息和情感。" +
 		" 原文如下:" + result.Content
 
 	resp, err = chat.Do(

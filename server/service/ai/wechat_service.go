@@ -120,9 +120,14 @@ func (*WechatService) PublishArticle(dbOfficialAccount aiModel.OfficialAccount, 
 	filePath := utils.SearchAndSave(aiArticle.Title)
 
 	if filePath == "" {
-		global.GVA_LOG.Error("没有找到封面图片", zap.String("title", aiArticle.Title),
-			zap.String("appId", dbOfficialAccount.AppId),
-			zap.String("appName", dbOfficialAccount.AccountName))
+		// 找不到 则使用ai
+		keyword := QianfanServiceApp.GetKeyWord(aiArticle.Title)
+		filePath = utils.SearchAndSave(keyword)
+		if filePath == "" {
+			global.GVA_LOG.Error("没有找到封面图片", zap.String("title", aiArticle.Title),
+				zap.String("appId", dbOfficialAccount.AppId),
+				zap.String("appName", dbOfficialAccount.AccountName))
+		}
 
 		return 0, "", 0, 0, err
 	}
