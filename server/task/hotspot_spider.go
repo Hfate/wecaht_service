@@ -5,10 +5,12 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/model/ai"
 	ai2 "github.com/flipped-aurora/gin-vue-admin/server/service/ai"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
+	"github.com/gocolly/colly/v2"
+	"github.com/gocolly/colly/v2/extensions"
 	"github.com/spf13/cast"
-	"github.com/storyicon/graphquery"
 	"gorm.io/gorm"
-	"sync"
+	"log"
+	"time"
 )
 
 func HotspotSpider(db *gorm.DB) error {
@@ -18,61 +20,52 @@ func HotspotSpider(db *gorm.DB) error {
 	// 头条热点爬取
 	spiderToutiaoHeadline(db)
 
-	portalList := make([]*ai.Portal, 0)
-	err := db.Model(ai.Portal{}).Where("target_num>0").Find(&portalList).Error
-	if err != nil {
-		return err
-	}
-
-	wg := sync.WaitGroup{}
-	for _, portal := range portalList {
-		wg.Add(1)
-		p := portal
-		go func() {
-			defer wg.Done()
-			spiderHeadlines(db, p)
-		}()
-	}
-
-	wg.Wait()
-
 	return nil
 }
 
-func spiderHeadlines(db *gorm.DB, portal *ai.Portal) {
-	hotspotList := collectHeadlinesInfo(portal.Link, portal.GraphQuery)
-	if len(hotspotList) == 0 {
-		return
-	}
-	urlList := make([]string, 0)
-	for _, hotspot := range hotspotList {
-		urlList = append(urlList, hotspot.Link)
-		hotspot.BASEMODEL = ai2.BaseModel()
-		hotspot.PortalName = portal.PortalName
-	}
+func spiderBaiduHeadline(db *gorm.DB) {
+	collector := colly.NewCollector(
+		func(collector *colly.Collector) {
+			// 设置随机ua
+			extensions.RandomUserAgent(collector)
+		},
+		func(collector *colly.Collector) {
+			collector.OnRequest(func(request *colly.Request) {
+				log.Println(request.URL, ", User-Agent:", request.Headers.Get("User-Agent"))
+			})
+		},
+	)
+	collector.SetRequestTimeout(time.Second * 60)
 
-	err := db.Where("link in ?", urlList).Unscoped().Delete(&ai.Hotspot{}).Error
+	hotspotList := make([]*ai.Hotspot, 0)
+
+	collector.OnHTML(".container-bg_lQ801", func(element *colly.HTMLElement) {
+		element.ForEach(".category-wrap_iQLoo", func(i int, element *colly.HTMLElement) {
+			aLink := element.DOM.ChildrenFiltered("a")
+			jumpLink, _ := aLink.Attr("href")
+			title := element.ChildText(".content_1YWBm .c-single-text-ellipsis")
+			trending := element.ChildText(".trend_2RttY .hot-index_1Bl1a")
+			hotspotList = append(hotspotList, &ai.Hotspot{
+				PortalName: "百度",
+				BASEMODEL:  ai2.BaseModel(),
+				Link:       jumpLink,
+				Headline:   title,
+				Trending:   cast.ToInt(trending),
+			})
+		})
+	})
+
+	err := collector.Visit("https://top.baidu.com/board?tab=realtime")
 	if err != nil {
+		log.Fatalf("%v", err)
 		return
 	}
 
 	err = db.Create(&hotspotList).Error
-
-	fmt.Println(err)
-}
-
-func collectHeadlinesInfo(url, gQuery string) []*ai.Hotspot {
-	htmlResult, err := utils.GetStr(url)
 	if err != nil {
-		return []*ai.Hotspot{}
+		fmt.Println(err)
 	}
-
-	response := graphquery.ParseFromString(htmlResult, gQuery)
-
-	hotspotList := make([]*ai.Hotspot, 0)
-	response.Decode(&hotspotList)
-
-	return hotspotList
+	return
 }
 
 func spiderWeiboHeadline(db *gorm.DB) {

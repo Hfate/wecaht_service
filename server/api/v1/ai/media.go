@@ -27,6 +27,7 @@ func (e *MediaApi) CreateMedia(c *gin.Context) {
 
 	if targetAccountId == "" {
 		response.FailWithMessage("必须选定公众号", c)
+		return
 	}
 
 	err = mediaService.CreateMedia(targetAccountId, header)

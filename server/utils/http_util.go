@@ -43,6 +43,27 @@ func Get(url string, params map[string]string) (statusCode int, body []byte, err
 	return doSend(req)
 }
 
+func NormalGetStr(url string) (resp string, err error) {
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		println(err)
+		return "", err
+	}
+
+	if err != nil {
+		return "", err
+	}
+
+	_, body, err := doSend(req)
+	if err != nil {
+		return "", err
+	}
+
+	// 将响应体转换为字符串
+	bodyString := string(body)
+	return bodyString, err
+}
+
 func GetStr(url string) (resp string, err error) {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -211,4 +232,17 @@ func doSend(req *http.Request) (statusCode int, body []byte, err error) {
 		return res.StatusCode, bodyBytes, err
 	}
 	return res.StatusCode, bodyBytes, nil
+}
+
+func ParseUrlParams(url string) map[string]string {
+	// 解析URL参数
+	params := make(map[string]string)
+	if strings.Contains(url, "?") {
+		queryParams := strings.Split(url, "?")[1]
+		for _, param := range strings.Split(queryParams, "&") {
+			kv := strings.Split(param, "=")
+			params[kv[0]] = kv[1]
+		}
+	}
+	return params
 }

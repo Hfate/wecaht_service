@@ -47,3 +47,8 @@ func TestGet(t *testing.T) {
 
 	fmt.Println(gotBody)
 }
+
+func TestGetStr(t *testing.T) {
+	result, _ := NormalGetStr("http://image.baidu.com/search/flip?tn=baiduimage&ie=utf-8&word=美女&ct=201326592&v=flip")
+	fmt.Println(result)
+}

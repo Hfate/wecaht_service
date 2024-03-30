@@ -1,6 +1,10 @@
 package utils
 
-import "unicode"
+import (
+	"github.com/russross/blackfriday"
+	"strings"
+	"unicode"
+)
 
 func RemoveChinese(s string) string {
 	result := ""
@@ -10,4 +14,20 @@ func RemoveChinese(s string) string {
 		}
 	}
 	return result
+}
+
+func RenderMarkdownContent(markdown string) (string, error) {
+
+	return markdown, nil
+	// 渲染Markdown
+	html := blackfriday.MarkdownCommon([]byte(markdown))
+	return string(html), nil
+}
+
+// RemoveBookTitleBrackets 函数用于去除字符串中的书名号
+func RemoveBookTitleBrackets(s string) string {
+	// 替换书名号《》为空字符串
+	temp := strings.ReplaceAll(s, "《", "")   // 去除左侧书名号
+	temp = strings.ReplaceAll(temp, "》", "") // 去除右侧书名号
+	return temp
 }

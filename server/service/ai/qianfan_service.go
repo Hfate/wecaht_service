@@ -17,13 +17,13 @@ type QianfanService struct {
 var QianfanServiceApp = new(QianfanService)
 
 func (*QianfanService) HotSpotWrite(topic string) (*ArticleContext, error) {
-	chat := qianfan.NewChatCompletion()
+	chat := qianfan.NewChatCompletion(qianfan.WithModel("ERNIE-Bot-4"))
 
-	chatGptPrompt := "请以<" + topic + ">为主题写一篇1200字的文章，无需撰写标题"
-
+	chatGptPrompt := "请以<" + topic + ">为主题写一篇1200字的文章，文章内容各处无需补充说明"
 	resp, err := chat.Do(
 		context.TODO(),
 		&qianfan.ChatCompletionRequest{
+			System: "微信公众号爆款文写作专家",
 			Messages: []qianfan.ChatCompletionMessage{
 				qianfan.ChatCompletionUserMessage(chatGptPrompt),
 			},
@@ -39,7 +39,7 @@ func (*QianfanService) HotSpotWrite(topic string) (*ArticleContext, error) {
 
 	result.Content = resp.Result
 
-	chatGptPrompt = "请给下文生成一个吸引人阅读的标题，直接回答标题即可无需补充说明。文章内容" + result.Content
+	chatGptPrompt = "请给下文生成一个吸引人阅读的标题，直接回答标题即可无需补充说明。文章内容:" + result.Content
 
 	resp, err = chat.Do(
 		context.TODO(),
@@ -52,18 +52,34 @@ func (*QianfanService) HotSpotWrite(topic string) (*ArticleContext, error) {
 
 	result.Title = resp.Result
 
+	chatGptPrompt = "你是一位微信公众号爆文写手，擅长创作爆款文章并为其配上合适的图片。现在，你需要基于提供的文章内容，在合适的位置添加配图占位符，以提升读者的阅读体验。" +
+		"占位符的格式要求为：[img]高中生放学[/img]。" +
+		"请确保图片与文章主题和内容紧密相连，让读者在阅读过程中能够更好地理解和感受文章所传达的信息和情感。" +
+		" 原文如下:" + result.Content
+
+	resp, err = chat.Do(
+		context.TODO(),
+		&qianfan.ChatCompletionRequest{
+			Messages: []qianfan.ChatCompletionMessage{
+				qianfan.ChatCompletionUserMessage(chatGptPrompt),
+			},
+		},
+	)
+	result.Content = resp.Result
+
 	return result, nil
 }
 
 func (*QianfanService) TopicSpotWrite(topic string) (*ArticleContext, error) {
 
-	chat := qianfan.NewChatCompletion()
+	chat := qianfan.NewChatCompletion(qianfan.WithModel("ERNIE-Bot-4"))
 
-	chatGptPrompt := "请以<" + topic + ">为主题提供一个写作话题，直接返回即可"
+	chatGptPrompt := "请以<" + topic + ">为主题随机提供一个有趣的写作话题，直接返回即可"
 
 	resp, err := chat.Do(
 		context.TODO(),
 		&qianfan.ChatCompletionRequest{
+			System: "微信公众号爆款文写作专家",
 			Messages: []qianfan.ChatCompletionMessage{
 				qianfan.ChatCompletionUserMessage(chatGptPrompt),
 			},
@@ -72,11 +88,11 @@ func (*QianfanService) TopicSpotWrite(topic string) (*ArticleContext, error) {
 
 	topic = resp.Result
 
-	chatGptPrompt = "请以<" + topic + ">为主题写一篇1200字的微信公众号文章"
-
+	chatGptPrompt = "请以<" + topic + ">为主题写一篇1200字微信公众号文章，文章内容各处无需补充说明"
 	resp, err = chat.Do(
 		context.TODO(),
 		&qianfan.ChatCompletionRequest{
+			System: "微信公众号爆款文写作专家",
 			Messages: []qianfan.ChatCompletionMessage{
 				qianfan.ChatCompletionUserMessage(chatGptPrompt),
 			},
@@ -97,6 +113,7 @@ func (*QianfanService) TopicSpotWrite(topic string) (*ArticleContext, error) {
 	resp, err = chat.Do(
 		context.TODO(),
 		&qianfan.ChatCompletionRequest{
+			System: "微信公众号爆款文写作专家",
 			Messages: []qianfan.ChatCompletionMessage{
 				qianfan.ChatCompletionUserMessage(chatGptPrompt),
 			},
@@ -105,18 +122,35 @@ func (*QianfanService) TopicSpotWrite(topic string) (*ArticleContext, error) {
 
 	result.Title = resp.Result
 
+	chatGptPrompt = "你是一位微信公众号爆文写手，擅长创作爆款文章并为其配上合适的图片。现在，你需要基于提供的文章内容，在合适的位置添加配图占位符，以提升读者的阅读体验。" +
+		"占位符的格式要求为：[img]高中生放学[/img]。" +
+		"请确保图片与文章主题和内容紧密相连，让读者在阅读过程中能够更好地理解和感受文章所传达的信息和情感。" +
+		" 原文如下:" + result.Content
+
+	resp, err = chat.Do(
+		context.TODO(),
+		&qianfan.ChatCompletionRequest{
+			System: "微信公众号爆款文写作专家",
+			Messages: []qianfan.ChatCompletionMessage{
+				qianfan.ChatCompletionUserMessage(chatGptPrompt),
+			},
+		},
+	)
+	result.Content = resp.Result
+
 	return result, nil
 }
 
 func (*QianfanService) Recreation(article ai.Article) (*ArticleContext, error) {
 	// 可以通过 WithModel 指定模型
-	chat := qianfan.NewChatCompletion()
+	chat := qianfan.NewChatCompletion(qianfan.WithModel("ERNIE-Bot-4"))
 
 	chatGptPrompt := QianfanServiceApp.parseContentPrompt(article)
 
 	resp, err := chat.Do(
 		context.TODO(),
 		&qianfan.ChatCompletionRequest{
+			System: "微信公众号爆款文写作专家",
 			Messages: []qianfan.ChatCompletionMessage{
 				qianfan.ChatCompletionUserMessage(chatGptPrompt),
 			},

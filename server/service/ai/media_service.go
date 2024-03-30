@@ -59,6 +59,39 @@ func (exa *MediaService) CreateMedia(targetAccountId string, header *multipart.F
 	return err
 }
 
+func (exa *MediaService) CreateMediaByPath(targetAccountId string, filePath string) (mediaID, url string, err error) {
+	officialAccount, err := OfficialAccountServiceApp.GetOfficialAccountByAppId(targetAccountId)
+	if err != nil {
+		return "", "", err
+	}
+
+	mediaID, url, err = WechatServiceApp.AddMaterial(officialAccount, filePath)
+	if err != nil {
+		return "", "", err
+	}
+
+	tagArr := strings.Split(filePath, ".")
+	pathArr := strings.Split(filePath, "/")
+
+	count := exa.CountByAccountId(targetAccountId)
+
+	media := &ai.Media{
+		Topic:             officialAccount.Topic,
+		MediaID:           mediaID,
+		Link:              url,
+		FileName:          pathArr[len(pathArr)-1],
+		Tag:               tagArr[len(tagArr)-1],
+		TargetAccountId:   targetAccountId,
+		TargetAccountName: officialAccount.AccountName,
+		SeqNum:            int(count) + 1,
+	}
+
+	media.BASEMODEL = BaseModel()
+	err = global.GVA_DB.Create(&media).Error
+	return mediaID, url, err
+
+}
+
 func (exa *MediaService) CountByAccountId(targetAccountId string) int {
 	var count int64
 	global.GVA_DB.Model(&ai.Media{}).Where("target_account_id=?", targetAccountId).Count(&count)

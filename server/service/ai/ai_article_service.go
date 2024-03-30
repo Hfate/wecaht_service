@@ -8,6 +8,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
 	systemService "github.com/flipped-aurora/gin-vue-admin/server/service/system"
+	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"go.uber.org/zap"
 	"strings"
 	"time"
@@ -115,6 +116,10 @@ func (exa *AIArticleService) GenerateDailyArticle() error {
 
 	for _, account := range list {
 
+		if account.AppId == "" {
+			continue
+		}
+
 		item := account
 		go func() {
 			articleContext := ArticlePipelineApp.Run(item.Topic)
@@ -144,6 +149,7 @@ func (exa *AIArticleService) GenerateDailyArticle() error {
 
 func (exa *AIArticleService) parseTitle(title string) string {
 	title = strings.ReplaceAll(title, "标题：", "")
+	title = utils.RemoveBookTitleBrackets(title)
 	return title
 }
 
@@ -160,9 +166,11 @@ func (exa *AIArticleService) parseContent(content string) string {
 	}
 
 	// 将剩余的行重新连接成一篇文章
-	content = strings.Join(contentLines, "\n")
+	markdownContent := strings.Join(contentLines, "\n")
 
-	return content
+	htmlContent, _ := utils.RenderMarkdownContent(markdownContent)
+
+	return htmlContent
 }
 
 func (exa *AIArticleService) Recreation(id uint64) (err error) {

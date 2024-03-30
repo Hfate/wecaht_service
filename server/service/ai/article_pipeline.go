@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/ai"
+	"github.com/flipped-aurora/gin-vue-admin/server/utils"
+	"regexp"
+	"strings"
 )
 
 type CreatePipeline interface {
@@ -34,6 +37,7 @@ var DefaultArticlePipelineApp = new(DefaultArticlePipeline)
 
 type DefaultArticlePipeline struct {
 	ArticleWriteHandleList []ArticleWriteHandle
+	AddImageHandleList     []AddImagesHandle
 }
 
 func (da *DefaultArticlePipeline) init() {
@@ -42,13 +46,53 @@ func (da *DefaultArticlePipeline) init() {
 		&RecreationArticle{},
 		&AIWriteArticle{},
 	}
+	da.AddImageHandleList = []AddImagesHandle{
+		&BaiduAddImage{},
+	}
+}
+
+type BaiduAddImage struct {
+}
+
+func (*BaiduAddImage) Handle(context *ArticleContext) error {
+
+	// 正则表达式匹配Markdown中的图片占位符描述
+	re := regexp.MustCompile(`\[img\](.*?)\[/img\]`)
+	matches := re.FindAllStringSubmatch(context.Content, -1)
+
+	if len(matches) == 0 {
+		return nil
+	}
+	context.Content = strings.ReplaceAll(context.Content, "[img]", "")
+	context.Content = strings.ReplaceAll(context.Content, "[/img]", "")
+
+	for _, match := range matches {
+		// 搜索图片
+		filePath := utils.SearchAndSave(match[1])
+		if filePath == "" {
+			continue
+		}
+
+		_, url, err := MediaServiceApp.CreateMediaByPath(context.AppId, filePath)
+
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+		context.Content = re.ReplaceAllString(match[1], url)
+	}
+
+	return nil
 }
 
 func (da *DefaultArticlePipeline) Write(context *ArticleContext) error {
 	// 初始化
 	da.init()
 
-	for _, handle := range da.ArticleWriteHandleList {
+	size := len(da.ArticleWriteHandleList)
+
+	for i := 0; i < size; i++ {
+		handle := da.ArticleWriteHandleList[i]
 		err := handle.Handle(context)
 		if err != nil {
 			fmt.Println("DefaultArticlePipeline Write", err)
@@ -58,7 +102,14 @@ func (da *DefaultArticlePipeline) Write(context *ArticleContext) error {
 		if context.Content != "" && len(context.Content) > 500 {
 			break
 		}
+	}
 
+	for _, handle := range da.AddImageHandleList {
+		err := handle.Handle(context)
+		if err != nil {
+			fmt.Println("DefaultArticlePipeline Add Image", err)
+			continue
+		}
 	}
 
 	return nil
@@ -69,10 +120,11 @@ type ArticleWriteHandle interface {
 }
 
 type AddImagesHandle interface {
-	AddImages(context *ArticleContext) error
+	Handle(context *ArticleContext) error
 }
 
 type ArticleContext struct {
+	AppId   string
 	Title   string
 	Content string
 	Topic   string

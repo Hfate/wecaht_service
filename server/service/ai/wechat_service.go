@@ -2,6 +2,7 @@ package ai
 
 import (
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
+	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"github.com/silenceper/wechat/v2/officialaccount/server"
 
 	aiModel "github.com/flipped-aurora/gin-vue-admin/server/model/ai"
@@ -113,21 +114,27 @@ func (*WechatService) PublishArticle(dbOfficialAccount aiModel.OfficialAccount, 
 		Content:      aiArticle.Content,
 	}})
 	if err != nil {
+		global.GVA_LOG.Error("PublishArticle AddDraft:", zap.String("err", err.Error()),
+			zap.String("appId", officialAccount.GetContext().AppID),
+			zap.String("dbAppId", dbOfficialAccount.AppId),
+			zap.String("mediaID", mediaID),
+		)
+
 		return 0, "", 0, 0, err
 	}
-	//global.GVA_LOG.Info("PublishArticle AddDraft:", zap.String("mediaID", mediaID))
-	//
-	//p := officialAccount.GetBroadcast()
-	//result, err := p.SendNews(nil, mediaID, false)
-	//global.GVA_LOG.Info("PublishArticle SendNews:", zap.String("result", utils.Parse2Json(result)))
-	//
-	//if err != nil {
-	//	// 群发不行  试试单发
-	//	freePublish := officialAccount.GetFreePublish()
-	//	publishID, err := freePublish.Publish(mediaID)
-	//	global.GVA_LOG.Info("PublishArticle Publish:", zap.Int64("publishID", publishID), zap.Error(err))
-	//	return publishID, mediaID, result.MsgID, result.MsgDataID, err
-	//}
+	global.GVA_LOG.Info("PublishArticle AddDraft:", zap.String("mediaID", mediaID))
+
+	p := officialAccount.GetBroadcast()
+	result, err := p.SendNews(nil, mediaID, false)
+	global.GVA_LOG.Info("PublishArticle SendNews:", zap.String("result", utils.Parse2Json(result)))
+
+	if err != nil {
+		// 群发不行  试试单发
+		freePublish := officialAccount.GetFreePublish()
+		publishID, err := freePublish.Publish(mediaID)
+		global.GVA_LOG.Info("PublishArticle Publish:", zap.Int64("publishID", publishID), zap.Error(err))
+		return publishID, mediaID, result.MsgID, result.MsgDataID, err
+	}
 
 	return 0, mediaID, 0, 0, err
 }
