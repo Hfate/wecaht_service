@@ -167,6 +167,7 @@ func (exa *AIArticleService) parseContent(content string) string {
 
 	// 将剩余的行重新连接成一篇文章
 	markdownContent := strings.Join(contentLines, "\n")
+	markdownContent = strings.ReplaceAll(markdownContent, "标题建议：", "")
 
 	htmlContent, _ := utils.RenderMarkdownContent(markdownContent)
 
