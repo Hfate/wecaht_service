@@ -79,7 +79,7 @@ func (*BaiduAddImage) Handle(context *ArticleContext) error {
 			fmt.Println(err)
 			continue
 		}
-		context.Content = re.ReplaceAllString(match[1], url)
+		context.Content = strings.ReplaceAll(context.Content, match[1], url)
 	}
 
 	return nil
