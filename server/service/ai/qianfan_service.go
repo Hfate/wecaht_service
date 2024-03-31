@@ -16,32 +16,6 @@ type QianfanService struct {
 
 var QianfanServiceApp = new(QianfanService)
 
-func (*QianfanService) GetKeyWord(title string) string {
-	chat := qianfan.NewChatCompletion(qianfan.WithModel("ERNIE-Bot-4"))
-
-	chatGptPrompt := "你现在是一名爆文写手，特别擅长从文章标题中找到关键词。我将给一个文章标题，需要你帮忙提取标题中的一个关键词用以做图片搜索。如果找不到关键词，可以返回该标题的主题，例如：历史，职场，明星等等" +
-		"\n举例   " +
-		"\n文章标题：中瑙友谊再升华，开启双边合作新篇章。  关键词：友谊再升华" +
-		"\n文章标题：周处传奇：除三害、转人生，英雄之路的跌宕起伏  关键词：周处除三害" +
-		"\n文章标题：" + title
-	resp, _ := chat.Do(
-		context.TODO(),
-		&qianfan.ChatCompletionRequest{
-			System: "微信公众号爆款文写作专家",
-			Messages: []qianfan.ChatCompletionMessage{
-				qianfan.ChatCompletionUserMessage(chatGptPrompt),
-			},
-		},
-	)
-
-	result := resp.Result
-	if len(result) > 10 {
-		result = "夜晚的城市"
-	}
-
-	return resp.Result
-}
-
 func (*QianfanService) HotSpotWrite(topic string) (*ArticleContext, error) {
 	chat := qianfan.NewChatCompletion(qianfan.WithModel("ERNIE-Bot-4"))
 	articleContext := &ArticleContext{}

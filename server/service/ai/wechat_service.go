@@ -121,7 +121,7 @@ func (*WechatService) PublishArticle(dbOfficialAccount aiModel.OfficialAccount, 
 
 	if filePath == "" {
 		// 找不到 则使用ai
-		keyword := QianfanServiceApp.GetKeyWord(aiArticle.Title)
+		keyword := KimiServiceApp.GetKeyWord(aiArticle.Title)
 		filePath = utils.SearchAndSave(keyword)
 		if filePath == "" {
 			global.GVA_LOG.Error("没有找到封面图片", zap.String("title", aiArticle.Title),

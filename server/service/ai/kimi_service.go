@@ -16,6 +16,21 @@ type KimiService struct {
 
 var KimiServiceApp = new(KimiService)
 
+func (*KimiService) GetKeyWord(title string) string {
+	chatGptPrompt := "你现在是一名爆文写手，特别擅长从文章标题中找到关键词。我将给一个文章标题，需要你帮忙提取标题中的一个关键词用以做图片搜索。如果找不到关键词，可以返回该标题的主题，例如：历史，职场，明星等等" +
+		"\n举例   " +
+		"\n文章标题：中瑙友谊再升华，开启双边合作新篇章。  关键词：友谊再升华" +
+		"\n文章标题：周处传奇：除三害、转人生，英雄之路的跌宕起伏  关键词：周处除三害" +
+		"\n文章标题：" + title
+
+	resp, err := KimiServiceApp.ChatWithKimi(chatGptPrompt)
+	if err != nil || len(resp) > 10 {
+		resp = "夜晚的城市"
+	}
+
+	return resp
+}
+
 func (*KimiService) HotSpotWrite(topic string) (*ArticleContext, error) {
 
 	articleContext := &ArticleContext{}
