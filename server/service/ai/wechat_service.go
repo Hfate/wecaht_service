@@ -135,6 +135,7 @@ func (*WechatService) PublishArticle(dbOfficialAccount aiModel.OfficialAccount, 
 	imgMediaID, _, err := MediaServiceApp.CreateMediaByPath(dbOfficialAccount.AppId, filePath)
 	if err != nil {
 		global.GVA_LOG.Error("上传封面图片失败", zap.String("title", aiArticle.Title),
+			zap.String("filePath", filePath),
 			zap.String("appId", dbOfficialAccount.AppId),
 			zap.String("appName", dbOfficialAccount.AccountName), zap.Error(err))
 		return 0, "", 0, 0, err
