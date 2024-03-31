@@ -19,7 +19,7 @@ var QianfanServiceApp = new(QianfanService)
 func (*QianfanService) GetKeyWord(title string) string {
 	chat := qianfan.NewChatCompletion(qianfan.WithModel("ERNIE-Bot-4"))
 
-	chatGptPrompt := "我将给一个文章标题，需要你帮忙提取标题中的一个关键词用以做图片搜索。" +
+	chatGptPrompt := "我将给一个文章标题，需要你帮忙提取标题中的一个关键词用以做图片搜索。如果找不到关键词，可以返回该标题的主题，例如：历史，职场，明星等等" +
 		"\n举例   " +
 		"\n文章标题：中瑙友谊再升华，开启双边合作新篇章。  关键词：友谊再升华" +
 		"\n文章标题：周处传奇：除三害、转人生，英雄之路的跌宕起伏  关键词：周处除三害" +
@@ -38,8 +38,14 @@ func (*QianfanService) GetKeyWord(title string) string {
 
 func (*QianfanService) HotSpotWrite(topic string) (*ArticleContext, error) {
 	chat := qianfan.NewChatCompletion(qianfan.WithModel("ERNIE-Bot-4"))
+	articleContext := &ArticleContext{}
+	articleContext.Topic = topic
 
-	chatGptPrompt := "请以<" + topic + ">为主题写一篇1200字的文章，文章内容各处无需补充说明,要求返回文章格式为markdown格式，且限定markdown仅支持字体加粗，下划线，斜体，有序列表等格式"
+	chatGptPrompt, err := QianfanServiceApp.parsePrompt(articleContext, ai.HotSpotWrite)
+	if err != nil {
+		return &ArticleContext{}, err
+	}
+
 	resp, err := chat.Do(
 		context.TODO(),
 		&qianfan.ChatCompletionRequest{
@@ -58,8 +64,12 @@ func (*QianfanService) HotSpotWrite(topic string) (*ArticleContext, error) {
 	}
 
 	result.Content = resp.Result
+	articleContext.Content = resp.Result
 
-	chatGptPrompt = "请给下文生成一个吸引人阅读的标题，直接回答标题即可无需补充说明。文章内容:" + result.Content
+	chatGptPrompt, err = QianfanServiceApp.parsePrompt(articleContext, ai.TitleCreate)
+	if err != nil {
+		return nil, err
+	}
 
 	resp, err = chat.Do(
 		context.TODO(),
@@ -69,13 +79,16 @@ func (*QianfanService) HotSpotWrite(topic string) (*ArticleContext, error) {
 			},
 		},
 	)
+	if err != nil {
+		return nil, err
+	}
 
 	result.Title = resp.Result
 
-	chatGptPrompt = "你是一位微信公众号爆文写手，擅长创作爆款文章并为其配上合适的图片。现在，你需要基于提供的文章内容，在合适的位置添加配图占位符，以提升读者的阅读体验。" +
-		" 占位符的格式示例：[img]高中生放学[/img]。" +
-		" 请确保图片与文章主题和内容紧密相连，让读者在阅读过程中能够更好地理解和感受文章所传达的信息和情感。" +
-		" 原文如下:" + result.Content
+	chatGptPrompt, err = QianfanServiceApp.parsePrompt(articleContext, ai.AddImage)
+	if err != nil {
+		return nil, err
+	}
 
 	resp, err = chat.Do(
 		context.TODO(),
@@ -85,16 +98,22 @@ func (*QianfanService) HotSpotWrite(topic string) (*ArticleContext, error) {
 			},
 		},
 	)
+	if err != nil {
+		return nil, err
+	}
+
 	result.Content = resp.Result
 
 	return result, nil
 }
 
 func (*QianfanService) TopicWrite(topic string) (*ArticleContext, error) {
+	articleContext := &ArticleContext{}
+	articleContext.Topic = topic
 
 	chat := qianfan.NewChatCompletion(qianfan.WithModel("ERNIE-Bot-4"))
 
-	chatGptPrompt := "请以<" + topic + ">为主题随机提供一个有趣的不重复紧贴时事的写作话题，直接返回即可"
+	chatGptPrompt := "请以<" + topic + ">为主题随机提供一个有趣的不重复紧贴时事的写作话题，直接返回话题即可，无需任何补充说明"
 
 	resp, err := chat.Do(
 		context.TODO(),
@@ -106,9 +125,13 @@ func (*QianfanService) TopicWrite(topic string) (*ArticleContext, error) {
 		},
 	)
 
-	topic = resp.Result
+	articleContext.Topic = resp.Result
 
-	chatGptPrompt = "请以<" + topic + ">为主题写一篇1200字的微信公众号文章，文章内容各处无需补充说明，要求返回文章格式为markdown格式，且限定markdown仅支持字体加粗，下划线，斜体，有序列表等格式"
+	chatGptPrompt, err = QianfanServiceApp.parsePrompt(articleContext, ai.TopicWrite)
+	if err != nil {
+		return &ArticleContext{}, err
+	}
+
 	resp, err = chat.Do(
 		context.TODO(),
 		&qianfan.ChatCompletionRequest{
@@ -118,17 +141,20 @@ func (*QianfanService) TopicWrite(topic string) (*ArticleContext, error) {
 			},
 		},
 	)
-
-	result := &ArticleContext{}
 
 	if err != nil {
 		global.GVA_LOG.Info("chat gpt响应失败", zap.Error(err))
-		return result, err
+		return nil, err
 	}
 
+	result := &ArticleContext{}
 	result.Content = resp.Result
+	articleContext.Content = resp.Result
 
-	chatGptPrompt = "请给下文生成一个吸引人阅读的标题，直接回答标题即可无需补充说明.文章内容" + result.Content
+	chatGptPrompt, err = QianfanServiceApp.parsePrompt(articleContext, ai.TitleCreate)
+	if err != nil {
+		return articleContext, err
+	}
 
 	resp, err = chat.Do(
 		context.TODO(),
@@ -139,13 +165,16 @@ func (*QianfanService) TopicWrite(topic string) (*ArticleContext, error) {
 			},
 		},
 	)
+	if err != nil {
+		return nil, err
+	}
 
 	result.Title = resp.Result
 
-	chatGptPrompt = "你是一位微信公众号爆文写手，擅长创作爆款文章并为其配上合适的图片。现在，你需要基于提供的文章内容，在合适的位置添加配图占位符，以提升读者的阅读体验。" +
-		" 占位符的格式示例：[img]高中生放学[/img]。" +
-		" 请确保图片与文章主题和内容紧密相连，让读者在阅读过程中能够更好地理解和感受文章所传达的信息和情感。" +
-		" 原文如下:" + result.Content
+	chatGptPrompt, err = QianfanServiceApp.parsePrompt(articleContext, ai.AddImage)
+	if err != nil {
+		return nil, err
+	}
 
 	resp, err = chat.Do(
 		context.TODO(),
@@ -156,16 +185,28 @@ func (*QianfanService) TopicWrite(topic string) (*ArticleContext, error) {
 			},
 		},
 	)
+	if err != nil {
+		return nil, err
+	}
+
 	result.Content = resp.Result
 
 	return result, nil
 }
 
 func (*QianfanService) Recreation(article ai.Article) (*ArticleContext, error) {
+	articleContext := &ArticleContext{}
+	articleContext.Content = article.Content
+	articleContext.Title = article.Title
+	articleContext.Topic = article.Topic
+
 	// 可以通过 WithModel 指定模型
 	chat := qianfan.NewChatCompletion(qianfan.WithModel("ERNIE-Bot-4"))
 
-	chatGptPrompt := QianfanServiceApp.parseContentPrompt(article)
+	chatGptPrompt, err := QianfanServiceApp.parsePrompt(articleContext, ai.ContentRecreation)
+	if err != nil {
+		return &ArticleContext{}, err
+	}
 
 	resp, err := chat.Do(
 		context.TODO(),
@@ -183,11 +224,12 @@ func (*QianfanService) Recreation(article ai.Article) (*ArticleContext, error) {
 	}
 
 	content := resp.Result
+	articleContext.Content = content
 
-	chatGptResp := &ArticleContext{}
-	chatGptResp.Content = content
-
-	chatGptPrompt = QianfanServiceApp.parseTitlePrompt(article)
+	chatGptPrompt, err = QianfanServiceApp.parsePrompt(articleContext, ai.TitleCreate)
+	if err != nil {
+		return &ArticleContext{}, err
+	}
 	resp, err = chat.Do(
 		context.TODO(),
 		&qianfan.ChatCompletionRequest{
@@ -199,64 +241,32 @@ func (*QianfanService) Recreation(article ai.Article) (*ArticleContext, error) {
 
 	title := strings.TrimSpace(resp.Result)
 	title = strings.ReplaceAll(title, "{}", "")
-	chatGptResp.Title = title
+	articleContext.Title = title
 
-	return chatGptResp, nil
+	return articleContext, nil
 }
 
-func (*QianfanService) parseContentPrompt(article ai.Article) string {
-	topic := article.Topic
-	prompt, err := PromptServiceApp.FindPromptByTopicAndType(topic, 1)
-	// 没找到 则使用默认的
+func (*QianfanService) parsePrompt(context *ArticleContext, promptType int) (string, error) {
+	topic := context.Topic
+	prompt, err := PromptServiceApp.FindPromptByTopicAndType(topic, promptType)
 	if err != nil {
-		prompt, err = PromptServiceApp.FindPromptByTopicAndType("default", 1)
-		if err != nil {
-			global.GVA_LOG.Info("无法找到topic相关的prompt", zap.Error(err), zap.String("topic", topic))
-			return ""
-		}
+		return "", err
 	}
 
 	temp := template.New("ChatGptPrompt")
-	tmpl, err := temp.Parse(prompt.Prompt)
+	tmpl, err := temp.Parse(prompt)
 	if err != nil {
 		global.GVA_LOG.Info("模板解析失败")
-		return ""
+		return "", err
 	}
 
 	// 创建一个缓冲区来保存模板生成的结果
 	var buf bytes.Buffer
 	// 使用模板和数据生成输出
-	err = tmpl.Execute(&buf, article)
+	err = tmpl.Execute(&buf, context)
 
 	chatGptPrompt := buf.String()
-	return chatGptPrompt
-}
-
-func (*QianfanService) parseTitlePrompt(article ai.Article) string {
-	topic := article.Topic
-	prompt, err := PromptServiceApp.FindPromptByTopicAndType(topic, 2)
-	if err != nil {
-		prompt, err = PromptServiceApp.FindPromptByTopicAndType("default", 2)
-		if err != nil {
-			global.GVA_LOG.Info("无法找到topic相关的prompt", zap.Error(err), zap.String("topic", topic))
-			return ""
-		}
-	}
-
-	temp := template.New("ChatGptPrompt")
-	tmpl, err := temp.Parse(prompt.Prompt)
-	if err != nil {
-		global.GVA_LOG.Info("模板解析失败")
-		return ""
-	}
-
-	// 创建一个缓冲区来保存模板生成的结果
-	var buf bytes.Buffer
-	// 使用模板和数据生成输出
-	err = tmpl.Execute(&buf, article)
-
-	chatGptPrompt := buf.String()
-	return chatGptPrompt
+	return chatGptPrompt, err
 }
 
 type ChatGptResp struct {

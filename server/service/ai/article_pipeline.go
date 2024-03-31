@@ -172,7 +172,7 @@ type HotSpotWriteArticle struct {
 
 func (r *HotSpotWriteArticle) Handle(context *ArticleContext) error {
 	hotspot := ai.Hotspot{}
-	err := global.GVA_DB.Where("topic like ?", "%"+context.Topic).Where("use_times=0").Order("trending desc").Last(&hotspot).Error
+	err := global.GVA_DB.Where("topic like ?", "%"+context.Topic).Where("use_times=0").Order("created_at desc ,trending desc").Last(&hotspot).Error
 	if err != nil {
 		return err
 	}

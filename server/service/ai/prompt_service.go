@@ -1,11 +1,14 @@
 package ai
 
 import (
+	"errors"
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/ai"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
 	systemService "github.com/flipped-aurora/gin-vue-admin/server/service/system"
+	"github.com/spf13/cast"
+	"go.uber.org/zap"
 )
 
 type PromptService struct {
@@ -86,8 +89,22 @@ func (exa *PromptService) GetPromptList(sysUserAuthorityID uint, info request.Pa
 	return promptList, total, err
 }
 
-func (exa *PromptService) FindPromptByTopicAndType(topic string, promptType int) (prompt ai.Prompt, err error) {
-	err = global.GVA_DB.Where("topic = ?", topic).Where("prompt_type=?", promptType).Last(&prompt).Error
+func (exa *PromptService) FindPromptByTopicAndType(topic string, promptType int) (prompt string, err error) {
+
+	promptModel := &ai.Prompt{}
+
+	err = global.GVA_DB.Where("topic = ?", topic).Where("prompt_type=?", promptType).Last(&promptModel).Error
+
+	// 没找到 则使用默认的
+	if err != nil {
+		err = global.GVA_DB.Where("topic = ?", "default").Where("prompt_type=?", promptType).Last(&promptModel).Error
+		if err != nil {
+			global.GVA_LOG.Info("无法找到topic相关的prompt", zap.Error(err), zap.String("topic", topic))
+			return "", errors.New("无法找到topic相关的prompt,promptType=" + cast.ToString(promptType))
+		}
+	}
+
+	prompt = promptModel.Prompt
 	return
 
 }

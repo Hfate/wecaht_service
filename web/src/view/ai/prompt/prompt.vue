@@ -35,7 +35,7 @@
             width="120"
         >
           <template #default="scope">
-            <span>{{ scope.row.promptType == 1 ? "内容改写" : "标题改写" }}</span>
+            <span>{{ translatedType(scope.row.promptType) }}</span>
           </template>
         </el-table-column>
         <el-table-column
@@ -161,6 +161,22 @@
                   :value="2"
                   label="标题改写"
               />
+              <el-option
+                  :value="3"
+                  label="热点创作"
+              />
+              <el-option
+                  :value="4"
+                  label="AI创作"
+              />
+              <el-option
+                  :value="5"
+                  label="标题生成"
+              />
+              <el-option
+                  :value="6"
+                  label="文章配图"
+              />
             </el-select>
           </el-form-item>
           <el-form-item label="prompt">
@@ -221,6 +237,15 @@ const form = ref({
   language: '中文',
 })
 
+const translatedTypes = ref({
+  1: '内容改写',
+  2: '标题改写',
+  3: '热点创作',
+  4: 'AI创作',
+  5: '标题生成',
+  6: '文章配图'
+})
+
 const page = ref(1)
 const total = ref(0)
 const pageSize = ref(10)
@@ -244,6 +269,7 @@ const getTableData = async () => {
   const topicSelect = await getTopicList({page: page.value, pageSize: pageSize.value})
   if (topicSelect.code === 0) {
     topicArr.value = topicSelect.data.list
+    topicArr.value.unshift('default')
   }
 
   const table = await getPromptList({page: page.value, pageSize: pageSize.value})
@@ -260,6 +286,8 @@ getTableData()
 
 const dialogFormVisible = ref(false)
 const type = ref('')
+
+
 const updateWechatPrompt = async (row) => {
   const res = await getPrompt({ID: row.ID})
   type.value = 'update'
@@ -315,6 +343,10 @@ const enterDialog = async () => {
 const openDialog = () => {
   type.value = 'create'
   dialogFormVisible.value = true
+}
+
+const translatedType = (typeValue) => {
+  return translatedTypes.value[typeValue]
 }
 
 </script>

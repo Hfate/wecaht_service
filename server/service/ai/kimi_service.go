@@ -113,18 +113,14 @@ func (*KimiService) Recreation(article ai.Article) (*ArticleContext, error) {
 
 func (*KimiService) parseContentPrompt(article ai.Article) string {
 	topic := article.Topic
-	prompt, err := PromptServiceApp.FindPromptByTopicAndType(topic, 1)
-	// 没找到 则使用默认的
+	prompt, err := PromptServiceApp.FindPromptByTopicAndType(topic, ai.ContentRecreation)
 	if err != nil {
-		prompt, err = PromptServiceApp.FindPromptByTopicAndType("default", 1)
-		if err != nil {
-			global.GVA_LOG.Info("无法找到topic相关的prompt", zap.Error(err), zap.String("topic", topic))
-			return ""
-		}
+		global.GVA_LOG.Info("无法找到topic相关的prompt", zap.Error(err), zap.String("topic", topic))
+		return ""
 	}
 
 	temp := template.New("ChatGptPrompt")
-	tmpl, err := temp.Parse(prompt.Prompt)
+	tmpl, err := temp.Parse(prompt)
 	if err != nil {
 		global.GVA_LOG.Info("模板解析失败")
 		return ""
@@ -141,17 +137,14 @@ func (*KimiService) parseContentPrompt(article ai.Article) string {
 
 func (*KimiService) parseTitlePrompt(article ai.Article) string {
 	topic := article.Topic
-	prompt, err := PromptServiceApp.FindPromptByTopicAndType(topic, 2)
+	prompt, err := PromptServiceApp.FindPromptByTopicAndType(topic, ai.TitleRecreation)
 	if err != nil {
-		prompt, err = PromptServiceApp.FindPromptByTopicAndType("default", 2)
-		if err != nil {
-			global.GVA_LOG.Info("无法找到topic相关的prompt", zap.Error(err), zap.String("topic", topic))
-			return ""
-		}
+		global.GVA_LOG.Info("无法找到topic相关的prompt", zap.Error(err), zap.String("topic", topic))
+		return ""
 	}
 
 	temp := template.New("ChatGptPrompt")
-	tmpl, err := temp.Parse(prompt.Prompt)
+	tmpl, err := temp.Parse(prompt)
 	if err != nil {
 		global.GVA_LOG.Info("模板解析失败")
 		return ""
