@@ -113,26 +113,32 @@ func (*QianfanService) TopicWrite(topic string) (*ArticleContext, error) {
 
 	chat := qianfan.NewChatCompletion(qianfan.WithModel("ERNIE-Bot-4"))
 
-	chatGptPrompt := "请以<" + topic + ">为主题随机提供一个有趣的不重复紧贴时事的写作话题，直接返回话题即可，无需任何补充说明"
-
-	resp, err := chat.Do(
-		context.TODO(),
-		&qianfan.ChatCompletionRequest{
-			System: "微信公众号爆款文写作专家",
-			Messages: []qianfan.ChatCompletionMessage{
-				qianfan.ChatCompletionUserMessage(chatGptPrompt),
+	subject := SubjectServiceApp.FindAndUseSubjectByTopic(topic)
+	if subject == "" {
+		chatGptPrompt := "请以<" + topic + ">为主题随机提供一个有趣的吸引人的写作话题，直接返回话题即可，无需任何补充说明"
+		resp, err := chat.Do(
+			context.TODO(),
+			&qianfan.ChatCompletionRequest{
+				System: "微信公众号爆款文写作专家",
+				Messages: []qianfan.ChatCompletionMessage{
+					qianfan.ChatCompletionUserMessage(chatGptPrompt),
+				},
 			},
-		},
-	)
+		)
+		if err != nil {
+			return &ArticleContext{}, err
+		}
+		subject = resp.Result
+	}
 
-	articleContext.Topic = resp.Result
+	articleContext.Topic = subject
 
-	chatGptPrompt, err = QianfanServiceApp.parsePrompt(articleContext, ai.TopicWrite)
+	chatGptPrompt, err := QianfanServiceApp.parsePrompt(articleContext, ai.TopicWrite)
 	if err != nil {
 		return &ArticleContext{}, err
 	}
 
-	resp, err = chat.Do(
+	resp, err := chat.Do(
 		context.TODO(),
 		&qianfan.ChatCompletionRequest{
 			System: "微信公众号爆款文写作专家",
@@ -242,6 +248,26 @@ func (*QianfanService) Recreation(article ai.Article) (*ArticleContext, error) {
 	title := strings.TrimSpace(resp.Result)
 	title = strings.ReplaceAll(title, "{}", "")
 	articleContext.Title = title
+
+	chatGptPrompt, err = QianfanServiceApp.parsePrompt(articleContext, ai.AddImage)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err = chat.Do(
+		context.TODO(),
+		&qianfan.ChatCompletionRequest{
+			System: "微信公众号爆款文写作专家",
+			Messages: []qianfan.ChatCompletionMessage{
+				qianfan.ChatCompletionUserMessage(chatGptPrompt),
+			},
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	articleContext.Content = resp.Result
 
 	return articleContext, nil
 }

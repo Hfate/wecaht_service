@@ -25,6 +25,10 @@ func (*ChatModelService) Recreation(article ai.Article, chatModel string) (*Arti
 	case Kimi:
 
 	default:
+		result, err := KimiServiceApp.Recreation(article)
+		if err == nil {
+			return result, nil
+		}
 		return QianfanServiceApp.Recreation(article)
 	}
 
@@ -39,10 +43,10 @@ func (*ChatModelService) HotSpotWrite(topic string, chatModel string) (*ArticleC
 	case Kimi:
 
 	default:
-		//result, err := KimiServiceApp.HotSpotWrite(topic)
-		//if err == nil {
-		//	return result, nil
-		//}
+		result, err := KimiServiceApp.HotSpotWrite(topic)
+		if err == nil {
+			return result, nil
+		}
 		return QianfanServiceApp.HotSpotWrite(topic)
 	}
 
@@ -57,10 +61,10 @@ func (*ChatModelService) TopicWrite(topic, chatModel string) (*ArticleContext, e
 	case Kimi:
 
 	default:
-		//result, err := KimiServiceApp.TopicWrite(topic)
-		//if err == nil {
-		//	return result, nil
-		//}
+		result, err := KimiServiceApp.TopicWrite(topic)
+		if err == nil {
+			return result, nil
+		}
 		return QianfanServiceApp.TopicWrite(topic)
 	}
 	return nil, nil
