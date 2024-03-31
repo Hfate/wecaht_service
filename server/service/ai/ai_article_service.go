@@ -1,7 +1,6 @@
 package ai
 
 import (
-	"fmt"
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/ai"
 	aiReq "github.com/flipped-aurora/gin-vue-admin/server/model/ai/request"
@@ -147,7 +146,8 @@ func (exa *AIArticleService) GenerateDailyArticle() error {
 			aiArticle.BASEMODEL = BaseModel()
 
 			err = AIArticleServiceApp.CreateAIArticle(aiArticle)
-			fmt.Println(err)
+
+			global.GVA_LOG.Info("AI创作完成", zap.String("appId", item.AppId), zap.String("topic", item.Topic))
 		}()
 
 	}
@@ -176,6 +176,10 @@ func (exa *AIArticleService) parseContent(content string) string {
 
 	// 将剩余的行重新连接成一篇文章
 	markdownContent := strings.Join(contentLines, "\n")
+
+	//```markdown
+	markdownContent = strings.ReplaceAll(markdownContent, "```markdown", "")
+	markdownContent = strings.ReplaceAll(markdownContent, "```", "")
 
 	htmlContent, _ := utils.RenderMarkdownContent(markdownContent)
 
