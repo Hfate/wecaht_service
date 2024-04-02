@@ -19,6 +19,23 @@ export const deleteHotspot = (data) => {
 
 
 // @Tags PortalApi
+// @Summary 删除热点
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data body dbModel.Portal true "删除热点"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"获取成功"}"
+// @Router /hotspot/create [delete]
+export const hotspotCreate = (data) => {
+    return service({
+        url: '/hotspot/create',
+        method: 'post',
+        data
+    })
+}
+
+
+// @Tags PortalApi
 // @Summary 获取热点列表
 // @Security ApiKeyAuth
 // @accept application/json

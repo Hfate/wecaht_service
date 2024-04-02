@@ -19,14 +19,13 @@ var ArticlePipelineApp = new(ArticlePipeline)
 type ArticlePipeline struct {
 }
 
-func (*ArticlePipeline) Run(appId, topic string) *ArticleContext {
-	context := &ArticleContext{}
-	context.Topic = topic
-	context.AppId = appId
-
-	switch topic {
-	case "":
-
+func (*ArticlePipeline) Run(model string, context *ArticleContext) *ArticleContext {
+	switch model {
+	case "hotpot":
+		err := HotSpotArticlePipelineApp.Write(context)
+		if err != nil {
+			fmt.Println(err)
+		}
 	default:
 		err := DefaultArticlePipelineApp.Write(context)
 		if err != nil {
@@ -34,6 +33,52 @@ func (*ArticlePipeline) Run(appId, topic string) *ArticleContext {
 		}
 	}
 	return context
+}
+
+var HotSpotArticlePipelineApp = new(HotSpotArticlePipeline)
+
+type HotSpotArticlePipeline struct {
+	ArticleWriteHandleList []ArticleWriteHandle
+	AddImageHandleList     []AddImagesHandle
+}
+
+func (da *HotSpotArticlePipeline) init() {
+	da.ArticleWriteHandleList = []ArticleWriteHandle{
+		&HotSpotWriteArticle{},
+	}
+	da.AddImageHandleList = []AddImagesHandle{
+		&BaiduAddImage{},
+	}
+}
+
+func (da *HotSpotArticlePipeline) Write(context *ArticleContext) error {
+	// 初始化
+	da.init()
+
+	size := len(da.ArticleWriteHandleList)
+
+	for i := 0; i < size; i++ {
+		handle := da.ArticleWriteHandleList[i]
+		err := handle.Handle(context)
+		if err != nil {
+			continue
+		}
+		// 完成写作
+		if context.Content != "" && len(context.Content) > 500 {
+			global.GVA_LOG.Info("完成AI创作", zap.String("appID", context.AppId), zap.String("title", context.Title))
+			break
+		}
+	}
+
+	for _, handle := range da.AddImageHandleList {
+		err := handle.Handle(context)
+		if err != nil {
+			fmt.Println("DefaultArticlePipeline Add Image", err)
+			continue
+		}
+	}
+
+	return nil
 }
 
 var DefaultArticlePipelineApp = new(DefaultArticlePipeline)
@@ -139,6 +184,7 @@ type ArticleContext struct {
 	Title   string
 	Content string
 	Topic   string
+	Link    string
 	Tags    []string
 }
 
@@ -172,15 +218,23 @@ type HotSpotWriteArticle struct {
 
 func (r *HotSpotWriteArticle) Handle(context *ArticleContext) error {
 	hotspot := ai.Hotspot{}
-	err := global.GVA_DB.Where("topic like ?", "%"+context.Topic).Where("use_times=0").Order("created_at desc ,trending desc").Last(&hotspot).Error
-	if err != nil {
-		return err
+	if len(context.Link) > 0 {
+		err := global.GVA_DB.Where("link = ?", context.Link).Where("use_times=0").Order("created_at desc ,trending desc").Last(&hotspot).Error
+		if err != nil {
+			return err
+		}
+	} else {
+		err := global.GVA_DB.Where("topic like ?", "%"+context.Topic).Where("use_times=0").Order("created_at desc ,trending desc").Last(&hotspot).Error
+		if err != nil {
+			return err
+		}
 	}
+
 	// 更新使用次数
 	hotspot.UseTimes = hotspot.UseTimes + 1
-	err = global.GVA_DB.Save(&hotspot).Error
+	err := global.GVA_DB.Save(&hotspot).Error
 
-	result, err := ChatModelServiceApp.HotSpotWrite(hotspot.Headline, AllModel)
+	result, err := ChatModelServiceApp.HotSpotWrite(hotspot.Link, AllModel)
 	if err != nil {
 		return err
 	}

@@ -29,6 +29,26 @@ func (exa *HotspotService) CreateHotspot(e ai.Hotspot) (err error) {
 //@param: e model.Hotspot
 //@return: err error
 
+func (exa *HotspotService) CreateArticle(id uint64) (err error) {
+	hotspot, err := exa.GetHotspot(id)
+	if err != nil {
+		return err
+	}
+
+	topic := hotspot.Topic
+	officeAccount, err := OfficialAccountServiceApp.FindByTopic(topic)
+	if err != nil {
+		return err
+	}
+
+	return AIArticleServiceApp.GenerateArticleByLink(hotspot.Link, officeAccount)
+}
+
+// @function: DeleteHotspot
+// @description: 删除热点
+// @param: e model.Hotspot
+// @return: err error
+
 func (exa *HotspotService) DeleteHotspot(e ai.Hotspot) (err error) {
 	err = global.GVA_DB.Delete(&e).Error
 	return err

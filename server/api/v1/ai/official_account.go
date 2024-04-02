@@ -138,6 +138,36 @@ func (e *OfficialAccountApi) GetOfficialAccount(c *gin.Context) {
 	response.OkWithDetailed(aiRes.OfficialAccountResponse{OfficialAccount: data}, "获取成功", c)
 }
 
+// CreateArticle
+// @Tags      OfficialAccount
+// @Summary   获取单一门户信息
+// @Security  ApiKeyAuth
+// @accept    application/json
+// @Produce   application/json
+// @Param     data  query     wechat.OfficialAccount                                                true  "公众号id"
+// @Success   200   {object}  response.Response{data=exampleRes.OfficialAccountResponse,msg=string}  "创建文章"
+// @Router    /officialAccount/create [Post]
+func (e *OfficialAccountApi) CreateArticle(c *gin.Context) {
+	var officialAccount ai.OfficialAccount
+	err := c.ShouldBindJSON(&officialAccount)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	err = utils.Verify(officialAccount.BASEMODEL, utils.IdVerify)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	err = officialAccountService.CreateArticle(officialAccount.ID)
+	if err != nil {
+		global.GVA_LOG.Error("获取失败!", zap.Error(err))
+		response.FailWithMessage("获取失败", c)
+		return
+	}
+	response.OkWithMessage("创建成功", c)
+}
+
 // GetOfficialAccountList
 // @Tags      OfficialAccount
 // @Summary   分页获取权限门户列表

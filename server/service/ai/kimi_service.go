@@ -31,13 +31,20 @@ func (*KimiService) GetKeyWord(title string) string {
 	return resp
 }
 
-func (*KimiService) HotSpotWrite(topic string) (*ArticleContext, error) {
+func (*KimiService) HotSpotWrite(link string) (*ArticleContext, error) {
 
 	articleContext := &ArticleContext{}
-	articleContext.Topic = topic
+	articleContext.Link = link
 
-	chatGptPrompt := "请以<" + topic + ">为话题，结合你的联网搜索能力，写一篇1200字的文章，文章内容各处无需补充说明,要求返回文章格式为markdown格式，且限定markdown仅支持字体加粗，下划线，斜体，有序列表等格式"
+	chatGptPrompt, err := QianfanServiceApp.parsePrompt(articleContext, ai.HotSpotWrite)
+	if err != nil {
+		return &ArticleContext{}, err
+	}
+
 	resp, err := KimiServiceApp.ChatWithKimi(chatGptPrompt)
+	if err != nil {
+		return nil, err
+	}
 
 	result := &ArticleContext{}
 
@@ -80,10 +87,9 @@ func (*KimiService) TopicWrite(topic string) (*ArticleContext, error) {
 	articleContext := &ArticleContext{}
 	articleContext.Topic = topic
 
-	chat := qianfan.NewChatCompletion(qianfan.WithModel("ERNIE-Bot-4"))
-
 	subject := SubjectServiceApp.FindAndUseSubjectByTopic(topic)
 	if subject == "" {
+		chat := qianfan.NewChatCompletion(qianfan.WithModel("ERNIE-Bot-4"))
 		chatGptPrompt := "请以<" + topic + ">为主题随机提供一个有趣的吸引人的写作话题，直接返回话题即可，无需任何补充说明"
 		resp, err := chat.Do(
 			context.TODO(),

@@ -14,12 +14,12 @@ type HotspotApi struct{}
 
 // DeleteHotspot
 // @Tags      Hotspot
-// @Summary   删除门户
+// @Summary   删除头条
 // @Security  ApiKeyAuth
 // @accept    application/json
 // @Produce   application/json
-// @Param     data  body      wechat.Hotspot            true  "门户ID"
-// @Success   200   {object}  response.Response{msg=string}  "删除门户"
+// @Param     data  body      wechat.Hotspot            true  "头条ID"
+// @Success   200   {object}  response.Response{msg=string}  "删除头条"
 // @Router    /hotspot/hotspot [delete]
 func (e *HotspotApi) DeleteHotspot(c *gin.Context) {
 	var hotspot ai.Hotspot
@@ -42,14 +42,44 @@ func (e *HotspotApi) DeleteHotspot(c *gin.Context) {
 	response.OkWithMessage("删除成功", c)
 }
 
+// CreateArticle
+// @Tags      Hotspot
+// @Summary   删除头条
+// @Security  ApiKeyAuth
+// @accept    application/json
+// @Produce   application/json
+// @Param     data  body      wechat.Hotspot            true  "头条ID"
+// @Success   200   {object}  response.Response{msg=string}  "删除头条"
+// @Router    /hotspot/create [post]
+func (e *HotspotApi) CreateArticle(c *gin.Context) {
+	var hotspot ai.Hotspot
+	err := c.ShouldBindJSON(&hotspot)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	err = utils.Verify(hotspot.BASEMODEL, utils.IdVerify)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	err = hotspotService.CreateArticle(hotspot.ID)
+	if err != nil {
+		global.GVA_LOG.Error("创建失败!", zap.Error(err))
+		response.FailWithMessage("创建失败", c)
+		return
+	}
+	response.OkWithMessage("创建成功", c)
+}
+
 // GetHotspotList
 // @Tags      Hotspot
-// @Summary   分页获取权限门户列表
+// @Summary   分页获取权限头条列表
 // @Security  ApiKeyAuth
 // @accept    application/json
 // @Produce   application/json
 // @Param     data  query     request.PageInfo                                        true  "页码, 每页大小"
-// @Success   200   {object}  response.Response{data=response.PageResult,msg=string}  "分页获取权限门户列表,返回包括列表,总数,页码,每页数量"
+// @Success   200   {object}  response.Response{data=response.PageResult,msg=string}  "分页获取权限头条列表,返回包括列表,总数,页码,每页数量"
 // @Router    /hotspot/hotspotList [get]
 func (e *HotspotApi) GetHotspotList(c *gin.Context) {
 	var pageInfo aiReq.HotspotSearch

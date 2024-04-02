@@ -44,6 +44,14 @@ func (exa *OfficialAccountService) UpdateOfficialAccount(e *ai.OfficialAccount) 
 	return err
 }
 
+func (exa *OfficialAccountService) CreateArticle(id uint64) error {
+	officialAccount, err := exa.GetOfficialAccount(id)
+	if err != nil {
+		return err
+	}
+	return AIArticleServiceApp.GenerateArticle(officialAccount)
+}
+
 //@function: GetOfficialAccount
 //@description: 获取公众号信息
 //@param: id uint
@@ -51,6 +59,21 @@ func (exa *OfficialAccountService) UpdateOfficialAccount(e *ai.OfficialAccount) 
 
 func (exa *OfficialAccountService) GetOfficialAccount(id uint64) (officialAccount ai.OfficialAccount, err error) {
 	err = global.GVA_DB.Where("id = ?", id).First(&officialAccount).Error
+	return
+}
+
+//@function: GetOfficialAccount
+//@description: 获取公众号信息
+//@param: id uint
+//@return: customer model.OfficialAccount, err error
+
+func (exa *OfficialAccountService) FindByTopic(topic string) (officialAccount ai.OfficialAccount, err error) {
+	err = global.GVA_DB.Where("topic = ?", topic).Last(&officialAccount).Error
+
+	if err != nil {
+		//找不到默认用时事主题
+		err = global.GVA_DB.Where("topic = ?", "时事").Last(&officialAccount).Error
+	}
 	return
 }
 

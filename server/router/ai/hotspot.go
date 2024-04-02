@@ -14,11 +14,11 @@ func (e *HotspotRouter) InitHotspotRouter(Router *gin.RouterGroup) {
 	hotspotRouterWithoutRecord := Router.Group("hotspot")
 	hotspotApi := v1.ApiGroupApp.AIApiGroup.HotspotApi
 	{
-
-		hotspotRouter.DELETE("hotspot", hotspotApi.DeleteHotspot) // 删除门户
+		hotspotRouter.POST("create", hotspotApi.CreateArticle)    // 删除头条
+		hotspotRouter.DELETE("hotspot", hotspotApi.DeleteHotspot) // 删除头条
 	}
 	{
 
-		hotspotRouterWithoutRecord.GET("hotspotList", hotspotApi.GetHotspotList) // 获取门户列表
+		hotspotRouterWithoutRecord.GET("hotspotList", hotspotApi.GetHotspotList) // 获取头条列表
 	}
 }

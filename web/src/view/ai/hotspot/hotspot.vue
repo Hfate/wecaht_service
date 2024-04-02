@@ -117,6 +117,35 @@
                 </el-button>
               </template>
             </el-popover>
+            <el-popover
+                v-model="scope.row.visible"
+                placement="top"
+                width="160"
+            >
+              <p>确定要创作新文章吗？</p>
+              <div style="text-align: right; margin-top: 8px;">
+                <el-button
+                    type="primary"
+                    link
+                    @click="scope.row.visible = false"
+                >取消
+                </el-button>
+                <el-button
+                    type="primary"
+                    @click="hotspotCreateArticle(scope.row)"
+                >确定
+                </el-button>
+              </div>
+              <template #reference>
+                <el-button
+                    type="primary"
+                    link
+                    icon="delete"
+                    @click="scope.row.visible = true"
+                >创作
+                </el-button>
+              </template>
+            </el-popover>
           </template>
         </el-table-column>
       </el-table>
@@ -137,7 +166,7 @@
 </template>
 
 <script setup>
-import {deleteHotspot, getHotspotList} from '@/api/hotspot'
+import {deleteHotspot, getHotspotList, hotspotCreate} from '@/api/hotspot'
 import {ref} from 'vue'
 import {ElMessage} from 'element-plus'
 import {formatDate} from '@/utils/format'
@@ -205,6 +234,21 @@ const deleteWechatHotspot = async (row) => {
     ElMessage({
       type: 'success',
       message: '删除成功'
+    })
+    if (tableData.value.length === 1 && page.value > 1) {
+      page.value--
+    }
+    getTableData()
+  }
+}
+
+const hotspotCreateArticle = async (row) => {
+  row.visible = false
+  const res = await hotspotCreate({ID: row.ID})
+  if (res.code === 0) {
+    ElMessage({
+      type: 'success',
+      message: '创建成功'
     })
     if (tableData.value.length === 1 && page.value > 1) {
       page.value--

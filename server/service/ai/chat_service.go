@@ -35,19 +35,19 @@ func (*ChatModelService) Recreation(article ai.Article, chatModel string) (*Arti
 	return nil, nil
 }
 
-func (*ChatModelService) HotSpotWrite(topic string, chatModel string) (*ArticleContext, error) {
+func (*ChatModelService) HotSpotWrite(link string, chatModel string) (*ArticleContext, error) {
 	// 可以通过 WithModel 指定模型
 	switch chatModel {
 	case QianfanChat:
-		return QianfanServiceApp.HotSpotWrite(topic)
+		return QianfanServiceApp.HotSpotWrite(link)
 	case Kimi:
 
 	default:
-		result, err := KimiServiceApp.HotSpotWrite(topic)
+		result, err := KimiServiceApp.HotSpotWrite(link)
 		if err == nil {
 			return result, nil
 		}
-		return QianfanServiceApp.HotSpotWrite(topic)
+		return QianfanServiceApp.HotSpotWrite(link)
 	}
 
 	return nil, nil

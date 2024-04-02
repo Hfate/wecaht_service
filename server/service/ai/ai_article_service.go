@@ -1,6 +1,7 @@
 package ai
 
 import (
+	"errors"
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/ai"
 	aiReq "github.com/flipped-aurora/gin-vue-admin/server/model/ai/request"
@@ -109,6 +110,64 @@ func (exa *AIArticleService) GetAIArticle(id uint64) (aiArticle ai.AIArticle, er
 	return
 }
 
+func (exa *AIArticleService) GenerateArticleByLink(link string, account ai.OfficialAccount) error {
+	context := &ArticleContext{
+		Topic: account.Topic,
+		AppId: account.AppId,
+		Link:  link,
+	}
+
+	articleContext := ArticlePipelineApp.Run("hotspot", context)
+	if articleContext.Content == "" {
+		return errors.New("AI创作失败")
+	}
+
+	aiArticle := ai.AIArticle{
+		Title:             exa.parseTitle(articleContext.Title),
+		TargetAccountName: account.AccountName,
+		TargetAccountId:   account.AppId,
+		Topic:             articleContext.Topic,
+		AuthorName:        account.DefaultAuthorName,
+		Tags:              strings.Join(articleContext.Tags, ","),
+		Content:           exa.parseContent(articleContext.Content),
+	}
+	aiArticle.BASEMODEL = BaseModel()
+
+	err := AIArticleServiceApp.CreateAIArticle(aiArticle)
+
+	global.GVA_LOG.Info("AI创作完成", zap.String("appId", account.AppId), zap.String("topic", account.Topic))
+
+	return err
+}
+
+func (exa *AIArticleService) GenerateArticle(account ai.OfficialAccount) error {
+	context := &ArticleContext{
+		Topic: account.Topic,
+		AppId: account.AppId,
+	}
+	articleContext := ArticlePipelineApp.Run("", context)
+	if articleContext.Content == "" {
+		return errors.New("AI创作失败")
+	}
+
+	aiArticle := ai.AIArticle{
+		Title:             exa.parseTitle(articleContext.Title),
+		TargetAccountName: account.AccountName,
+		TargetAccountId:   account.AppId,
+		Topic:             articleContext.Topic,
+		AuthorName:        account.DefaultAuthorName,
+		Tags:              strings.Join(articleContext.Tags, ","),
+		Content:           exa.parseContent(articleContext.Content),
+	}
+	aiArticle.BASEMODEL = BaseModel()
+
+	err := AIArticleServiceApp.CreateAIArticle(aiArticle)
+
+	global.GVA_LOG.Info("AI创作完成", zap.String("appId", account.AppId), zap.String("topic", account.Topic))
+
+	return err
+}
+
 // GenerateDailyArticle 生成每日文章
 func (exa *AIArticleService) GenerateDailyArticle() error {
 	// 获取公众号列表
@@ -129,25 +188,12 @@ func (exa *AIArticleService) GenerateDailyArticle() error {
 		time.Sleep(500 * time.Millisecond)
 
 		go func() {
-			articleContext := ArticlePipelineApp.Run(item.AppId, item.Topic)
-			if articleContext.Content == "" {
-				return
+
+			err2 := exa.GenerateArticle(item)
+			if err2 != nil {
+				global.GVA_LOG.Error("GenerateArticle With err", zap.Error(err2))
 			}
 
-			aiArticle := ai.AIArticle{
-				Title:             exa.parseTitle(articleContext.Title),
-				TargetAccountName: item.AccountName,
-				TargetAccountId:   item.AppId,
-				Topic:             articleContext.Topic,
-				AuthorName:        item.DefaultAuthorName,
-				Tags:              strings.Join(articleContext.Tags, ","),
-				Content:           exa.parseContent(articleContext.Content),
-			}
-			aiArticle.BASEMODEL = BaseModel()
-
-			err = AIArticleServiceApp.CreateAIArticle(aiArticle)
-
-			global.GVA_LOG.Info("AI创作完成", zap.String("appId", item.AppId), zap.String("topic", item.Topic))
 		}()
 
 	}
