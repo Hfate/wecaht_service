@@ -135,7 +135,7 @@ func (*BaiduAddImage) Handle(context *ArticleContext) error {
 		wxImgFmt := "<img src=\"%s\">"
 		wxImgUrl := fmt.Sprintf(wxImgFmt, link)
 
-		context.Content = strings.ReplaceAll(context.Content, match[1], "<p>"+wxImgUrl+"</p>")
+		context.Content = strings.ReplaceAll(context.Content, match[1], "<br><p>"+wxImgUrl+"</p><br>")
 	}
 
 	return nil

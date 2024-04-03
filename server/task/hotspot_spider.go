@@ -20,6 +20,8 @@ func HotspotSpider(db *gorm.DB) error {
 	// 头条热点爬取
 	spiderToutiaoHeadline(db)
 
+	spiderBaiduHeadline(db)
+
 	return nil
 }
 

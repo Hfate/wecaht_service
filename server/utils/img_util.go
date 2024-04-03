@@ -9,14 +9,23 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"strings"
 )
 
 type BaiduService struct {
 }
 
 func SearchAndSave(keyword string) string {
-	imgUrlList := CollectBaiduImgUrl(keyword)
+	imgUrlList := make([]string, 0)
+
+	unsplashImgUrlList := CollectUnsplashImgUrl(keyword)
+	if len(unsplashImgUrlList) > 0 {
+		imgUrlList = append(imgUrlList, unsplashImgUrlList...)
+	}
+
+	baiduImgUrlList := CollectBaiduImgUrl(keyword)
+	if len(baiduImgUrlList) > 0 {
+		imgUrlList = append(imgUrlList, baiduImgUrlList...)
+	}
 
 	// 通过第一张图片链接下载图片
 	return saveImage(imgUrlList)
@@ -27,14 +36,8 @@ func saveImage(imgUrlList []string) string {
 	filePath := ""
 
 	for _, imgUrl := range imgUrlList {
-		if !strings.Contains(imgUrl, "jpg") && !strings.Contains(imgUrl, ".png") {
-			continue
-		}
 
-		// 解析图片链接中的参数
-		strArr := strings.Split(imgUrl, ".")
-
-		filePath = global.GVA_CONFIG.Local.Path + "/" + cast.ToString(GenID()) + "." + strArr[len(strArr)-1]
+		filePath = global.GVA_CONFIG.Local.Path + "/" + cast.ToString(GenID()) + ".jpg"
 		err := downloadImage(imgUrl, filePath)
 		if err != nil {
 			global.GVA_LOG.Info("downloadImage failed", zap.Any("err", err.Error()))

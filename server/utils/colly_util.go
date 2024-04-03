@@ -1,13 +1,59 @@
 package utils
 
 import (
+	"encoding/json"
 	"fmt"
+	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/gocolly/colly/v2"
 	"github.com/gocolly/colly/v2/extensions"
+	"go.uber.org/zap"
 	"log"
+	"net/url"
 	"regexp"
 	"time"
 )
+
+type Item struct {
+	Id     string
+	Width  int
+	Height int
+	Links  Links
+}
+
+type Links struct {
+	Download string
+}
+
+func CollectUnsplashImgUrl(keyWord string) []string {
+	c := colly.NewCollector(
+		colly.Async(true),
+	)
+	err := c.Limit(&colly.LimitRule{
+		DomainRegexp: `unsplash\.com`,
+		RandomDelay:  500 * time.Millisecond,
+		Parallelism:  12,
+	})
+	if err != nil {
+		global.GVA_LOG.Error("SearchUnsplash", zap.Error(err))
+	}
+
+	result := make([]string, 0)
+	c.OnResponse(func(r *colly.Response) {
+		var items []*Item
+		json.Unmarshal(r.Body, &items)
+		for _, item := range items {
+			result = append(result, item.Links.Download)
+		}
+	})
+
+	encodedParam := url.QueryEscape(keyWord)
+
+	c.Visit(fmt.Sprintf("https://unsplash.com/napi/photos?page=1&per_page=10&query=%s", encodedParam))
+
+	c.Wait()
+
+	return result
+}
 
 func CollectBaiduImgUrl(keyWord string) []string {
 	collector := colly.NewCollector(
