@@ -53,9 +53,9 @@ func (exa *AIArticleService) PublishArticle(ids []int) error {
 				global.GVA_LOG.Error("发布失败!", zap.Error(err), zap.String("item", item.Title))
 				item.ArticleStatus = 4
 				item.ErrMessage = err.Error()
-			}
 
-			item.ArticleStatus = 2
+				global.GVA_DB.Save(&item)
+			}
 
 		}
 	}()
@@ -90,7 +90,7 @@ func (exa *AIArticleService) Publish1Article(aiArticle ai.AIArticle) (err error)
 	// 更新发布状态
 	aiArticle.TargetAccountName = officialAccount.AccountName
 	aiArticle.PublishTime = time.Now()
-	aiArticle.ArticleStatus = 3
+	aiArticle.ArticleStatus = 1
 	aiArticle.MediaId = mediaID
 	aiArticle.MsgId = msgId
 	aiArticle.PublishId = publishId
