@@ -37,6 +37,7 @@ type ArticleExcl struct {
 }
 
 type ArticleExclUpload struct {
-	Topic string `json:"topic" xlsx:"Topic"` //
-	Link  string `json:"link" xlsx:"Link"`   //
+	Title string `json:"title"  xlsx:"Title"` //
+	Topic string `json:"topic" xlsx:"Topic"`  //
+	Link  string `json:"link" xlsx:"Link"`    //
 }

@@ -16,6 +16,7 @@ import (
 	"go.uber.org/zap"
 	"mime/multipart"
 	"strings"
+	"time"
 )
 
 type ArticleService struct {
@@ -55,9 +56,20 @@ func (exa *ArticleService) UploadArticle(file *multipart.FileHeader) error {
 
 	articleList := make([]*ai.Article, 0)
 	for _, item := range list {
+		// 获取当前时间
+		currentTime := time.Now()
+
+		// 定义时间格式
+		layout := "2006-01-02 15:04:00"
+
+		// 格式化时间
+		formattedTime := currentTime.Format(layout)
+
 		article := &ai.Article{
-			Topic: item.Topic,
-			Link:  item.Link,
+			Title:       item.Title,
+			Topic:       item.Topic,
+			Link:        item.Link,
+			PublishTime: formattedTime,
 		}
 		article.BASEMODEL = BaseModel()
 		articleList = append(articleList, article)

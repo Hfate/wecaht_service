@@ -42,19 +42,6 @@
       </el-form>
     </div>
 
-    <el-upload
-        accept=".xlsx"
-        ref="upload"
-        :action="`/api/article/upload`"
-        :limit="1"
-        :on-success="uploadSuccess"
-        :on-error="uploadError"
-        :show-file-list="false"
-        :file-list="files"
-        class="upload-btn"
-    >
-      <el-button type="primary">上传文件</el-button>
-    </el-upload>
 
     <div class="gva-table-box">
       <div class="gva-btn-list">
@@ -113,6 +100,20 @@
             </el-button>
           </template>
         </el-popover>
+        <el-upload
+            accept=".xlsx"
+            ref="upload"
+            auto-upload=auto-upload
+            :action="`/api/article/upload`"
+            :limit="1"
+            :on-success="uploadSuccess"
+            :on-error="uploadError"
+            :show-file-list="true"
+            :file-list="files"
+            class="upload-btn"
+        >
+          <el-button type="primary">上传文件</el-button>
+        </el-upload>
       </div>
       <el-table
           ref="multipleTable"
@@ -272,37 +273,6 @@
     </div>
 
 
-    <el-dialog
-        v-model="dialogFormVisible"
-        :before-close="closeDialog"
-        title="文章素材"
-    >
-      <el-form>
-        <el-upload
-            accept=".xlsx"
-            ref="upload"
-            :action="`/api/article/upload`"
-            :limit="1"
-            :on-success="uploadSuccess"
-            :on-error="uploadError"
-            :show-file-list="false"
-            :file-list="files"
-            class="upload-btn"
-        >
-          <el-button type="primary">上传文件</el-button>
-        </el-upload>
-      </el-form>
-      <template #footer>
-        <div class="dialog-footer">
-          <el-button @click="closeDialog">取 消</el-button>
-          <el-button
-              type="primary"
-              @click="enterDialog"
-          >确 定
-          </el-button>
-        </div>
-      </template>
-    </el-dialog>
   </div>
 
 </template>
@@ -314,7 +284,6 @@ import {ElMessage} from 'element-plus'
 import {formatDate} from '@/utils/format'
 import axios from 'axios'
 import {saveAs} from 'file-saver'
-import {createMedia} from "@/api/media";
 
 
 defineOptions({
@@ -458,24 +427,9 @@ const recreationWechatArticle = async (row) => {
 }
 
 
-const closeDialog = () => {
-  dialogFormVisible.value = false
-}
-
-const enterDialog = async () => {
-  let res = await createMedia(form.value)
-
-  if (res.code === 0) {
-    closeDialog()
-    getTableData()
-  }
-}
-
 const uploadSuccess = (res) => {
   dialogFormVisible.value = false
-  form.value = {
-    targetAccountId: '',
-  }
+  files.value = []
   getTableData()
   const {data} = res
   if (data.file) {
@@ -484,14 +438,11 @@ const uploadSuccess = (res) => {
 }
 
 const uploadError = () => {
+  files.value = []
   ElMessage({
     type: 'error',
     message: '上传失败'
   })
-}
-
-const openDialog = () => {
-  dialogFormVisible.value = true
 }
 
 
