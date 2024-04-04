@@ -42,7 +42,8 @@
             align="left"
             label="Prompt"
             prop="prompt"
-            width="300"
+            width="500"
+            show-overflow-tooltip="true"
         />
         <el-table-column
             align="left"

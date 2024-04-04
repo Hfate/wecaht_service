@@ -1,4 +1,6 @@
 FROM golang:1.20 as builder
+ENV TZ=Asia/Shanghai
+CMD ["date"]
 
 WORKDIR /go/src/github.com/flipped-aurora/gin-vue-admin/server
 COPY . .

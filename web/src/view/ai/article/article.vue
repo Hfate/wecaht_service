@@ -73,33 +73,7 @@
             </el-button>
           </template>
         </el-popover>
-        <el-popover
-            v-model="downloadVisible"
-            placement="top"
-            width="160"
-        >
-          <p>确定要下载文章上次模板吗？</p>
-          <div style="text-align: right; margin-top: 8px;">
-            <el-button
-                type="primary"
-                link
-                @click="downloadVisible = false"
-            >取消
-            </el-button>
-            <el-button
-                type="primary"
-                @click="downloadTemplate"
-            >确定
-            </el-button>
-          </div>
-          <template #reference>
-            <el-button
-                icon="Download"
-                @click="downloadVisible = true"
-            >模板下载
-            </el-button>
-          </template>
-        </el-popover>
+        
         <el-upload
             accept=".xlsx"
             ref="upload"

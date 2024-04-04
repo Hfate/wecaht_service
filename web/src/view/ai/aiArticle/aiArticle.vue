@@ -119,6 +119,7 @@
             label="文章标题"
             prop="title"
             width="300"
+            show-overflow-tooltip="true"
         >
           <template #default="scope">
             <a :href="scope.row.link" target="_blank">{{ scope.row.title }}</a>
