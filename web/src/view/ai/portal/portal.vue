@@ -25,20 +25,20 @@
             align="left"
             label="门户"
             prop="portalName"
-            width="180"
+            width="150"
         >
         </el-table-column>
         <el-table-column
             align="left"
             label="门户Key"
             prop="portalKey"
-            width="120"
+            width="100"
         />
         <el-table-column
             align="left"
             label="文章key"
             prop="articleKey"
-            width="120"
+            width="100"
         />
         <el-table-column
             align="left"
@@ -50,7 +50,7 @@
             align="left"
             label="主题"
             prop="topic"
-            width="120"
+            width="80"
         />
         <el-table-column
             align="left"
@@ -62,12 +62,12 @@
             align="left"
             label="备注"
             prop="remark"
-            width="120"
+            width="150"
         />
         <el-table-column
             align="left"
             label="创建时间"
-            width="180"
+            width="160"
         >
           <template #default="scope">
             <span>{{ formatDate(scope.row.CreatedAt) }}</span>

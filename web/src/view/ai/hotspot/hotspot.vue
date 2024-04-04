@@ -49,7 +49,8 @@
             align="left"
             label="头条"
             prop="headline"
-            width="600"
+            width="500"
+            show-overflow-tooltip="true"
         >
           <template #default="scope">
             <a :href="scope.row.link" target="_blank">{{ scope.row.headline }}</a>
@@ -59,13 +60,13 @@
             align="left"
             label="主题"
             prop="topic"
-            width="120"
+            width="100"
         />
         <el-table-column
             align="left"
             label="门户"
             prop="portalName"
-            width="120"
+            width="100"
         />
         <el-table-column
             align="left"
@@ -76,7 +77,7 @@
         <el-table-column
             align="left"
             label="创建时间"
-            width="180"
+            width="160"
         >
           <template #default="scope">
             <span>{{ formatDate(scope.row.CreatedAt) }}</span>

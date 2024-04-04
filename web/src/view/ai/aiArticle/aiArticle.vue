@@ -135,12 +135,12 @@
             align="left"
             label="目标发送公众号"
             prop="targetAccountName"
-            width="250"
+            width="140"
         />
         <el-table-column
             align="left"
             label="发布时间"
-            width="180"
+            width="160"
         >
           <template #default="scope">
             <span>{{ formatDate(scope.row.publishTime) }}</span>
@@ -150,27 +150,36 @@
             align="left"
             label="阅读量"
             prop="readNum"
-            width="100"
+            width="70"
         />
         <el-table-column
             align="left"
             label="评论量"
             prop="commentNum"
-            width="100"
+            width="70"
         />
         <el-table-column
             align="left"
             label="点赞量"
             prop="likeNum"
-            width="100"
+            width="70"
         />
         <el-table-column
             align="left"
             label="创建时间"
-            width="180"
+            width="160"
         >
           <template #default="scope">
             <span>{{ formatDate(scope.row.CreatedAt) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column
+            align="left"
+            label="发布状态"
+            width="100"
+        >
+          <template #default="scope">
+            <span>{{ translatedArticleStatus(scope.row.articleStatus) }}</span>
           </template>
         </el-table-column>
         <el-table-column
@@ -334,11 +343,11 @@
 <script setup>
 import {
   deleteAIArticle,
-  publishAIArticles,
   deleteAIArticlesByIds,
   generateAIArticle,
   getAIArticle,
   getAIArticleList,
+  publishAIArticles,
   recreationAIArticle,
   updateArticle
 } from '@/api/aiArticle'
@@ -540,9 +549,18 @@ const recreationWechatAIArticle = async (row) => {
   }
 }
 
-const openDialog = () => {
-  type.value = 'create'
-  dialogFormVisible.value = true
+
+const translatedStatus = ref({
+  0: '新生成',
+  1: '已发送至草稿箱',
+  2: '发布成功',
+  3: '群发成功',
+  4: '发送草稿失败',
+  5: '发布失败',
+})
+
+const translatedArticleStatus = (statusValue) => {
+  return translatedStatus.value[statusValue]
 }
 
 </script>

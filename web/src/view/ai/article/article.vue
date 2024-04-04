@@ -73,7 +73,7 @@
             </el-button>
           </template>
         </el-popover>
-        
+
         <el-upload
             accept=".xlsx"
             ref="upload"
@@ -105,6 +105,7 @@
             label="文章标题"
             prop="title"
             width="300"
+            show-overflow-tooltip="true"
         >
           <template #default="scope">
             <a :href="scope.row.link" target="_blank">{{ scope.row.title }}</a>
@@ -131,7 +132,7 @@
         <el-table-column
             align="left"
             label="发布时间"
-            width="180"
+            width="160"
         >
           <template #default="scope">
             <span>{{ formatDate(scope.row.publishTime) }}</span>
@@ -141,24 +142,24 @@
             align="left"
             label="阅读量"
             prop="readNum"
-            width="120"
+            width="70"
         />
         <el-table-column
             align="left"
             label="评论量"
             prop="commentNum"
-            width="120"
+            width="70"
         />
         <el-table-column
             align="left"
             label="点赞量"
             prop="likeNum"
-            width="120"
+            width="70"
         />
         <el-table-column
             align="left"
             label="创建时间"
-            width="180"
+            width="160"
         >
           <template #default="scope">
             <span>{{ formatDate(scope.row.CreatedAt) }}</span>

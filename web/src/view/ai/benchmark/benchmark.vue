@@ -31,14 +31,14 @@
             align="left"
             label="公众号名称"
             prop="accountName"
-            width="300"
+            width="150"
         >
         </el-table-column>
         <el-table-column
             align="left"
             label="公众号ID"
             prop="accountId"
-            width="100"
+            width="200"
         />
         <el-table-column
             align="left"
@@ -50,18 +50,18 @@
             align="left"
             label="初始爬取文章数量"
             prop="initNum"
-            width="100"
+            width="150"
         />
         <el-table-column
             align="left"
             label="已爬取文章数量"
             prop="finishNum"
-            width="100"
+            width="150"
         />
         <el-table-column
             align="left"
             label="创建时间"
-            width="180"
+            width="160"
         >
           <template #default="scope">
             <span>{{ formatDate(scope.row.CreatedAt) }}</span>
