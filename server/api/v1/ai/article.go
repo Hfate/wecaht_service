@@ -14,6 +14,32 @@ import (
 
 type ArticleApi struct{}
 
+// UploadArticle
+// @Tags      Article
+// @Summary   上传文章
+// @Security  ApiKeyAuth
+// @accept    application/json
+// @Produce   application/json
+// @Param     data  body      wechat.Article            true  "文章ID"
+// @Success   200   {object}  response.Response{msg=string}  "上传文章"
+// @Router    /article/upload [delete]
+func (e *ArticleApi) UploadArticle(c *gin.Context) {
+	_, header, err := c.Request.FormFile("file")
+	if err != nil {
+		global.GVA_LOG.Error("接收文件失败!", zap.Error(err))
+		response.FailWithMessage("接收文件失败", c)
+		return
+	}
+	err = articleService.UploadArticle(header)
+	if err != nil {
+		global.GVA_LOG.Error("上传失败!", zap.Error(err))
+		response.FailWithMessage("上传失败", c)
+		return
+	}
+	response.OkWithMessage("上传成功", c)
+
+}
+
 // DeleteArticle
 // @Tags      Article
 // @Summary   删除文章

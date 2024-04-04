@@ -16,11 +16,6 @@
               placeholder=""
           />
         </el-form-item>
-        <el-form-item label="门户">
-          <el-input
-              v-model="searchInfo.PortalName"
-          />
-        </el-form-item>
         <el-form-item label="主题">
           <el-input
               v-model="searchInfo.Topic"
@@ -129,12 +124,6 @@
             <a :href="scope.row.link" target="_blank">{{ scope.row.title }}</a>
           </template>
         </el-table-column>
-        <el-table-column
-            align="left"
-            label="门户"
-            prop="portalName"
-            width="100"
-        />
         <el-table-column
             align="left"
             label="主题"

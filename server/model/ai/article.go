@@ -6,9 +6,9 @@ type Article struct {
 	global.BASEMODEL
 	Title       string `json:"title"` //
 	PortalName  string `json:"portalName"`
-	Topic       string `json:"topic"`       //
-	AuthorName  string `json:"authorName" ` //
-	Link        string `json:"link"`        //
+	Topic       string `json:"topic" xlsx:"Topic"` //
+	AuthorName  string `json:"authorName" `        //
+	Link        string `json:"link" xlsx:"Link"`   //
 	PublishTime string `json:"publishTime"`
 	LikeNum     int    `json:"likeNum"`
 	ReadNum     int    `json:"readNum"`
@@ -34,4 +34,9 @@ type ArticleExcl struct {
 	CommentNum  int    `json:"commentNum" xlsx:"CommentNum"`
 	Content     string `json:"content" xlsx:"Content"`
 	Tags        string `json:"tags" xlsx:"Tags"`
+}
+
+type ArticleExclUpload struct {
+	Topic string `json:"topic" xlsx:"Topic"` //
+	Link  string `json:"link" xlsx:"Link"`   //
 }

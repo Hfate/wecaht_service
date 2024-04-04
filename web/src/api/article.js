@@ -97,3 +97,20 @@ export const download = (params) => {
         params
     })
 }
+
+
+// @Tags ArticleApi
+// @Summary 上传文章
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data body modelInterface.PageInfo true "上传文章"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"获取成功"}"
+// @Router /article/upload [get]
+export const upload = (params) => {
+    return service({
+        url: '/article/upload',
+        method: 'post',
+        params
+    })
+}

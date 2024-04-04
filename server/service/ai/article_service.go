@@ -1,6 +1,7 @@
 package ai
 
 import (
+	"errors"
 	"fmt"
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/ai"
@@ -9,8 +10,11 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
 	systemService "github.com/flipped-aurora/gin-vue-admin/server/service/system"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
+	"github.com/flipped-aurora/gin-vue-admin/server/utils/convertor"
 	"github.com/gin-gonic/gin"
 	"github.com/xuri/excelize/v2"
+	"go.uber.org/zap"
+	"mime/multipart"
 	"strings"
 )
 
@@ -18,6 +22,49 @@ type ArticleService struct {
 }
 
 var ArticleServiceApp = new(ArticleService)
+
+func (exa *ArticleService) UploadArticle(file *multipart.FileHeader) error {
+
+	fileReader, err := file.Open()
+	if err != nil {
+		global.GVA_LOG.Error("Error opening file header", zap.Error(err))
+		return err
+	}
+	defer fileReader.Close()
+
+	list := make([]ai.ArticleExclUpload, 0)
+
+	objHeaders, headers, err := utils.ReadExcelByReader(
+		fileReader, // Path of the csv file
+		&list,      // A pointer to the create slice )
+	)
+	if err != nil {
+		return err
+	}
+
+	//  Header 验证
+	objHeaderSet := convertor.StringListToSet(objHeaders)
+	for _, header := range headers {
+		if header == "" {
+			continue
+		}
+		if !objHeaderSet.Contains(header) {
+			return errors.New("文件表头不正确")
+		}
+	}
+
+	articleList := make([]*ai.Article, 0)
+	for _, item := range list {
+		article := &ai.Article{
+			Topic: item.Topic,
+			Link:  item.Link,
+		}
+		article.BASEMODEL = BaseModel()
+		articleList = append(articleList, article)
+	}
+
+	return global.GVA_DB.Create(&articleList).Error
+}
 
 //@function: DeleteFileChunk
 //@description: 删除文章

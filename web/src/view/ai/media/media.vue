@@ -123,7 +123,7 @@
             :data="{'targetAccountId':form.targetAccountId}"
             accept=".jpg,.png"
             ref="upload"
-            :action="`/api/media/media`"
+            :action="`/api/article/upload`"
             :limit="1"
             :on-success="uploadSuccess"
             :on-error="uploadError"
@@ -281,7 +281,6 @@ const uploadError = () => {
     type: 'error',
     message: '上传失败'
   })
-  fullscreenLoading.value = false
 }
 
 </script>
