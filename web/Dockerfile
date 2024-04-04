@@ -1,6 +1,9 @@
 FROM node:18
 
 WORKDIR /gva_web/
+# 复制 package.json 和 package-lock.json 到工作目录
+COPY package*.json ./
+
 COPY . .
 
 RUN yarn && yarn build

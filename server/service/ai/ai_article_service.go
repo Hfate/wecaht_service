@@ -46,17 +46,20 @@ func (exa *AIArticleService) PublishArticle(ids []int) error {
 	var articles []ai.AIArticle
 	err := global.GVA_DB.Model(&ai.AIArticle{}).Where("id in ?", ids).Find(&articles).Error
 
-	for _, item := range articles {
-		err = exa.Publish1Article(item)
-		if err != nil {
-			global.GVA_LOG.Error("发布失败!", zap.Error(err), zap.String("item", item.Title))
-			item.ArticleStatus = 4
-			item.ErrMessage = err.Error()
+	go func() {
+		for _, item := range articles {
+			err = exa.Publish1Article(item)
+			if err != nil {
+				global.GVA_LOG.Error("发布失败!", zap.Error(err), zap.String("item", item.Title))
+				item.ArticleStatus = 4
+				item.ErrMessage = err.Error()
+			}
+
+			item.ArticleStatus = 2
+
 		}
+	}()
 
-		item.ArticleStatus = 2
-
-	}
 	return err
 }
 

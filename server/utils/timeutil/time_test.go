@@ -26,14 +26,6 @@ func TestStrToTimeStamp(t *testing.T) {
 
 }
 
-func TestParseTime(t *testing.T) {
-	fmt.Println(ParseTime("2020-01-01"))
-	fmt.Println(ParseTime("2020/01/01"))
-	fmt.Println(ParseTime("20200101"))
-	fmt.Println(ParseTime("2020.01.01"))
-	fmt.Println(ParseTime("43831"))
-}
-
 func TestAddMonths(t *testing.T) {
 
 	fmt.Println(AddMonths(GetYearStartTime(GetCurTime()), 6))
