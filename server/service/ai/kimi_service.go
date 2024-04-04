@@ -153,9 +153,9 @@ func (*KimiService) TopicWrite(topic string) (*ArticleContext, error) {
 
 func (*KimiService) Recreation(article ai.Article) (*ArticleContext, error) {
 	articleContext := &ArticleContext{}
-	articleContext.Content = article.Content
 	articleContext.Title = article.Title
 	articleContext.Topic = article.Topic
+	articleContext.Link = article.Link
 
 	chatGptPrompt, err := QianfanServiceApp.parsePrompt(articleContext, ai.ContentRecreation)
 	if err != nil {
@@ -231,7 +231,11 @@ func (*KimiService) ChatWithKimi(message string) (string, error) {
 		return "", err
 	}
 
-	return kimiResp.Choices[0].Message.Content, err
+	if len(kimiResp.Choices) > 0 {
+		return kimiResp.Choices[0].Message.Content, err
+	}
+
+	return "", errors.New("kimi回复为空")
 }
 
 type KimiReq struct {

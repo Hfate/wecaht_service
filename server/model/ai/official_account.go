@@ -14,6 +14,7 @@ type OfficialAccount struct {
 	EncodingAESKey    string `json:"encodingAesKey"`
 	DefaultAuthorName string `json:"defaultAuthorName"`
 	Remark            string `json:"remark"`
+	TargetNum         int    `json:"targetNum"`
 }
 
 func (OfficialAccount) TableName() string {

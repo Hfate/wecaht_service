@@ -7,6 +7,7 @@ import (
 
 type AIArticle struct {
 	global.BASEMODEL
+	BatchId           string    `json:"batchId"`
 	OriginId          uint64    `json:"originId"`
 	Title             string    `json:"title"` //
 	PortalName        string    `json:"portalName"`

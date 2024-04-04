@@ -43,6 +43,7 @@ func WechatSpider(db *gorm.DB) error {
 				response := graphquery.ParseFromString(resp, GRAPH_QUERY)
 				response.Decode(&content)
 
+				a.Topic = item.Topic
 				a.Content = content.Content
 
 				db.Model(&ai.Article{}).Create(&a)

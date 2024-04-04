@@ -7,6 +7,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
 	systemService "github.com/flipped-aurora/gin-vue-admin/server/service/system"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
+	"go.uber.org/zap"
 	"time"
 )
 
@@ -41,7 +42,14 @@ func (exa *HotspotService) CreateArticle(id uint64) (err error) {
 		return err
 	}
 
-	return AIArticleServiceApp.GenerateArticleByLink(hotspot.Link, officeAccount)
+	go func() {
+		err = AIArticleServiceApp.GenerateArticleByLink(hotspot.Link, officeAccount)
+		if err != nil {
+			global.GVA_LOG.Error("CreateArticle", zap.Error(err))
+		}
+	}()
+
+	return nil
 }
 
 // @function: DeleteHotspot

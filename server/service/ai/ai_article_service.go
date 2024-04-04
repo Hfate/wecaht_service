@@ -5,10 +5,12 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/ai"
 	aiReq "github.com/flipped-aurora/gin-vue-admin/server/model/ai/request"
+	aiRes "github.com/flipped-aurora/gin-vue-admin/server/model/ai/response"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
 	systemService "github.com/flipped-aurora/gin-vue-admin/server/service/system"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
+	"github.com/flipped-aurora/gin-vue-admin/server/utils/timeutil"
 	"go.uber.org/zap"
 	"strings"
 	"time"
@@ -141,31 +143,48 @@ func (exa *AIArticleService) GenerateArticleByLink(link string, account ai.Offic
 }
 
 func (exa *AIArticleService) GenerateArticle(account ai.OfficialAccount) error {
-	context := &ArticleContext{
-		Topic: account.Topic,
-		AppId: account.AppId,
+	targetNum := account.TargetNum
+
+	i := 0
+
+	for i < targetNum {
+		context := &ArticleContext{
+			Topic: account.Topic,
+			AppId: account.AppId,
+		}
+
+		batchId := timeutil.GetCurDate() + account.AppId
+
+		articleContext := ArticlePipelineApp.Run("", context)
+		if articleContext.Content == "" {
+			return errors.New("AI创作失败")
+		}
+
+		aiArticle := ai.AIArticle{
+			BatchId:           batchId,
+			Title:             exa.parseTitle(articleContext.Title),
+			TargetAccountName: account.AccountName,
+			TargetAccountId:   account.AppId,
+			Topic:             articleContext.Topic,
+			AuthorName:        account.DefaultAuthorName,
+			Tags:              strings.Join(articleContext.Tags, ","),
+			Content:           exa.parseContent(articleContext.Content),
+		}
+		aiArticle.BASEMODEL = BaseModel()
+
+		err := AIArticleServiceApp.CreateAIArticle(aiArticle)
+		if err != nil {
+
+			global.GVA_LOG.Error("CreateAIArticle", zap.Error(err))
+			continue
+		}
+
+		global.GVA_LOG.Info("AI创作完成", zap.String("appId", account.AppId), zap.String("topic", account.Topic))
+
+		i++
 	}
-	articleContext := ArticlePipelineApp.Run("", context)
-	if articleContext.Content == "" {
-		return errors.New("AI创作失败")
-	}
 
-	aiArticle := ai.AIArticle{
-		Title:             exa.parseTitle(articleContext.Title),
-		TargetAccountName: account.AccountName,
-		TargetAccountId:   account.AppId,
-		Topic:             articleContext.Topic,
-		AuthorName:        account.DefaultAuthorName,
-		Tags:              strings.Join(articleContext.Tags, ","),
-		Content:           exa.parseContent(articleContext.Content),
-	}
-	aiArticle.BASEMODEL = BaseModel()
-
-	err := AIArticleServiceApp.CreateAIArticle(aiArticle)
-
-	global.GVA_LOG.Info("AI创作完成", zap.String("appId", account.AppId), zap.String("topic", account.Topic))
-
-	return err
+	return nil
 }
 
 // GenerateDailyArticle 生成每日文章
@@ -305,7 +324,27 @@ func (exa *AIArticleService) GetAIArticleList(sysUserAuthorityID uint, info aiRe
 	if err != nil {
 		return articleList, total, err
 	} else {
-		err = db.Limit(limit).Offset(offset).Order("updated_at desc").Find(&articleList).Error
+		err = db.Limit(limit).Offset(offset).Order("batch_id desc").Find(&articleList).Error
 	}
-	return articleList, total, err
+
+	articleMap := make(map[string][]ai.AIArticle)
+
+	for _, item := range articleList {
+		articleMap[item.BatchId] = append(articleMap[item.BatchId], item)
+	}
+
+	result := make([]aiRes.AIArticleParentResponse, 0)
+	for _, subList := range articleMap {
+		children := make([]ai.AIArticle, 0)
+		if len(subList) > 1 {
+			children = subList[1:]
+		}
+		item := aiRes.AIArticleParentResponse{
+			AIArticle: subList[0],
+			Children:  children,
+		}
+		result = append(result, item)
+	}
+
+	return result, total, err
 }

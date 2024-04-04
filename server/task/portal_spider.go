@@ -79,7 +79,7 @@ func spiderPortal(db *gorm.DB, portal *ai.Portal) {
 			BASEMODEL:   global.BASEMODEL{ID: utils.GenID(), CreatedAt: time.Now(), UpdatedAt: time.Now()},
 			PortalName:  portal.PortalName,
 			AuthorName:  articleResp.AuthorName,
-			Topic:       articleResp.Topic,
+			Topic:       portal.Topic,
 			Title:       strings.TrimSpace(articleResp.Title),
 			Link:        articleUrl,
 			Content:     strings.TrimSpace(articleResp.Content),

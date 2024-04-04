@@ -42,6 +42,18 @@
         />
         <el-table-column
             align="left"
+            label="默认作者"
+            prop="defaultAuthorName"
+            width="150"
+        />
+        <el-table-column
+            align="left"
+            label="每日默认生成文章数"
+            prop="targetNum"
+            width="150"
+        />
+        <el-table-column
+            align="left"
             label="备注"
             prop="remark"
             width="120"
@@ -150,7 +162,7 @@
         <el-form
             :model="form"
             label-position="right"
-            label-width="130px"
+            label-width="150px"
         >
           <el-form-item label="微信公众号">
             <el-input
@@ -173,6 +185,12 @@
           <el-form-item label="账号邮箱">
             <el-input
                 v-model="form.userEmail"
+                autocomplete="off"
+            />
+          </el-form-item>
+          <el-form-item label="默认作者">
+            <el-input
+                v-model="form.defaultAuthorName"
                 autocomplete="off"
             />
           </el-form-item>
@@ -206,6 +224,12 @@
                 autocomplete="off"
             />
           </el-form-item>
+          <el-form-item label="每日默认生成文章数">
+            <el-input
+                v-model.number="form.targetNum"
+                autocomplete="off"
+            />
+          </el-form-item>
         </el-form>
       </el-scrollbar>
       <template #footer>
@@ -228,8 +252,8 @@ import {
   deleteOfficialAccount,
   getOfficialAccount,
   getOfficialAccountList,
-  updateOfficialAccount,
-  officialAccountCreate
+  officialAccountCreate,
+  updateOfficialAccount
 } from '@/api/officialAccount'
 import {ref} from 'vue'
 import {ElMessage} from 'element-plus'
@@ -244,7 +268,9 @@ const form = ref({
   accountName: '',
   topic: '',
   userEmail: '',
+  defaultAuthorName: '',
   remark: '',
+  targetNum: 1,
   appId: '',
   appSecret: '',
   token: '',
@@ -302,9 +328,11 @@ const closeDialog = () => {
     accountName: '',
     topic: '',
     userEmail: '',
+    defaultAuthorName: '',
     remark: '',
     appId: '',
     appSecret: '',
+    targetNum: 1,
     token: '',
     encodingAesKey: ''
   }

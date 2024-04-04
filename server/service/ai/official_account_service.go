@@ -6,6 +6,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
 	systemService "github.com/flipped-aurora/gin-vue-admin/server/service/system"
+	"go.uber.org/zap"
 )
 
 type OfficialAccountService struct {
@@ -49,7 +50,14 @@ func (exa *OfficialAccountService) CreateArticle(id uint64) error {
 	if err != nil {
 		return err
 	}
-	return AIArticleServiceApp.GenerateArticle(officialAccount)
+
+	go func() {
+		err = AIArticleServiceApp.GenerateArticle(officialAccount)
+		if err != nil {
+			global.GVA_LOG.Error("GenerateArticle", zap.Error(err))
+		}
+	}()
+	return nil
 }
 
 //@function: GetOfficialAccount

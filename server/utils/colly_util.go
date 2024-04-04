@@ -18,10 +18,15 @@ type Item struct {
 	Width  int
 	Height int
 	Links  Links
+	Urls   Urls
 }
 
 type Links struct {
 	Download string
+}
+
+type Urls struct {
+	Regular string
 }
 
 func CollectUnsplashImgUrl(keyWord string) []string {
@@ -42,7 +47,7 @@ func CollectUnsplashImgUrl(keyWord string) []string {
 		var items []*Item
 		json.Unmarshal(r.Body, &items)
 		for _, item := range items {
-			result = append(result, item.Links.Download)
+			result = append(result, item.Urls.Regular)
 		}
 	})
 
