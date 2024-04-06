@@ -10,6 +10,7 @@ import (
 	"github.com/spf13/cast"
 	"gorm.io/gorm"
 	"log"
+	"strings"
 	"time"
 )
 
@@ -40,6 +41,7 @@ func spiderBaiduHeadline(db *gorm.DB) {
 	collector.SetRequestTimeout(time.Second * 60)
 
 	hotspotList := make([]*ai.Hotspot, 0)
+	linkUrlList := make([]string, 0)
 
 	collector.OnHTML(".container-bg_lQ801", func(element *colly.HTMLElement) {
 		element.ForEach(".category-wrap_iQLoo", func(i int, element *colly.HTMLElement) {
@@ -54,12 +56,22 @@ func spiderBaiduHeadline(db *gorm.DB) {
 				Headline:   title,
 				Trending:   cast.ToInt(trending),
 			})
+			linkUrlList = append(linkUrlList, jumpLink)
 		})
 	})
 
 	err := collector.Visit("https://top.baidu.com/board?tab=realtime")
 	if err != nil {
 		log.Fatalf("%v", err)
+		return
+	}
+
+	if len(linkUrlList) == 0 {
+		return
+	}
+
+	err = db.Where("link in ?", linkUrlList).Unscoped().Delete(&ai.Hotspot{}).Error
+	if err != nil {
 		return
 	}
 
@@ -136,6 +148,9 @@ func spiderToutiaoHeadline(db *gorm.DB) {
 		} else {
 			topic = item.LabelDesc
 		}
+
+		topic = strings.TrimRight(topic, ",")
+
 		hotspot := &ai.Hotspot{
 			PortalName: "头条",
 			BASEMODEL:  ai2.BaseModel(),

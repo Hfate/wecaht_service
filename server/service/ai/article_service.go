@@ -116,7 +116,7 @@ func (exa *ArticleService) Recreation(id uint64) error {
 		return err
 	}
 
-	chatGptResp, err := QianfanServiceApp.Recreation(article)
+	chatGptResp, err := KimiServiceApp.Recreation(article)
 	if err != nil {
 		return err
 	}
@@ -182,7 +182,7 @@ func (exa *ArticleService) GetArticleList(sysUserAuthorityID uint, info aiReq.Ar
 	if err != nil {
 		return articleList, total, err
 	} else {
-		err = db.Limit(limit).Offset(offset).Order("publish_time desc").Find(&articleList).Error
+		err = db.Limit(limit).Offset(offset).Order("create_time desc").Find(&articleList).Error
 	}
 	return articleList, total, err
 }

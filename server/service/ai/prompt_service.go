@@ -1,12 +1,15 @@
 package ai
 
 import (
+	"encoding/json"
 	"errors"
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/ai"
+	aiRes "github.com/flipped-aurora/gin-vue-admin/server/model/ai/response"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
 	systemService "github.com/flipped-aurora/gin-vue-admin/server/service/system"
+	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"github.com/spf13/cast"
 	"go.uber.org/zap"
 )
@@ -52,8 +55,27 @@ func (exa *PromptService) UpdatePrompt(e *ai.Prompt) (err error) {
 //@param: id uint
 //@return: customer model.Prompt, err error
 
-func (exa *PromptService) GetPrompt(id uint64) (prompt ai.Prompt, err error) {
+func (exa *PromptService) GetPrompt(id uint64) (promptResp aiRes.PromptResp, err error) {
+	prompt := &ai.Prompt{}
 	err = global.GVA_DB.Where("id = ?", id).First(&prompt).Error
+	if err != nil {
+		return aiRes.PromptResp{}, err
+	}
+
+	// 定义一个空的字符串切片
+	promptList := make([]string, 0)
+
+	// 使用json.Unmarshal将JSON字符串解析到字符串切片
+	err = json.Unmarshal([]byte(utils.EscapeSpecialCharacters(prompt.Prompt)), &promptList)
+
+	promptResp = aiRes.PromptResp{
+		BASEMODEL:  prompt.BASEMODEL,
+		Topic:      prompt.Topic,
+		PromptType: prompt.PromptType,
+		PromptList: promptList,
+		Language:   prompt.Language,
+	}
+
 	return
 }
 

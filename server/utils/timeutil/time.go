@@ -20,7 +20,11 @@ const (
 )
 
 var Loc *time.Location
-var TimeFormatArr []string
+
+func init() {
+	Loc, _ = time.LoadLocation("Asia/Shanghai")
+	carbon.SetLocation(Loc)
+}
 
 // Now gets current time in millisecond uint
 func Now() uint64 {

@@ -180,14 +180,6 @@
               />
             </el-select>
           </el-form-item>
-          <el-form-item label="prompt">
-            <el-input
-                v-model="form.prompt"
-                type="textarea"
-                :rows="20"
-                autocomplete="off"
-            />
-          </el-form-item>
           <el-form-item label="语言">
             <el-select
                 class="w-56"
@@ -204,6 +196,17 @@
               />
             </el-select>
           </el-form-item>
+          <el-form-item v-for="(prompt, index) in form.promptList" :key="index">
+            <span>{{ 'Prompt ' + (index + 1) }}</span>
+            <el-input
+                v-model="form.promptList[index]"
+                type="textarea"
+                :rows="15"
+                autocomplete="off"
+            />
+            <el-button type="danger" icon="el-icon-delete" @click="removePrompt(index)">删除</el-button>
+          </el-form-item>
+          <el-button type="primary" @click="addNewPrompt">添加新的Prompt</el-button>
         </el-form>
       </el-scrollbar>
       <template #footer>
@@ -236,6 +239,7 @@ const form = ref({
   promptType: '',
   prompt: '',
   language: '中文',
+  promptList: [],
 })
 
 const translatedTypes = ref({
@@ -263,6 +267,15 @@ const handleSizeChange = (val) => {
 const handleCurrentChange = (val) => {
   page.value = val
   getTableData()
+}
+
+
+const addNewPrompt = (val) => {
+  form.value.promptList.push('请在这里编写下一个prompt')
+}
+
+const removePrompt = (index) => {
+  form.value.promptList.splice(index, 1)
 }
 
 // 查询
@@ -293,7 +306,8 @@ const updateWechatPrompt = async (row) => {
   const res = await getPrompt({ID: row.ID})
   type.value = 'update'
   if (res.code === 0) {
-    form.value = res.data.prompt
+    form.value = res.data
+    console.log(form)
     dialogFormVisible.value = true
   }
 }
@@ -302,7 +316,7 @@ const closeDialog = () => {
   form.value = {
     topic: '',
     promptType: '',
-    prompt: '',
+    promptList: [],
     language: '',
   }
 }
@@ -322,6 +336,9 @@ const deleteWechatPrompt = async (row) => {
 }
 const enterDialog = async () => {
   let res
+
+  form.value.prompt = JSON.stringify(form.value.promptList)
+
   switch (type.value) {
     case 'create':
       res = await createPrompt(form.value)

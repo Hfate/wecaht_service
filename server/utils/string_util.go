@@ -29,3 +29,13 @@ func RemoveBookTitleBrackets(s string) string {
 	temp = strings.ReplaceAll(temp, "》", "") // 去除右侧书名号
 	return temp
 }
+
+// EscapeSpecialCharacters 函数接受一个字符串并转义其中的特定特殊字符。
+func EscapeSpecialCharacters(input string) string {
+	// 使用Go的字符串替换功能来转义特殊字符
+	escaped := input
+	escaped = strings.ReplaceAll(escaped, "\n", "\\n") // 转义换行符
+	escaped = strings.ReplaceAll(escaped, "\t", "\\t") // 转义制表符
+
+	return escaped
+}

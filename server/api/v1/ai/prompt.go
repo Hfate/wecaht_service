@@ -3,7 +3,6 @@ package ai
 import (
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/ai"
-	aiRes "github.com/flipped-aurora/gin-vue-admin/server/model/ai/response"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/response"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
@@ -135,7 +134,7 @@ func (e *PromptApi) GetPrompt(c *gin.Context) {
 		response.FailWithMessage("获取失败", c)
 		return
 	}
-	response.OkWithDetailed(aiRes.PromptResponse{Prompt: data}, "获取成功", c)
+	response.OkWithDetailed(data, "获取成功", c)
 }
 
 // GetPromptList

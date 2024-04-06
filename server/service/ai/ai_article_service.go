@@ -269,7 +269,7 @@ func (exa *AIArticleService) Recreation(id uint64) (err error) {
 		Content:    aiArticle.Content,
 	}
 
-	chatGptResp, err := QianfanServiceApp.Recreation(article)
+	chatGptResp, err := KimiServiceApp.Recreation(article)
 	if err != nil {
 		return err
 	}

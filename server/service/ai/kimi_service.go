@@ -1,14 +1,15 @@
 package ai
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"github.com/baidubce/bce-qianfan-sdk/go/qianfan"
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/ai"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
-	"go.uber.org/zap"
-	"strings"
+	"text/template"
 )
 
 type KimiService struct {
@@ -38,51 +39,50 @@ func (*KimiService) HotSpotWrite(link string) (*ArticleContext, error) {
 	articleContext := &ArticleContext{}
 	articleContext.Link = link
 
-	chatGptPrompt, err := QianfanServiceApp.parsePrompt(articleContext, ai.HotSpotWrite)
+	chatGptPromptList, err := parsePrompt(articleContext, ai.HotSpotWrite)
 	if err != nil {
 		return &ArticleContext{}, err
 	}
 
 	kimiMessageHistory := []*KimiMessage{SystemMessage}
-
-	resp, kimiMessageHistory, err := KimiServiceApp.ChatWithKimi(chatGptPrompt, kimiMessageHistory)
-	if err != nil {
-		return nil, err
-	}
-
 	result := &ArticleContext{}
+	resp := ""
 
-	if err != nil {
-		global.GVA_LOG.Info("chat gpt响应失败", zap.Error(err))
-		return result, err
+	for _, chatGptPrompt := range chatGptPromptList {
+		resp, kimiMessageHistory, err = KimiServiceApp.ChatWithKimi(chatGptPrompt, kimiMessageHistory)
+		if err != nil {
+			return nil, err
+		}
+		result.Content = resp
+		articleContext.Content = resp
 	}
 
-	result.Content = resp
-	articleContext.Content = resp
-
-	chatGptPrompt, err = QianfanServiceApp.parsePrompt(articleContext, ai.TitleCreate)
-	if err != nil {
-		return nil, err
-	}
-
-	resp, kimiMessageHistory, err = KimiServiceApp.ChatWithKimi(chatGptPrompt, kimiMessageHistory)
+	chatGptPromptList, err = parsePrompt(articleContext, ai.TitleCreate)
 	if err != nil {
 		return nil, err
 	}
 
-	result.Title = resp
+	for _, chatGptPrompt := range chatGptPromptList {
+		resp, kimiMessageHistory, err = KimiServiceApp.ChatWithKimi(chatGptPrompt, kimiMessageHistory)
+		if err != nil {
+			return nil, err
+		}
+		result.Title = resp
+	}
 
-	chatGptPrompt, err = QianfanServiceApp.parsePrompt(articleContext, ai.AddImage)
+	chatGptPromptList, err = parsePrompt(articleContext, ai.AddImage)
 	if err != nil {
 		return nil, err
 	}
 
-	resp, kimiMessageHistory, err = KimiServiceApp.ChatWithKimi(chatGptPrompt, kimiMessageHistory)
-	if err != nil {
-		return nil, err
-	}
+	for _, chatGptPrompt := range chatGptPromptList {
+		resp, kimiMessageHistory, err = KimiServiceApp.ChatWithKimi(chatGptPrompt, kimiMessageHistory)
+		if err != nil {
+			return nil, err
+		}
 
-	result.Content = resp
+		result.Content = resp
+	}
 
 	return result, nil
 }
@@ -112,47 +112,50 @@ func (*KimiService) TopicWrite(topic string) (*ArticleContext, error) {
 
 	articleContext.Topic = subject
 
-	chatGptPrompt, err := QianfanServiceApp.parsePrompt(articleContext, ai.TopicWrite)
+	chatGptPromptList, err := parsePrompt(articleContext, ai.TopicWrite)
 	if err != nil {
 		return &ArticleContext{}, err
 	}
 
 	kimiMessageHistory := []*KimiMessage{SystemMessage}
-
-	resp, kimiMessageHistory, err := KimiServiceApp.ChatWithKimi(chatGptPrompt, kimiMessageHistory)
-
-	if err != nil {
-		global.GVA_LOG.Info("chat gpt响应失败", zap.Error(err))
-		return nil, err
-	}
-
 	result := &ArticleContext{}
-	result.Content = resp
-	articleContext.Content = resp
+	resp := ""
 
-	chatGptPrompt, err = QianfanServiceApp.parsePrompt(articleContext, ai.TitleCreate)
-	if err != nil {
-		return articleContext, err
+	for _, chatGptPrompt := range chatGptPromptList {
+		resp, kimiMessageHistory, err = KimiServiceApp.ChatWithKimi(chatGptPrompt, kimiMessageHistory)
+		if err != nil {
+			return nil, err
+		}
+		result.Content = resp
+		articleContext.Content = resp
 	}
 
-	resp, kimiMessageHistory, err = KimiServiceApp.ChatWithKimi(chatGptPrompt, kimiMessageHistory)
-	if err != nil {
-		return nil, err
-	}
-
-	result.Title = resp
-
-	chatGptPrompt, err = QianfanServiceApp.parsePrompt(articleContext, ai.AddImage)
+	chatGptPromptList, err = parsePrompt(articleContext, ai.TitleCreate)
 	if err != nil {
 		return nil, err
 	}
 
-	resp, kimiMessageHistory, err = KimiServiceApp.ChatWithKimi(chatGptPrompt, kimiMessageHistory)
+	for _, chatGptPrompt := range chatGptPromptList {
+		resp, kimiMessageHistory, err = KimiServiceApp.ChatWithKimi(chatGptPrompt, kimiMessageHistory)
+		if err != nil {
+			return nil, err
+		}
+		result.Title = resp
+	}
+
+	chatGptPromptList, err = parsePrompt(articleContext, ai.AddImage)
 	if err != nil {
 		return nil, err
 	}
 
-	result.Content = resp
+	for _, chatGptPrompt := range chatGptPromptList {
+		resp, kimiMessageHistory, err = KimiServiceApp.ChatWithKimi(chatGptPrompt, kimiMessageHistory)
+		if err != nil {
+			return nil, err
+		}
+
+		result.Content = resp
+	}
 
 	return result, nil
 }
@@ -163,44 +166,50 @@ func (*KimiService) Recreation(article ai.Article) (*ArticleContext, error) {
 	articleContext.Topic = article.Topic
 	articleContext.Link = article.Link
 
-	chatGptPrompt, err := QianfanServiceApp.parsePrompt(articleContext, ai.ContentRecreation)
+	chatGptPromptList, err := parsePrompt(articleContext, ai.ContentRecreation)
 	if err != nil {
 		return &ArticleContext{}, err
 	}
 
 	kimiMessageHistory := []*KimiMessage{SystemMessage}
+	result := &ArticleContext{}
+	resp := ""
 
-	resp, kimiMessageHistory, err := KimiServiceApp.ChatWithKimi(chatGptPrompt, kimiMessageHistory)
-
-	if err != nil {
-		global.GVA_LOG.Info("chat gpt响应失败", zap.Error(err))
-		return &ArticleContext{}, err
+	for _, chatGptPrompt := range chatGptPromptList {
+		resp, kimiMessageHistory, err = KimiServiceApp.ChatWithKimi(chatGptPrompt, kimiMessageHistory)
+		if err != nil {
+			return nil, err
+		}
+		result.Content = resp
+		articleContext.Content = resp
 	}
 
-	content := resp
-	articleContext.Content = content
-
-	chatGptPrompt, err = QianfanServiceApp.parsePrompt(articleContext, ai.TitleCreate)
-	if err != nil {
-		return &ArticleContext{}, err
-	}
-	resp, kimiMessageHistory, err = KimiServiceApp.ChatWithKimi(chatGptPrompt, kimiMessageHistory)
-
-	title := strings.TrimSpace(resp)
-	title = strings.ReplaceAll(title, "{}", "")
-	articleContext.Title = title
-
-	chatGptPrompt, err = QianfanServiceApp.parsePrompt(articleContext, ai.AddImage)
+	chatGptPromptList, err = parsePrompt(articleContext, ai.TitleCreate)
 	if err != nil {
 		return nil, err
 	}
 
-	resp, kimiMessageHistory, err = KimiServiceApp.ChatWithKimi(chatGptPrompt, kimiMessageHistory)
+	for _, chatGptPrompt := range chatGptPromptList {
+		resp, kimiMessageHistory, err = KimiServiceApp.ChatWithKimi(chatGptPrompt, kimiMessageHistory)
+		if err != nil {
+			return nil, err
+		}
+		result.Title = resp
+	}
+
+	chatGptPromptList, err = parsePrompt(articleContext, ai.AddImage)
 	if err != nil {
 		return nil, err
 	}
 
-	articleContext.Content = resp
+	for _, chatGptPrompt := range chatGptPromptList {
+		resp, kimiMessageHistory, err = KimiServiceApp.ChatWithKimi(chatGptPrompt, kimiMessageHistory)
+		if err != nil {
+			return nil, err
+		}
+
+		result.Content = resp
+	}
 
 	return articleContext, nil
 }
@@ -283,4 +292,42 @@ type KimiResp struct {
 		CompletionTokens int `json:"completion_tokens"`
 		TotalTokens      int `json:"total_tokens"`
 	} `json:"usage"`
+}
+
+func parsePrompt(context *ArticleContext, promptType int) ([]string, error) {
+	topic := context.Topic
+	prompt, err := PromptServiceApp.FindPromptByTopicAndType(topic, promptType)
+	if err != nil {
+		return []string{}, err
+	}
+
+	promptList := make([]string, 0)
+	// 使用json.Unmarshal将JSON字符串解析到字符串切片
+	err = json.Unmarshal([]byte(utils.EscapeSpecialCharacters(prompt)), &promptList)
+
+	if len(promptList) == 0 {
+		promptList = []string{prompt}
+	}
+
+	result := make([]string, 0)
+
+	for _, item := range promptList {
+		temp := template.New("ChatGptPrompt")
+		tmpl, err2 := temp.Parse(item)
+		if err2 != nil {
+			global.GVA_LOG.Info("模板解析失败")
+			return []string{}, err2
+		}
+
+		// 创建一个缓冲区来保存模板生成的结果
+		var buf bytes.Buffer
+		// 使用模板和数据生成输出
+		err = tmpl.Execute(&buf, context)
+
+		chatGptPrompt := buf.String()
+
+		result = append(result, chatGptPrompt)
+	}
+
+	return result, err
 }
