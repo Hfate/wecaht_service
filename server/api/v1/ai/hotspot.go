@@ -69,7 +69,7 @@ func (e *HotspotApi) CreateArticle(c *gin.Context) {
 		response.FailWithMessage("创建失败", c)
 		return
 	}
-	response.OkWithMessage("创建成功", c)
+	response.OkWithMessage("创作任务创建成功", c)
 }
 
 // GetHotspotList

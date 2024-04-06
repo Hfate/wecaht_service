@@ -133,9 +133,9 @@
         />
         <el-table-column
             align="left"
-            label="目标发送公众号"
+            label="目标公众号"
             prop="targetAccountName"
-            width="140"
+            width="100"
         />
         <el-table-column
             align="left"

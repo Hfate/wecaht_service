@@ -17,14 +17,14 @@ type BaiduService struct {
 func SearchAndSave(keyword string) string {
 	imgUrlList := make([]string, 0)
 
-	unsplashImgUrlList := CollectUnsplashImgUrl(keyword)
-	if len(unsplashImgUrlList) > 0 {
-		imgUrlList = append(imgUrlList, unsplashImgUrlList...)
-	}
-
 	baiduImgUrlList := CollectBaiduImgUrl(keyword)
 	if len(baiduImgUrlList) > 0 {
 		imgUrlList = append(imgUrlList, baiduImgUrlList...)
+	}
+
+	unsplashImgUrlList := CollectUnsplashImgUrl(keyword)
+	if len(unsplashImgUrlList) > 0 {
+		imgUrlList = append(imgUrlList, unsplashImgUrlList...)
 	}
 
 	// 通过第一张图片链接下载图片

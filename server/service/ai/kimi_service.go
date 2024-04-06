@@ -197,6 +197,45 @@ func (*KimiService) Recreation(article ai.Article) (*ArticleContext, error) {
 	return articleContext, nil
 }
 
+func ChatWithKimiTest() (string, error) {
+	kimiReq := &KimiReq{
+		Model: "moonshot-v1-8k",
+		Messages: []KimiMessage{{
+			Role:    "system",
+			Content: "你是 Kimi，由 Moonshot AI 提供的人工智能助手，你更擅长中文和英文的对话。你会为用户提供安全，有帮助，准确的回答。同时，你会拒绝一切涉及恐怖主义，种族歧视，黄色暴力等问题的回答。Moonshot AI 为专有名词，不可翻译成其他语言。",
+		}, {
+			Role:    "user",
+			Content: "今天深圳的天气怎么样",
+		},
+		},
+		Temperature: 0.3,
+	}
+
+	statusCode, respBody, err := utils.PostWithHeaders("http://localhost:8000/v1/chat/completions", utils.Parse2Json(kimiReq), map[string]string{
+		"Authorization": "Bearer " + "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ1c2VyLWNlbnRlciIsImV4cCI6MTcyMDE4Mzg3NCwiaWF0IjoxNzEyNDA3ODc0LCJqdGkiOiJjbzhrYWdoa3FxNHJtZ25vN3NtZyIsInR5cCI6InJlZnJlc2giLCJzdWIiOiJjbnRnMWNlY3A3ZmNhbTVtbGE0MCIsInNwYWNlX2lkIjoiY250ZzFjZWNwN2ZjYW01bWxhM2ciLCJhYnN0cmFjdF91c2VyX2lkIjoiY250ZzFjZWNwN2ZjYW01bWxhMzAifQ.1zl8Acq-_ftv0KNZpzqStIqaY8I57s5RdMOTVQlAWRnLH0Y66GAwWMN5eyTfut2R9hKGDWHNnNifeYED_BJO4g",
+	})
+
+	if err != nil {
+		return "", err
+	}
+
+	if statusCode != 200 {
+		return "", errors.New(string(respBody))
+	}
+
+	kimiResp := &KimiResp{}
+	err = utils.JsonStrToStruct(string(respBody), kimiResp)
+	if err != nil {
+		return "", err
+	}
+
+	if len(kimiResp.Choices) > 0 {
+		return kimiResp.Choices[0].Message.Content, err
+	}
+
+	return "", errors.New("kimi回复为空")
+}
+
 func (*KimiService) ChatWithKimi(message string) (string, error) {
 	kimiCfg := global.GVA_CONFIG.Kimi
 
@@ -213,7 +252,7 @@ func (*KimiService) ChatWithKimi(message string) (string, error) {
 		Temperature: 0.3,
 	}
 
-	statusCode, respBody, err := utils.PostWithHeaders("https://api.moonshot.cn/v1/chat/completions", utils.Parse2Json(kimiReq), map[string]string{
+	statusCode, respBody, err := utils.PostWithHeaders("http://localhost:8000/v1/chat/completions", utils.Parse2Json(kimiReq), map[string]string{
 		"Authorization": "Bearer " + kimiCfg.AccessKey,
 	})
 
