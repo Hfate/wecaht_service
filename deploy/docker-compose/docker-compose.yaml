@@ -14,18 +14,18 @@ networks:
 
 services:
   # kimi
-  kimi-free-api:
-    container_name: kimi-free-api
-    image: vinlic/kimi-free-api:latest
-    restart: always
-    ports:
-      - "8000:8000"
-    environment:
-      - TZ=Asia/Shanghai
-    networks:
-      network:
-        # 在network网络下的容器内部的Ipv4地址
-        ipv4_address: 177.7.0.15
+#  kimi-free-api:
+#    container_name: kimi-free-api
+#    image: vinlic/kimi-free-api:latest
+#    restart: always
+#    ports:
+#      - "8000:8000"
+#    environment:
+#      - TZ=Asia/Shanghai
+#    networks:
+#      network:
+#        # 在network网络下的容器内部的Ipv4地址
+#        ipv4_address: 177.7.0.15
 
   # web服务
   web:
