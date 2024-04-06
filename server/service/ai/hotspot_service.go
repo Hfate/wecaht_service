@@ -43,7 +43,7 @@ func (exa *HotspotService) CreateArticle(id uint64) (err error) {
 	}
 
 	go func() {
-		err = AIArticleServiceApp.GenerateArticleByLink(hotspot.Link, officeAccount)
+		err = AIArticleServiceApp.GenerateArticleById(hotspot.ID, officeAccount)
 		if err != nil {
 			global.GVA_LOG.Error("CreateArticle", zap.Error(err))
 		}

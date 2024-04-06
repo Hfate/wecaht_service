@@ -115,11 +115,11 @@ func (exa *AIArticleService) GetAIArticle(id uint64) (aiArticle ai.AIArticle, er
 	return
 }
 
-func (exa *AIArticleService) GenerateArticleByLink(link string, account ai.OfficialAccount) error {
+func (exa *AIArticleService) GenerateArticleById(hotspotId uint64, account ai.OfficialAccount) error {
 	context := &ArticleContext{
-		Topic: account.Topic,
-		AppId: account.AppId,
-		Link:  link,
+		Topic:     account.Topic,
+		AppId:     account.AppId,
+		HotspotId: hotspotId,
 	}
 
 	articleContext := ArticlePipelineApp.Run("hotspot", context)

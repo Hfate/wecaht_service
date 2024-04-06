@@ -21,7 +21,7 @@ type ArticlePipeline struct {
 
 func (*ArticlePipeline) Run(model string, context *ArticleContext) *ArticleContext {
 	switch model {
-	case "hotpot":
+	case "hotspot":
 		err := HotSpotArticlePipelineApp.Write(context)
 		if err != nil {
 			fmt.Println(err)
@@ -180,12 +180,13 @@ type AddImagesHandle interface {
 }
 
 type ArticleContext struct {
-	AppId   string
-	Title   string
-	Content string
-	Topic   string
-	Link    string
-	Tags    []string
+	AppId     string
+	Title     string
+	Content   string
+	Topic     string
+	HotspotId uint64
+	Link      string
+	Tags      []string
 }
 
 // RecreationArticle 文章改写 or  二创
@@ -218,8 +219,8 @@ type HotSpotWriteArticle struct {
 
 func (r *HotSpotWriteArticle) Handle(context *ArticleContext) error {
 	hotspot := ai.Hotspot{}
-	if len(context.Link) > 0 {
-		err := global.GVA_DB.Where("link = ?", context.Link).Where("use_times=0").Order("created_at desc ,trending desc").Last(&hotspot).Error
+	if context.HotspotId != 0 {
+		err := global.GVA_DB.Where("id = ?", context.HotspotId).Order("created_at desc ,trending desc").Last(&hotspot).Error
 		if err != nil {
 			return err
 		}

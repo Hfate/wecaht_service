@@ -23,7 +23,9 @@ func (*KimiService) GetKeyWord(title string) string {
 		"\n文章标题：周处传奇：除三害、转人生，英雄之路的跌宕起伏  关键词：周处除三害" +
 		"\n文章标题：" + title
 
-	resp, err := KimiServiceApp.ChatWithKimi(chatGptPrompt)
+	kimiMessageHistory := []*KimiMessage{SystemMessage}
+
+	resp, kimiMessageHistory, err := KimiServiceApp.ChatWithKimi(chatGptPrompt, kimiMessageHistory)
 	if err != nil || len(resp) > 10 {
 		resp = "夜晚的城市"
 	}
@@ -41,7 +43,9 @@ func (*KimiService) HotSpotWrite(link string) (*ArticleContext, error) {
 		return &ArticleContext{}, err
 	}
 
-	resp, err := KimiServiceApp.ChatWithKimi(chatGptPrompt)
+	kimiMessageHistory := []*KimiMessage{SystemMessage}
+
+	resp, kimiMessageHistory, err := KimiServiceApp.ChatWithKimi(chatGptPrompt, kimiMessageHistory)
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +65,7 @@ func (*KimiService) HotSpotWrite(link string) (*ArticleContext, error) {
 		return nil, err
 	}
 
-	resp, err = KimiServiceApp.ChatWithKimi(chatGptPrompt)
+	resp, kimiMessageHistory, err = KimiServiceApp.ChatWithKimi(chatGptPrompt, kimiMessageHistory)
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +77,7 @@ func (*KimiService) HotSpotWrite(link string) (*ArticleContext, error) {
 		return nil, err
 	}
 
-	resp, err = KimiServiceApp.ChatWithKimi(chatGptPrompt)
+	resp, kimiMessageHistory, err = KimiServiceApp.ChatWithKimi(chatGptPrompt, kimiMessageHistory)
 	if err != nil {
 		return nil, err
 	}
@@ -113,7 +117,9 @@ func (*KimiService) TopicWrite(topic string) (*ArticleContext, error) {
 		return &ArticleContext{}, err
 	}
 
-	resp, err := KimiServiceApp.ChatWithKimi(chatGptPrompt)
+	kimiMessageHistory := []*KimiMessage{SystemMessage}
+
+	resp, kimiMessageHistory, err := KimiServiceApp.ChatWithKimi(chatGptPrompt, kimiMessageHistory)
 
 	if err != nil {
 		global.GVA_LOG.Info("chat gpt响应失败", zap.Error(err))
@@ -129,7 +135,7 @@ func (*KimiService) TopicWrite(topic string) (*ArticleContext, error) {
 		return articleContext, err
 	}
 
-	resp, err = KimiServiceApp.ChatWithKimi(chatGptPrompt)
+	resp, kimiMessageHistory, err = KimiServiceApp.ChatWithKimi(chatGptPrompt, kimiMessageHistory)
 	if err != nil {
 		return nil, err
 	}
@@ -141,7 +147,7 @@ func (*KimiService) TopicWrite(topic string) (*ArticleContext, error) {
 		return nil, err
 	}
 
-	resp, err = KimiServiceApp.ChatWithKimi(chatGptPrompt)
+	resp, kimiMessageHistory, err = KimiServiceApp.ChatWithKimi(chatGptPrompt, kimiMessageHistory)
 	if err != nil {
 		return nil, err
 	}
@@ -162,7 +168,9 @@ func (*KimiService) Recreation(article ai.Article) (*ArticleContext, error) {
 		return &ArticleContext{}, err
 	}
 
-	resp, err := KimiServiceApp.ChatWithKimi(chatGptPrompt)
+	kimiMessageHistory := []*KimiMessage{SystemMessage}
+
+	resp, kimiMessageHistory, err := KimiServiceApp.ChatWithKimi(chatGptPrompt, kimiMessageHistory)
 
 	if err != nil {
 		global.GVA_LOG.Info("chat gpt响应失败", zap.Error(err))
@@ -176,7 +184,7 @@ func (*KimiService) Recreation(article ai.Article) (*ArticleContext, error) {
 	if err != nil {
 		return &ArticleContext{}, err
 	}
-	resp, err = KimiServiceApp.ChatWithKimi(chatGptPrompt)
+	resp, kimiMessageHistory, err = KimiServiceApp.ChatWithKimi(chatGptPrompt, kimiMessageHistory)
 
 	title := strings.TrimSpace(resp)
 	title = strings.ReplaceAll(title, "{}", "")
@@ -187,7 +195,7 @@ func (*KimiService) Recreation(article ai.Article) (*ArticleContext, error) {
 		return nil, err
 	}
 
-	resp, err = KimiServiceApp.ChatWithKimi(chatGptPrompt)
+	resp, kimiMessageHistory, err = KimiServiceApp.ChatWithKimi(chatGptPrompt, kimiMessageHistory)
 	if err != nil {
 		return nil, err
 	}
@@ -197,90 +205,59 @@ func (*KimiService) Recreation(article ai.Article) (*ArticleContext, error) {
 	return articleContext, nil
 }
 
-func ChatWithKimiTest() (string, error) {
-	kimiReq := &KimiReq{
-		Model: "moonshot-v1-8k",
-		Messages: []KimiMessage{{
-			Role:    "system",
-			Content: "你是 Kimi，由 Moonshot AI 提供的人工智能助手，你更擅长中文和英文的对话。你会为用户提供安全，有帮助，准确的回答。同时，你会拒绝一切涉及恐怖主义，种族歧视，黄色暴力等问题的回答。Moonshot AI 为专有名词，不可翻译成其他语言。",
-		}, {
-			Role:    "user",
-			Content: "今天深圳的天气怎么样",
-		},
-		},
-		Temperature: 0.3,
-	}
-
-	statusCode, respBody, err := utils.PostWithHeaders("http://localhost:8000/v1/chat/completions", utils.Parse2Json(kimiReq), map[string]string{
-		"Authorization": "Bearer " + "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ1c2VyLWNlbnRlciIsImV4cCI6MTcyMDE4Mzg3NCwiaWF0IjoxNzEyNDA3ODc0LCJqdGkiOiJjbzhrYWdoa3FxNHJtZ25vN3NtZyIsInR5cCI6InJlZnJlc2giLCJzdWIiOiJjbnRnMWNlY3A3ZmNhbTVtbGE0MCIsInNwYWNlX2lkIjoiY250ZzFjZWNwN2ZjYW01bWxhM2ciLCJhYnN0cmFjdF91c2VyX2lkIjoiY250ZzFjZWNwN2ZjYW01bWxhMzAifQ.1zl8Acq-_ftv0KNZpzqStIqaY8I57s5RdMOTVQlAWRnLH0Y66GAwWMN5eyTfut2R9hKGDWHNnNifeYED_BJO4g",
-	})
-
-	if err != nil {
-		return "", err
-	}
-
-	if statusCode != 200 {
-		return "", errors.New(string(respBody))
-	}
-
-	kimiResp := &KimiResp{}
-	err = utils.JsonStrToStruct(string(respBody), kimiResp)
-	if err != nil {
-		return "", err
-	}
-
-	if len(kimiResp.Choices) > 0 {
-		return kimiResp.Choices[0].Message.Content, err
-	}
-
-	return "", errors.New("kimi回复为空")
+var SystemMessage = &KimiMessage{
+	Role:    "system",
+	Content: "你是 Kimi，由 Moonshot AI 提供的人工智能助手，你更擅长中文和英文的对话。你会为用户提供安全，有帮助，准确的回答。同时，你会拒绝一切涉及恐怖主义，种族歧视，黄色暴力等问题的回答。Moonshot AI 为专有名词，不可翻译成其他语言。",
 }
 
-func (*KimiService) ChatWithKimi(message string) (string, error) {
+func (*KimiService) ChatWithKimi(message string, history []*KimiMessage) (string, []*KimiMessage, error) {
 	kimiCfg := global.GVA_CONFIG.Kimi
 
+	history = append(history, &KimiMessage{
+		Role:    "user",
+		Content: message,
+	})
+
 	kimiReq := &KimiReq{
-		Model: "moonshot-v1-8k",
-		Messages: []KimiMessage{{
-			Role:    "system",
-			Content: "你是 Kimi，由 Moonshot AI 提供的人工智能助手，你更擅长中文和英文的对话。你会为用户提供安全，有帮助，准确的回答。同时，你会拒绝一切涉及恐怖主义，种族歧视，黄色暴力等问题的回答。Moonshot AI 为专有名词，不可翻译成其他语言。",
-		}, {
-			Role:    "user",
-			Content: message,
-		},
-		},
-		Temperature: 0.3,
+		Model:    "moonshot-v1-8k",
+		Messages: history,
 	}
 
-	statusCode, respBody, err := utils.PostWithHeaders("http://localhost:8000/v1/chat/completions", utils.Parse2Json(kimiReq), map[string]string{
-		"Authorization": "Bearer " + kimiCfg.AccessKey,
+	apiUrl := kimiCfg.ApiUrl
+
+	statusCode, respBody, err := utils.PostWithHeaders(apiUrl, utils.Parse2Json(kimiReq), map[string]string{
+		"Authorization": "Bearer " + kimiCfg.RefreshToken,
 	})
 
 	if err != nil {
-		return "", err
+		return "", history, err
 	}
 
 	if statusCode != 200 {
-		return "", errors.New(string(respBody))
+		return "", history, errors.New(string(respBody))
 	}
 
 	kimiResp := &KimiResp{}
 	err = utils.JsonStrToStruct(string(respBody), kimiResp)
 	if err != nil {
-		return "", err
+		return "", history, err
 	}
 
 	if len(kimiResp.Choices) > 0 {
-		return kimiResp.Choices[0].Message.Content, err
+		history = append(history, &KimiMessage{
+			Role:    "assistant",
+			Content: kimiResp.Choices[0].Message.Content,
+		})
+		return kimiResp.Choices[0].Message.Content, history, err
 	}
 
-	return "", errors.New("kimi回复为空")
+	return "", history, errors.New("kimi回复为空")
 }
 
 type KimiReq struct {
-	Model       string        `json:"model"`
-	Messages    []KimiMessage `json:"messages"`
-	Temperature float64       `json:"temperature"`
+	Model       string         `json:"model"`
+	Messages    []*KimiMessage `json:"messages"`
+	Temperature float64        `json:"temperature"`
 }
 
 type KimiMessage struct {

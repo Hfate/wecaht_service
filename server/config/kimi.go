@@ -1,5 +1,6 @@
 package config
 
 type Kimi struct {
-	AccessKey string `mapstructure:"access-key" json:"access-key" yaml:"access-key"`
+	ApiUrl       string `mapstructure:"api-url" json:"api-url" yaml:"api-url"`
+	RefreshToken string `mapstructure:"refresh-token" json:"refresh-token" yaml:"refresh-token"`
 }
