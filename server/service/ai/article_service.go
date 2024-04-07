@@ -182,7 +182,7 @@ func (exa *ArticleService) GetArticleList(sysUserAuthorityID uint, info aiReq.Ar
 	if err != nil {
 		return articleList, total, err
 	} else {
-		err = db.Limit(limit).Offset(offset).Order("create_time desc").Find(&articleList).Error
+		err = db.Limit(limit).Offset(offset).Order("created_at desc").Find(&articleList).Error
 	}
 	return articleList, total, err
 }

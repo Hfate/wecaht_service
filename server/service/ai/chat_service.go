@@ -10,6 +10,7 @@ type ChatService interface {
 
 var QianfanChat = "qianfan"
 var Kimi = "kimi"
+var Qianwen = "qianwen"
 var AllModel = "all"
 
 var ChatModelServiceApp = new(ChatModelService)
@@ -24,12 +25,14 @@ func (*ChatModelService) Recreation(article ai.Article, chatModel string) (*Arti
 		return KimiServiceApp.Recreation(article)
 	case Kimi:
 		return KimiServiceApp.Recreation(article)
+	case Qianwen:
+		return QianwenServiceApp.Recreation(article)
 	default:
-		return KimiServiceApp.Recreation(article)
-		//if err == nil {
-		//	return result, nil
-		//}
-		////return KimiServiceApp.Recreation(article)
+		result, err := KimiServiceApp.Recreation(article)
+		if err == nil {
+			return result, nil
+		}
+		return QianwenServiceApp.Recreation(article)
 	}
 }
 
@@ -40,12 +43,14 @@ func (*ChatModelService) HotSpotWrite(link string, chatModel string) (*ArticleCo
 		return KimiServiceApp.HotSpotWrite(link)
 	case Kimi:
 		return KimiServiceApp.HotSpotWrite(link)
+	case Qianwen:
+		return QianwenServiceApp.HotSpotWrite(link)
 	default:
 		result, err := KimiServiceApp.HotSpotWrite(link)
 		if err == nil {
 			return result, nil
 		}
-		return KimiServiceApp.HotSpotWrite(link)
+		return QianwenServiceApp.HotSpotWrite(link)
 	}
 }
 
@@ -56,11 +61,13 @@ func (*ChatModelService) TopicWrite(topic, chatModel string) (*ArticleContext, e
 		return KimiServiceApp.TopicWrite(topic)
 	case Kimi:
 		return KimiServiceApp.TopicWrite(topic)
+	case Qianwen:
+		return QianwenServiceApp.TopicWrite(topic)
 	default:
 		result, err := KimiServiceApp.TopicWrite(topic)
 		if err == nil {
 			return result, nil
 		}
-		return KimiServiceApp.TopicWrite(topic)
+		return QianwenServiceApp.TopicWrite(topic)
 	}
 }
