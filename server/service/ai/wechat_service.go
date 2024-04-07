@@ -161,6 +161,10 @@ func (*WechatService) PublishArticle(dbOfficialAccount aiModel.OfficialAccount, 
 		return 0, "", 0, 0, errors.New("全部发送草稿失败")
 	}
 
+	if len(draftList) > 5 {
+		draftList = draftList[0:5]
+	}
+
 	// 获取草稿箱api
 	d := officialAccount.GetDraft()
 	mediaID, err = d.AddDraft(draftList)
