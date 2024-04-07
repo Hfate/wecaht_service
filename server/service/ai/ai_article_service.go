@@ -46,15 +46,25 @@ func (exa *AIArticleService) PublishArticle(ids []int) error {
 	var articles []ai.AIArticle
 	err := global.GVA_DB.Model(&ai.AIArticle{}).Where("id in ?", ids).Find(&articles).Error
 
-	go func() {
-		for _, item := range articles {
-			err = exa.Publish1Article(item)
-			if err != nil {
-				global.GVA_LOG.Error("发布失败!", zap.Error(err), zap.String("item", item.Title))
-				item.ArticleStatus = 4
-				item.ErrMessage = err.Error()
+	batchAIArticleMap := make(map[string][]ai.AIArticle)
+	for _, item := range articles {
+		batchAIArticleMap[item.BatchId] = append(batchAIArticleMap[item.BatchId], item)
+	}
 
-				global.GVA_DB.Save(&item)
+	go func() {
+		for _, list := range batchAIArticleMap {
+			err = exa.Publish1Article(list)
+			if err != nil {
+
+				for _, item := range list {
+
+					global.GVA_LOG.Error("发布失败!", zap.Error(err), zap.String("item", item.Title))
+					item.ArticleStatus = 4
+					item.ErrMessage = err.Error()
+					global.GVA_DB.Save(&item)
+
+				}
+
 			}
 
 		}
@@ -75,27 +85,33 @@ func (exa *AIArticleService) UpdateArticle(aiArticle ai.AIArticle) (err error) {
 // @param: e model.AIArticle
 // @return: err error
 
-func (exa *AIArticleService) Publish1Article(aiArticle ai.AIArticle) (err error) {
-	officialAccount, err := OfficialAccountServiceApp.GetOfficialAccountByAppId(aiArticle.TargetAccountId)
+func (exa *AIArticleService) Publish1Article(aiArticleList []ai.AIArticle) (err error) {
+	if len(aiArticleList) == 0 {
+		return err
+	}
+	officialAccount, err := OfficialAccountServiceApp.GetOfficialAccountByAppId(aiArticleList[0].TargetAccountId)
 	if err != nil {
 		return err
 	}
 
 	// 发布文章
-	publishId, mediaID, msgId, msgDataID, err := WechatServiceApp.PublishArticle(officialAccount, aiArticle)
+	publishId, mediaID, msgId, msgDataID, err := WechatServiceApp.PublishArticle(officialAccount, aiArticleList)
 	if err != nil {
 		return err
 	}
 
-	// 更新发布状态
-	aiArticle.TargetAccountName = officialAccount.AccountName
-	aiArticle.PublishTime = time.Now()
-	aiArticle.ArticleStatus = 1
-	aiArticle.MediaId = mediaID
-	aiArticle.MsgId = msgId
-	aiArticle.PublishId = publishId
-	aiArticle.MsgDataID = msgDataID
-	err = global.GVA_DB.Save(&aiArticle).Error
+	for _, aiArticle := range aiArticleList {
+		// 更新发布状态
+		aiArticle.TargetAccountName = officialAccount.AccountName
+		aiArticle.PublishTime = time.Now()
+		aiArticle.ArticleStatus = 1
+		aiArticle.MediaId = mediaID
+		aiArticle.MsgId = msgId
+		aiArticle.PublishId = publishId
+		aiArticle.MsgDataID = msgDataID
+		err = global.GVA_DB.Save(&aiArticle).Error
+	}
+
 	return err
 }
 

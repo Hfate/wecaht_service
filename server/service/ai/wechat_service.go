@@ -105,7 +105,7 @@ func (*WechatService) ImageUpload(dbOfficialAccount aiModel.OfficialAccount, fil
 	return
 }
 
-func (*WechatService) PublishArticle(dbOfficialAccount aiModel.OfficialAccount, aiArticle aiModel.AIArticle) (publishId int64,
+func (*WechatService) PublishArticle(dbOfficialAccount aiModel.OfficialAccount, aiArticleList []aiModel.AIArticle) (publishId int64,
 	mediaID string, msgId, msgDataID int64, err error) {
 
 	cfg := &offConfig.Config{
@@ -116,42 +116,49 @@ func (*WechatService) PublishArticle(dbOfficialAccount aiModel.OfficialAccount, 
 	}
 	officialAccount := wc.GetOfficialAccount(cfg)
 
-	// 搜索封面托片
-	filePath := utils.SearchAndSave(aiArticle.Title)
+	draftList := make([]*draft.Article, 0)
+	for _, aiArticle := range aiArticleList {
+		// 搜索封面托片
+		filePath := utils.SearchAndSave(aiArticle.Title)
 
-	if filePath == "" {
-		// 找不到 则使用ai
-		keyword := KimiServiceApp.GetKeyWord(aiArticle.Title)
-		filePath = utils.SearchAndSave(keyword)
 		if filePath == "" {
-			global.GVA_LOG.Error("没有找到封面图片", zap.String("title", aiArticle.Title),
-				zap.String("appId", dbOfficialAccount.AppId),
-				zap.String("appName", dbOfficialAccount.AccountName))
+			// 找不到 则使用ai
+			keyword := KimiServiceApp.GetKeyWord(aiArticleList[0].Title)
+			filePath = utils.SearchAndSave(keyword)
+			if filePath == "" {
+				global.GVA_LOG.Error("没有找到封面图片", zap.String("title", aiArticle.Title),
+					zap.String("appId", dbOfficialAccount.AppId),
+					zap.String("appName", dbOfficialAccount.AccountName))
+			}
+
+			continue
+
 		}
 
-		return 0, "", 0, 0, err
-	}
+		imgMediaID, _, err2 := MediaServiceApp.CreateMediaByPath(dbOfficialAccount.AppId, filePath)
+		if err2 != nil {
+			global.GVA_LOG.Error("上传封面图片失败", zap.String("title", aiArticle.Title),
+				zap.String("filePath", filePath),
+				zap.String("appId", dbOfficialAccount.AppId),
+				zap.String("appName", dbOfficialAccount.AccountName), zap.Error(err2))
+			continue
+		}
 
-	imgMediaID, _, err := MediaServiceApp.CreateMediaByPath(dbOfficialAccount.AppId, filePath)
-	if err != nil {
-		global.GVA_LOG.Error("上传封面图片失败", zap.String("title", aiArticle.Title),
-			zap.String("filePath", filePath),
-			zap.String("appId", dbOfficialAccount.AppId),
-			zap.String("appName", dbOfficialAccount.AccountName), zap.Error(err))
-		return 0, "", 0, 0, err
+		draftList = append(draftList, &draft.Article{
+			Title:        aiArticle.Title,
+			ThumbMediaID: imgMediaID,
+			//ThumbURL:     "https://mmbiz.qpic.cn/sz_mmbiz_jpg/uO29ibicRxJ0QfibQSCptBtjsyia61jSn4V7RRX8aLcMUwN7adJhfyaj788qibHVibnOicDyeTAWAor7GGDP6fz1N499A/640?wx_fmt=webp&amp",
+			Author: dbOfficialAccount.DefaultAuthorName,
+			//Digest:       "test",
+			ShowCoverPic: 1,
+			Content:      aiArticle.Content,
+		})
+
 	}
 
 	// 获取草稿箱api
 	d := officialAccount.GetDraft()
-	mediaID, err = d.AddDraft([]*draft.Article{{
-		Title:        aiArticle.Title,
-		ThumbMediaID: imgMediaID,
-		//ThumbURL:     "https://mmbiz.qpic.cn/sz_mmbiz_jpg/uO29ibicRxJ0QfibQSCptBtjsyia61jSn4V7RRX8aLcMUwN7adJhfyaj788qibHVibnOicDyeTAWAor7GGDP6fz1N499A/640?wx_fmt=webp&amp",
-		Author: dbOfficialAccount.DefaultAuthorName,
-		//Digest:       "test",
-		ShowCoverPic: 1,
-		Content:      aiArticle.Content,
-	}})
+	mediaID, err = d.AddDraft(draftList)
 
 	fmt.Println("appId："+dbOfficialAccount.AppId+";appName:"+dbOfficialAccount.AccountName+";发布草稿：mediaID:", mediaID, err)
 	if err != nil {
