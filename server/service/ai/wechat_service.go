@@ -1,6 +1,7 @@
 package ai
 
 import (
+	"errors"
 	"fmt"
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
@@ -154,6 +155,10 @@ func (*WechatService) PublishArticle(dbOfficialAccount aiModel.OfficialAccount, 
 			Content:      aiArticle.Content,
 		})
 
+	}
+
+	if len(draftList) == 0 {
+		return 0, "", 0, 0, errors.New("全部发送草稿失败")
 	}
 
 	// 获取草稿箱api
