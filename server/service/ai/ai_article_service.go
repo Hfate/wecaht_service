@@ -168,8 +168,9 @@ func (exa *AIArticleService) GenerateArticle(account ai.OfficialAccount) error {
 
 	for i < targetNum {
 		context := &ArticleContext{
-			Topic: account.Topic,
-			AppId: account.AppId,
+			Topic:  account.Topic,
+			AppId:  account.AppId,
+			Params: []string{},
 		}
 
 		batchId := timeutil.GetCurDate() + account.AppId
@@ -188,6 +189,7 @@ func (exa *AIArticleService) GenerateArticle(account ai.OfficialAccount) error {
 			AuthorName:        account.DefaultAuthorName,
 			Tags:              strings.Join(articleContext.Tags, ","),
 			Content:           exa.parseContent(articleContext.Content),
+			Params:            strings.Join(articleContext.Params, ","),
 		}
 		aiArticle.BASEMODEL = BaseModel()
 
@@ -277,15 +279,14 @@ func (exa *AIArticleService) Recreation(id uint64) (err error) {
 		return err
 	}
 
-	article := ai.Article{
-		Title:      aiArticle.Title,
-		PortalName: aiArticle.PortalName,
-		Topic:      aiArticle.Topic,
-		AuthorName: aiArticle.AuthorName,
-		Content:    aiArticle.Content,
+	context := &ArticleContext{
+		Title:   aiArticle.Title,
+		Topic:   aiArticle.Topic,
+		Content: aiArticle.Content,
+		Link:    aiArticle.Link,
 	}
 
-	chatGptResp, err := KimiServiceApp.Recreation(article)
+	chatGptResp, err := KimiServiceApp.Recreation(context)
 	if err != nil {
 		return err
 	}

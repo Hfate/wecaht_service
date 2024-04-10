@@ -18,56 +18,56 @@ var ChatModelServiceApp = new(ChatModelService)
 type ChatModelService struct {
 }
 
-func (*ChatModelService) Recreation(article ai.Article, chatModel string) (*ArticleContext, error) {
+func (*ChatModelService) Recreation(context *ArticleContext, chatModel string) (*ArticleContext, error) {
 	// 可以通过 WithModel 指定模型
 	switch chatModel {
 	case QianfanChat:
-		return KimiServiceApp.Recreation(article)
+		return KimiServiceApp.Recreation(context)
 	case Kimi:
-		return KimiServiceApp.Recreation(article)
+		return KimiServiceApp.Recreation(context)
 	case Qianwen:
-		return QianwenServiceApp.Recreation(article)
+		return QianwenServiceApp.Recreation(context)
 	default:
-		result, err := KimiServiceApp.Recreation(article)
-		if err == nil {
+		result, err := KimiServiceApp.Recreation(context)
+		if err == nil && len(context.Params) > 0 {
 			return result, nil
 		}
-		return QianwenServiceApp.Recreation(article)
+		return QianwenServiceApp.Recreation(context)
 	}
 }
 
-func (*ChatModelService) HotSpotWrite(link string, chatModel string) (*ArticleContext, error) {
+func (*ChatModelService) HotSpotWrite(context *ArticleContext, chatModel string) (*ArticleContext, error) {
 	// 可以通过 WithModel 指定模型
 	switch chatModel {
 	case QianfanChat:
-		return KimiServiceApp.HotSpotWrite(link)
+		return KimiServiceApp.HotSpotWrite(context)
 	case Kimi:
-		return KimiServiceApp.HotSpotWrite(link)
+		return KimiServiceApp.HotSpotWrite(context)
 	case Qianwen:
-		return QianwenServiceApp.HotSpotWrite(link)
+		return QianwenServiceApp.HotSpotWrite(context)
 	default:
-		result, err := KimiServiceApp.HotSpotWrite(link)
-		if err == nil {
+		result, err := KimiServiceApp.HotSpotWrite(context)
+		if err == nil && len(context.Params) > 0 {
 			return result, nil
 		}
-		return QianwenServiceApp.HotSpotWrite(link)
+		return QianwenServiceApp.HotSpotWrite(context)
 	}
 }
 
-func (*ChatModelService) TopicWrite(topic, chatModel string) (*ArticleContext, error) {
+func (*ChatModelService) TopicWrite(context *ArticleContext, chatModel string) (*ArticleContext, error) {
 	// 可以通过 WithModel 指定模型
 	switch chatModel {
 	case QianfanChat:
-		return KimiServiceApp.TopicWrite(topic)
+		return KimiServiceApp.TopicWrite(context)
 	case Kimi:
-		return KimiServiceApp.TopicWrite(topic)
+		return KimiServiceApp.TopicWrite(context)
 	case Qianwen:
-		return QianwenServiceApp.TopicWrite(topic)
+		return QianwenServiceApp.TopicWrite(context)
 	default:
-		result, err := KimiServiceApp.TopicWrite(topic)
-		if err == nil {
+		result, err := KimiServiceApp.TopicWrite(context)
+		if err == nil && len(context.Params) > 0 {
 			return result, nil
 		}
-		return QianwenServiceApp.TopicWrite(topic)
+		return QianwenServiceApp.TopicWrite(context)
 	}
 }

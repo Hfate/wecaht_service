@@ -1,9 +1,8 @@
 package ai
 
 import (
-	"context"
 	"errors"
-	"github.com/baidubce/bce-qianfan-sdk/go/qianfan"
+
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/ai"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
@@ -21,9 +20,9 @@ func (*QianwenService) GetKeyWord(title string) string {
 		"\n文章标题：周处传奇：除三害、转人生，英雄之路的跌宕起伏  关键词：周处除三害" +
 		"\n文章标题：" + title
 
-	kimiMessageHistory := []*QianwenMessage{QianwenSystemMessage}
+	qianwenMessageHistory := []*QianwenMessage{QianwenSystemMessage}
 
-	resp, kimiMessageHistory, err := QianwenServiceApp.ChatWithQianwen(chatGptPrompt, kimiMessageHistory)
+	resp, qianwenMessageHistory, err := QianwenServiceApp.ChatWithQianwen(chatGptPrompt, qianwenMessageHistory)
 	if err != nil || len(resp) > 10 {
 		resp = "夜晚的城市"
 	}
@@ -31,81 +30,59 @@ func (*QianwenService) GetKeyWord(title string) string {
 	return resp
 }
 
-func (*QianwenService) HotSpotWrite(link string) (*ArticleContext, error) {
+func (*QianwenService) HotSpotWrite(context *ArticleContext) (*ArticleContext, error) {
 
-	articleContext := &ArticleContext{}
-	articleContext.Link = link
-
-	chatGptPromptList, err := parsePrompt(articleContext, ai.HotSpotWrite)
+	chatGptPromptList, err := parsePrompt(context, ai.HotSpotWrite)
 	if err != nil {
 		return &ArticleContext{}, err
 	}
 
-	kimiMessageHistory := []*QianwenMessage{QianwenSystemMessage}
-	result := &ArticleContext{}
+	qianwenMessageHistory := []*QianwenMessage{QianwenSystemMessage}
 	resp := ""
 
 	for _, chatGptPrompt := range chatGptPromptList {
-		resp, kimiMessageHistory, err = QianwenServiceApp.ChatWithQianwen(chatGptPrompt, kimiMessageHistory)
+		resp, qianwenMessageHistory, err = QianwenServiceApp.ChatWithQianwen(chatGptPrompt, qianwenMessageHistory)
 		if err != nil {
 			return nil, err
 		}
-		result.Content = resp
-		articleContext.Content = resp
+		context.Content = resp
 	}
 
-	chatGptPromptList, err = parsePrompt(articleContext, ai.TitleCreate)
+	chatGptPromptList, err = parsePrompt(context, ai.TitleCreate)
 	if err != nil {
 		return nil, err
 	}
 
 	for _, chatGptPrompt := range chatGptPromptList {
-		resp, kimiMessageHistory, err = QianwenServiceApp.ChatWithQianwen(chatGptPrompt, kimiMessageHistory)
+		resp, qianwenMessageHistory, err = QianwenServiceApp.ChatWithQianwen(chatGptPrompt, qianwenMessageHistory)
 		if err != nil {
 			return nil, err
 		}
-		result.Title = resp
+		context.Title = resp
 	}
 
-	chatGptPromptList, err = parsePrompt(articleContext, ai.AddImage)
+	chatGptPromptList, err = parsePrompt(context, ai.AddImage)
 	if err != nil {
 		return nil, err
 	}
 
 	for _, chatGptPrompt := range chatGptPromptList {
-		resp, kimiMessageHistory, err = QianwenServiceApp.ChatWithQianwen(chatGptPrompt, kimiMessageHistory)
+		resp, qianwenMessageHistory, err = QianwenServiceApp.ChatWithQianwen(chatGptPrompt, qianwenMessageHistory)
 		if err != nil {
 			return nil, err
 		}
 
-		result.Content = resp
+		context.Content = resp
 	}
 
-	return result, nil
+	context.Params = []string{"qianwen", "HotSpotWrite"}
+	return context, nil
 }
 
-func (*QianwenService) TopicWrite(topic string) (*ArticleContext, error) {
-	articleContext := &ArticleContext{}
-	articleContext.Topic = topic
+func (*QianwenService) TopicWrite(articleContext *ArticleContext) (*ArticleContext, error) {
+	topic := articleContext.Topic
 
 	subject := SubjectServiceApp.FindAndUseSubjectByTopic(topic)
-	if subject == "" {
-		chat := qianfan.NewChatCompletion(qianfan.WithModel("ERNIE-Bot-4"))
-		chatGptPrompt := "请以<" + topic + ">为主题随机提供一个有趣的吸引人的写作话题，直接返回话题即可，无需任何补充说明"
-		resp, err := chat.Do(
-			context.TODO(),
-			&qianfan.ChatCompletionRequest{
-				System: "微信公众号爆款文写作专家",
-				Messages: []qianfan.ChatCompletionMessage{
-					qianfan.ChatCompletionUserMessage(chatGptPrompt),
-				},
-			},
-		)
-		if err != nil {
-			return &ArticleContext{}, err
-		}
-		subject = resp.Result
-	}
 
 	articleContext.Topic = subject
 
@@ -114,16 +91,14 @@ func (*QianwenService) TopicWrite(topic string) (*ArticleContext, error) {
 		return &ArticleContext{}, err
 	}
 
-	kimiMessageHistory := []*QianwenMessage{QianwenSystemMessage}
-	result := &ArticleContext{}
+	qianwenMessageHistory := []*QianwenMessage{QianwenSystemMessage}
 	resp := ""
 
 	for _, chatGptPrompt := range chatGptPromptList {
-		resp, kimiMessageHistory, err = QianwenServiceApp.ChatWithQianwen(chatGptPrompt, kimiMessageHistory)
+		resp, qianwenMessageHistory, err = QianwenServiceApp.ChatWithQianwen(chatGptPrompt, qianwenMessageHistory)
 		if err != nil {
 			return nil, err
 		}
-		result.Content = resp
 		articleContext.Content = resp
 	}
 
@@ -133,11 +108,11 @@ func (*QianwenService) TopicWrite(topic string) (*ArticleContext, error) {
 	}
 
 	for _, chatGptPrompt := range chatGptPromptList {
-		resp, kimiMessageHistory, err = QianwenServiceApp.ChatWithQianwen(chatGptPrompt, kimiMessageHistory)
+		resp, qianwenMessageHistory, err = QianwenServiceApp.ChatWithQianwen(chatGptPrompt, qianwenMessageHistory)
 		if err != nil {
 			return nil, err
 		}
-		result.Title = resp
+		articleContext.Title = resp
 	}
 
 	chatGptPromptList, err = parsePrompt(articleContext, ai.AddImage)
@@ -146,38 +121,34 @@ func (*QianwenService) TopicWrite(topic string) (*ArticleContext, error) {
 	}
 
 	for _, chatGptPrompt := range chatGptPromptList {
-		resp, kimiMessageHistory, err = QianwenServiceApp.ChatWithQianwen(chatGptPrompt, kimiMessageHistory)
+		resp, qianwenMessageHistory, err = QianwenServiceApp.ChatWithQianwen(chatGptPrompt, qianwenMessageHistory)
 		if err != nil {
 			return nil, err
 		}
 
-		result.Content = resp
+		articleContext.Content = resp
 	}
 
-	return result, nil
+	articleContext.Params = []string{"qianwen", "HotSpotWrite"}
+
+	return articleContext, nil
 }
 
-func (*QianwenService) Recreation(article ai.Article) (*ArticleContext, error) {
-	articleContext := &ArticleContext{}
-	articleContext.Title = article.Title
-	articleContext.Topic = article.Topic
-	articleContext.Link = article.Link
+func (*QianwenService) Recreation(articleContext *ArticleContext) (*ArticleContext, error) {
 
 	chatGptPromptList, err := parsePrompt(articleContext, ai.ContentRecreation)
 	if err != nil {
 		return &ArticleContext{}, err
 	}
 
-	kimiMessageHistory := []*QianwenMessage{QianwenSystemMessage}
-	result := &ArticleContext{}
+	qianwenMessageHistory := []*QianwenMessage{QianwenSystemMessage}
 	resp := ""
 
 	for _, chatGptPrompt := range chatGptPromptList {
-		resp, kimiMessageHistory, err = QianwenServiceApp.ChatWithQianwen(chatGptPrompt, kimiMessageHistory)
+		resp, qianwenMessageHistory, err = QianwenServiceApp.ChatWithQianwen(chatGptPrompt, qianwenMessageHistory)
 		if err != nil {
 			return nil, err
 		}
-		result.Content = resp
 		articleContext.Content = resp
 	}
 
@@ -187,11 +158,11 @@ func (*QianwenService) Recreation(article ai.Article) (*ArticleContext, error) {
 	}
 
 	for _, chatGptPrompt := range chatGptPromptList {
-		resp, kimiMessageHistory, err = QianwenServiceApp.ChatWithQianwen(chatGptPrompt, kimiMessageHistory)
+		resp, qianwenMessageHistory, err = QianwenServiceApp.ChatWithQianwen(chatGptPrompt, qianwenMessageHistory)
 		if err != nil {
 			return nil, err
 		}
-		result.Title = resp
+		articleContext.Title = resp
 	}
 
 	chatGptPromptList, err = parsePrompt(articleContext, ai.AddImage)
@@ -200,14 +171,15 @@ func (*QianwenService) Recreation(article ai.Article) (*ArticleContext, error) {
 	}
 
 	for _, chatGptPrompt := range chatGptPromptList {
-		resp, kimiMessageHistory, err = QianwenServiceApp.ChatWithQianwen(chatGptPrompt, kimiMessageHistory)
+		resp, qianwenMessageHistory, err = QianwenServiceApp.ChatWithQianwen(chatGptPrompt, qianwenMessageHistory)
 		if err != nil {
 			return nil, err
 		}
 
-		result.Content = resp
+		articleContext.Content = resp
 	}
 
+	articleContext.Params = []string{"qianwen", "Recreation"}
 	return articleContext, nil
 }
 

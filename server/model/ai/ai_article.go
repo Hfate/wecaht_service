@@ -28,6 +28,7 @@ type AIArticle struct {
 	PublishId         int64     `json:"publishId"`
 	MsgDataID         int64     `json:"msgDataId"`
 	MsgId             int64     `json:"msgId"`
+	Params            string    `json:"params"`
 }
 
 func (AIArticle) TableName() string {

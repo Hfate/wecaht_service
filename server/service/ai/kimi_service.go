@@ -34,12 +34,9 @@ func (*KimiService) GetKeyWord(title string) string {
 	return resp
 }
 
-func (*KimiService) HotSpotWrite(link string) (*ArticleContext, error) {
+func (*KimiService) HotSpotWrite(context *ArticleContext) (*ArticleContext, error) {
 
-	articleContext := &ArticleContext{}
-	articleContext.Link = link
-
-	chatGptPromptList, err := parsePrompt(articleContext, ai.HotSpotWrite)
+	chatGptPromptList, err := parsePrompt(context, ai.HotSpotWrite)
 	if err != nil {
 		return &ArticleContext{}, err
 	}
@@ -54,10 +51,10 @@ func (*KimiService) HotSpotWrite(link string) (*ArticleContext, error) {
 			return nil, err
 		}
 		result.Content = resp
-		articleContext.Content = resp
+		context.Content = resp
 	}
 
-	chatGptPromptList, err = parsePrompt(articleContext, ai.TitleCreate)
+	chatGptPromptList, err = parsePrompt(context, ai.TitleCreate)
 	if err != nil {
 		return nil, err
 	}
@@ -70,7 +67,7 @@ func (*KimiService) HotSpotWrite(link string) (*ArticleContext, error) {
 		result.Title = resp
 	}
 
-	chatGptPromptList, err = parsePrompt(articleContext, ai.AddImage)
+	chatGptPromptList, err = parsePrompt(context, ai.AddImage)
 	if err != nil {
 		return nil, err
 	}
@@ -84,12 +81,12 @@ func (*KimiService) HotSpotWrite(link string) (*ArticleContext, error) {
 		result.Content = resp
 	}
 
+	context.Params = []string{"kimi", "HotWrite"}
 	return result, nil
 }
 
-func (*KimiService) TopicWrite(topic string) (*ArticleContext, error) {
-	articleContext := &ArticleContext{}
-	articleContext.Topic = topic
+func (*KimiService) TopicWrite(articleContext *ArticleContext) (*ArticleContext, error) {
+	topic := articleContext.Topic
 
 	subject := SubjectServiceApp.FindAndUseSubjectByTopic(topic)
 	if subject == "" {
@@ -157,22 +154,19 @@ func (*KimiService) TopicWrite(topic string) (*ArticleContext, error) {
 		result.Content = resp
 	}
 
+	articleContext.Params = []string{"kimi", "TopicWrite"}
 	return result, nil
 }
 
-func (*KimiService) Recreation(article ai.Article) (*ArticleContext, error) {
-	articleContext := &ArticleContext{}
-	articleContext.Title = article.Title
-	articleContext.Topic = article.Topic
-	articleContext.Link = article.Link
+func (*KimiService) Recreation(context *ArticleContext) (*ArticleContext, error) {
 
-	chatGptPromptList, err := parsePrompt(articleContext, ai.ContentRecreation)
+	chatGptPromptList, err := parsePrompt(context, ai.ContentRecreation)
 	if err != nil {
 		return &ArticleContext{}, err
 	}
 
 	kimiMessageHistory := []*KimiMessage{SystemMessage}
-	result := &ArticleContext{}
+
 	resp := ""
 
 	for _, chatGptPrompt := range chatGptPromptList {
@@ -180,11 +174,10 @@ func (*KimiService) Recreation(article ai.Article) (*ArticleContext, error) {
 		if err != nil {
 			return nil, err
 		}
-		result.Content = resp
-		articleContext.Content = resp
+		context.Content = resp
 	}
 
-	chatGptPromptList, err = parsePrompt(articleContext, ai.TitleCreate)
+	chatGptPromptList, err = parsePrompt(context, ai.TitleCreate)
 	if err != nil {
 		return nil, err
 	}
@@ -194,10 +187,10 @@ func (*KimiService) Recreation(article ai.Article) (*ArticleContext, error) {
 		if err != nil {
 			return nil, err
 		}
-		result.Title = resp
+		context.Title = resp
 	}
 
-	chatGptPromptList, err = parsePrompt(articleContext, ai.AddImage)
+	chatGptPromptList, err = parsePrompt(context, ai.AddImage)
 	if err != nil {
 		return nil, err
 	}
@@ -208,10 +201,11 @@ func (*KimiService) Recreation(article ai.Article) (*ArticleContext, error) {
 			return nil, err
 		}
 
-		result.Content = resp
+		context.Content = resp
 	}
 
-	return articleContext, nil
+	context.Params = []string{"kimi", "Recreation"}
+	return context, nil
 }
 
 var SystemMessage = &KimiMessage{

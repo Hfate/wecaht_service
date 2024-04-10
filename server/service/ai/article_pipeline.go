@@ -187,6 +187,7 @@ type ArticleContext struct {
 	HotspotId uint64
 	Link      string
 	Tags      []string
+	Params    []string
 }
 
 // RecreationArticle 文章改写 or  二创
@@ -203,7 +204,11 @@ func (r *RecreationArticle) Handle(context *ArticleContext) error {
 	article.UseTimes = article.UseTimes + 1
 	err = global.GVA_DB.Save(&article).Error
 
-	result, err := ChatModelServiceApp.Recreation(article, AllModel)
+	context.Title = article.Title
+	context.Content = article.Content
+	context.Link = article.Link
+
+	result, err := ChatModelServiceApp.Recreation(context, AllModel)
 	if err != nil {
 		return err
 	}
@@ -235,7 +240,10 @@ func (r *HotSpotWriteArticle) Handle(context *ArticleContext) error {
 	hotspot.UseTimes = hotspot.UseTimes + 1
 	err := global.GVA_DB.Save(&hotspot).Error
 
-	result, err := ChatModelServiceApp.HotSpotWrite(hotspot.Link, AllModel)
+	context.Link = hotspot.Link
+	context.Topic = hotspot.Headline
+
+	result, err := ChatModelServiceApp.HotSpotWrite(context, AllModel)
 	if err != nil {
 		return err
 	}
@@ -252,7 +260,7 @@ type AIWriteArticle struct {
 
 func (r *AIWriteArticle) Handle(context *ArticleContext) error {
 
-	result, err := ChatModelServiceApp.TopicWrite(context.Topic, AllModel)
+	result, err := ChatModelServiceApp.TopicWrite(context, AllModel)
 	if err != nil {
 		return err
 	}

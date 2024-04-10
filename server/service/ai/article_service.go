@@ -116,7 +116,13 @@ func (exa *ArticleService) Recreation(id uint64) error {
 		return err
 	}
 
-	chatGptResp, err := KimiServiceApp.Recreation(article)
+	context := &ArticleContext{
+		Topic: article.Topic,
+		Link:  article.Link,
+		Title: article.Title,
+	}
+
+	chatGptResp, err := KimiServiceApp.Recreation(context)
 	if err != nil {
 		return err
 	}

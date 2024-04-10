@@ -146,24 +146,24 @@
             <span>{{ formatDate(scope.row.publishTime) }}</span>
           </template>
         </el-table-column>
-        <el-table-column
-            align="left"
-            label="阅读量"
-            prop="readNum"
-            width="70"
-        />
-        <el-table-column
-            align="left"
-            label="评论量"
-            prop="commentNum"
-            width="70"
-        />
-        <el-table-column
-            align="left"
-            label="点赞量"
-            prop="likeNum"
-            width="70"
-        />
+        <!--        <el-table-column-->
+        <!--            align="left"-->
+        <!--            label="阅读量"-->
+        <!--            prop="readNum"-->
+        <!--            width="70"-->
+        <!--        />-->
+        <!--        <el-table-column-->
+        <!--            align="left"-->
+        <!--            label="评论量"-->
+        <!--            prop="commentNum"-->
+        <!--            width="70"-->
+        <!--        />-->
+        <!--        <el-table-column-->
+        <!--            align="left"-->
+        <!--            label="点赞量"-->
+        <!--            prop="likeNum"-->
+        <!--            width="70"-->
+        <!--        />-->
         <el-table-column
             align="left"
             label="创建时间"
@@ -182,6 +182,12 @@
             <span>{{ translatedArticleStatus(scope.row.articleStatus) }}</span>
           </template>
         </el-table-column>
+        <el-table-column
+            align="left"
+            label="创作参数"
+            prop="params"
+            width="100"
+        />
         <el-table-column
             align="left"
             label="操作"
