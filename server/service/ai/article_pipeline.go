@@ -154,7 +154,7 @@ func (da *DefaultArticlePipeline) Write(context *ArticleContext) error {
 			continue
 		}
 		// 完成写作
-		if context.Content != "" && len(context.Content) > 500 {
+		if context.Content != "" && len(context.Content) > 500 && len(context.Params) > 0 {
 			global.GVA_LOG.Info("完成AI创作", zap.String("appID", context.AppId), zap.String("title", context.Title))
 			break
 		}
