@@ -223,37 +223,54 @@ type HotSpotWriteArticle struct {
 }
 
 func (r *HotSpotWriteArticle) Handle(context *ArticleContext) error {
-	hotspot := ai.Hotspot{}
+
+	hotspotList := make([]ai.Hotspot, 0)
+
 	if context.HotspotId != 0 {
+		hotspot := ai.Hotspot{}
 		err := global.GVA_DB.Where("id = ?", context.HotspotId).Order("created_at desc ,trending desc").Last(&hotspot).Error
 		if err != nil {
 			return err
 		}
+		hotspotList = append(hotspotList, hotspot)
 	} else {
-		err := global.GVA_DB.Where("topic like ?", "%"+context.Topic).Where("use_times=0").Order("created_at desc ,trending desc").Last(&hotspot).Error
+		err := global.GVA_DB.Where("topic like ?", "%"+context.Topic).Where("use_times=0").Order("created_at desc ,trending desc").Limit(5).Find(&hotspotList).Error
 		if err != nil {
 			return err
 		}
 	}
 
-	// 更新使用次数
-	hotspot.UseTimes = hotspot.UseTimes + 1
-	err := global.GVA_DB.Save(&hotspot).Error
-	oldTopic := context.Topic
+	for _, hotspot := range hotspotList {
 
-	context.Link = hotspot.Link
-	context.Topic = hotspot.Headline
+		oldTopic := context.Topic
 
-	result, err := ChatModelServiceApp.HotSpotWrite(context, AllModel)
-	if err != nil {
-		return err
+		// 找有没有相关的热点文章素材
+		article := &ai.Article{}
+		likeValue := "%" + hotspot.Headline + "%"
+		err := global.GVA_DB.Model(&ai.Article{}).Where("title like  ? or content like ?", likeValue, likeValue).Last(&article).Error
+		if err != nil {
+			return err
+		}
+
+		// 更新使用次数
+		hotspot.UseTimes = hotspot.UseTimes + 1
+		global.GVA_DB.Save(&hotspot)
+
+		context.Content = article.Content
+
+		result, err := ChatModelServiceApp.HotSpotWrite(context, AllModel)
+		if err != nil {
+			return err
+		}
+
+		context.Content = result.Content
+		context.Title = result.Title
+		context.Topic = oldTopic
+
+		return nil
 	}
 
-	context.Content = result.Content
-	context.Title = result.Title
-	context.Topic = oldTopic
-
-	return err
+	return nil
 }
 
 // AIWriteArticle ai 写作
