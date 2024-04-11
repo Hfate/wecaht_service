@@ -239,6 +239,7 @@ func (r *HotSpotWriteArticle) Handle(context *ArticleContext) error {
 	// 更新使用次数
 	hotspot.UseTimes = hotspot.UseTimes + 1
 	err := global.GVA_DB.Save(&hotspot).Error
+	oldTopic := context.Topic
 
 	context.Link = hotspot.Link
 	context.Topic = hotspot.Headline
@@ -250,6 +251,7 @@ func (r *HotSpotWriteArticle) Handle(context *ArticleContext) error {
 
 	context.Content = result.Content
 	context.Title = result.Title
+	context.Topic = oldTopic
 
 	return err
 }
