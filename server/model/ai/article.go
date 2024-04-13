@@ -14,6 +14,7 @@ type Article struct {
 	ReadNum     int    `json:"readNum"`
 	CommentNum  int    `json:"commentNum"`
 	Content     string `json:"content"`
+	Comment     string `json:"comment"`
 	Tags        string `json:"tags"`
 	UseTimes    int    `json:"useTimes"`
 }
@@ -37,7 +38,9 @@ type ArticleExcl struct {
 }
 
 type ArticleExclUpload struct {
-	Title string `json:"title"  xlsx:"Title"` //
-	Topic string `json:"topic" xlsx:"Topic"`  //
-	Link  string `json:"link" xlsx:"Link"`    //
+	Title   string `json:"title"  xlsx:"Title"` //
+	Topic   string `json:"topic" xlsx:"Topic"`  //
+	Link    string `json:"link" xlsx:"Link"`    //
+	Comment string `json:"comment" xlsx:"Comment"`
+	Content string `json:"content" xlsx:"Content"`
 }

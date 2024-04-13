@@ -234,13 +234,17 @@ func (r *HotSpotWriteArticle) Handle(context *ArticleContext) error {
 		}
 		hotspotList = append(hotspotList, hotspot)
 	} else {
-		err := global.GVA_DB.Where("topic like ?", "%"+context.Topic).Where("use_times=0").Order("created_at desc ,trending desc").Limit(5).Find(&hotspotList).Error
+		err := global.GVA_DB.Where("topic like ?", "%"+context.Topic).Where("use_times=0").Order("created_at desc ,trending desc").Limit(100).Find(&hotspotList).Error
 		if err != nil {
 			return err
 		}
 	}
 
 	for _, hotspot := range hotspotList {
+
+		// 更新使用次数
+		hotspot.UseTimes = hotspot.UseTimes + 1
+		global.GVA_DB.Save(&hotspot)
 
 		oldTopic := context.Topic
 
@@ -249,18 +253,16 @@ func (r *HotSpotWriteArticle) Handle(context *ArticleContext) error {
 		likeValue := "%" + hotspot.Headline + "%"
 		err := global.GVA_DB.Model(&ai.Article{}).Where("title like  ? or content like ?", likeValue, likeValue).Last(&article).Error
 		if err != nil {
-			return err
+			global.GVA_LOG.Info("没有找到热点词条相关的文章" + hotspot.Headline)
+			continue
 		}
-
-		// 更新使用次数
-		hotspot.UseTimes = hotspot.UseTimes + 1
-		global.GVA_DB.Save(&hotspot)
 
 		context.Content = article.Content
 
 		result, err := ChatModelServiceApp.HotSpotWrite(context, AllModel)
 		if err != nil {
-			return err
+			global.GVA_LOG.Info("热点词条创作失败" + hotspot.Headline)
+			continue
 		}
 
 		context.Content = result.Content
