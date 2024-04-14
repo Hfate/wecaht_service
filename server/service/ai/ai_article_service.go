@@ -243,6 +243,7 @@ func (exa *AIArticleService) GenerateDailyArticle() error {
 
 func (exa *AIArticleService) parseTitle(title string) string {
 	title = strings.ReplaceAll(title, "标题：", "")
+	title = strings.ReplaceAll(title, "#", "")
 	title = utils.RemoveBookTitleBrackets(title)
 	title = strings.ReplaceAll(title, "标题建议：", "")
 	return title
@@ -255,7 +256,7 @@ func (exa *AIArticleService) parseContent(content string) string {
 	// 排除标题行
 	var contentLines []string
 	for _, line := range lines {
-		if !strings.HasPrefix(line, "标题：") {
+		if !strings.Contains(line, "标题：") {
 			contentLines = append(contentLines, line)
 		}
 	}
