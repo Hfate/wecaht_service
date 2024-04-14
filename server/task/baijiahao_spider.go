@@ -43,6 +43,8 @@ func spiderHotspot(hotspot ai.Hotspot) error {
 		err := global.GVA_DB.Create(articleList).Error
 		hotspot.SpiderNum = len(articleList)
 		global.GVA_DB.Save(hotspot)
+
+		global.GVA_LOG.Info("spiderHotspot", zap.String("hotspot", utils.Parse2Json(hotspot)))
 		return err
 	}
 
@@ -158,7 +160,7 @@ func collectArticle(hotspot ai.Hotspot) []ai.Article {
 
 	err := collector.Visit("http://www.baidu.com/s?tn=news&rtt=1&bsst=1&cl=2&wd=" + encodedParam)
 	if err != nil {
-		fmt.Println(err)
+		global.GVA_LOG.Error("collectArticle", zap.Error(err))
 	}
 
 	return result
