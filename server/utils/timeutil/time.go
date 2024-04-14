@@ -131,6 +131,10 @@ func AddDays(t1 int64, days int) int64 {
 	return carbon.CreateFromTimestampMilli(t1).AddDays(days).TimestampMilli()
 }
 
+func AddHours(t1 int64, hours int) time.Time {
+	return carbon.CreateFromTimestampMilli(t1).AddHours(hours).Carbon2Time()
+}
+
 func AddMonths(t1 int64, months int) int64 {
 	return carbon.CreateFromTimestampMilli(t1).AddMonths(months).TimestampMilli()
 }

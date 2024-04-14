@@ -17,6 +17,7 @@ type Article struct {
 	Comment     string `json:"comment"`
 	Tags        string `json:"tags"`
 	UseTimes    int    `json:"useTimes"`
+	HotspotId   uint64 `json:"hotspotId"`
 }
 
 func (Article) TableName() string {

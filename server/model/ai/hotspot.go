@@ -10,6 +10,7 @@ type Hotspot struct {
 	Trending   int    `json:"trending"`
 	Topic      string `json:"topic"`
 	UseTimes   int    `json:"useTimes"`
+	SpiderNum  int    `json:"spiderNum"`
 }
 
 func (Hotspot) TableName() string {

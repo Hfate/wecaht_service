@@ -249,8 +249,8 @@ func (r *HotSpotWriteArticle) Handle(context *ArticleContext) error {
 
 		// 找有没有相关的热点文章素材
 		article := &ai.Article{}
-		likeValue := "%" + hotspot.Headline + "%"
-		err := global.GVA_DB.Model(&ai.Article{}).Where("title like  ? or content like ?", likeValue, likeValue).Last(&article).Error
+
+		err := global.GVA_DB.Model(&ai.Article{}).Where("hotspot_id = ?", hotspot.ID).Last(&article).Error
 		if err != nil {
 			global.GVA_LOG.Info("没有找到热点词条相关的文章" + hotspot.Headline)
 			continue
