@@ -92,7 +92,6 @@ func (da *DefaultArticlePipeline) init() {
 	da.ArticleWriteHandleList = []ArticleWriteHandle{
 		&HotSpotWriteArticle{},
 		&RecreationArticle{},
-		&AIWriteArticle{},
 	}
 	da.AddImageHandleList = []AddImagesHandle{
 		&BaiduAddImage{},
