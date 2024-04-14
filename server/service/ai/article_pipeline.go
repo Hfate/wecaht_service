@@ -234,7 +234,7 @@ func (r *HotSpotWriteArticle) Handle(context *ArticleContext) error {
 		}
 		hotspotList = append(hotspotList, hotspot)
 	} else {
-		err := global.GVA_DB.Where("topic like ?", "%"+context.Topic).Where("use_times=0").Order("created_at desc ,trending desc").Limit(100).Find(&hotspotList).Error
+		err := global.GVA_DB.Where("topic like ?", "%"+context.Topic).Where("use_times=0").Order("created_at desc ,trending desc").Limit(10).Find(&hotspotList).Error
 		if err != nil {
 			return err
 		}
