@@ -32,7 +32,7 @@ func (*QianwenService) GetKeyWord(title string) string {
 
 func (*QianwenService) HotSpotWrite(context *ArticleContext) (*ArticleContext, error) {
 
-	chatGptPromptList, err := parsePrompt(context, ai.HotSpotWrite)
+	chatGptPromptList, err := parsePrompt(context, ai.ContentRecreation)
 	if err != nil {
 		return &ArticleContext{}, err
 	}

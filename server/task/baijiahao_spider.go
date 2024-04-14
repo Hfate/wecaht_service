@@ -37,9 +37,8 @@ func SpiderHotArticle() {
 }
 
 func spiderHotspot(hotspot ai.Hotspot) error {
-	headLine := hotspot.Headline
 
-	articleList := collectArticle(hotspot.ID, headLine)
+	articleList := collectArticle(hotspot)
 	if len(articleList) > 0 {
 		err := global.GVA_DB.Create(articleList).Error
 		hotspot.SpiderNum = len(articleList)
@@ -50,7 +49,7 @@ func spiderHotspot(hotspot ai.Hotspot) error {
 	return nil
 }
 
-func collectArticle(hotsoptId uint64, headLine string) []ai.Article {
+func collectArticle(hotspot ai.Hotspot) []ai.Article {
 	collector := colly.NewCollector(
 		colly.UserAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"),
 	)
@@ -144,8 +143,8 @@ func collectArticle(hotsoptId uint64, headLine string) []ai.Article {
 			Comment:     content,
 			AuthorName:  author,
 			PublishTime: publishTime,
-			HotspotId:   hotsoptId,
-			Topic:       "时事",
+			HotspotId:   hotspot.ID,
+			Topic:       hotspot.Topic,
 			PortalName:  "百家号",
 		}
 
@@ -155,7 +154,7 @@ func collectArticle(hotsoptId uint64, headLine string) []ai.Article {
 		result = append(result, item)
 	})
 
-	encodedParam := url.QueryEscape(headLine)
+	encodedParam := url.QueryEscape(hotspot.Headline)
 
 	err := collector.Visit("http://www.baidu.com/s?tn=news&rtt=1&bsst=1&cl=2&wd=" + encodedParam)
 	if err != nil {
