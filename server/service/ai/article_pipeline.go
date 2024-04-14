@@ -262,6 +262,7 @@ func (r *HotSpotWriteArticle) Handle(context *ArticleContext) error {
 		result, err := ChatModelServiceApp.HotSpotWrite(context, AllModel)
 		if err != nil {
 			global.GVA_LOG.Info("热点词条创作失败" + hotspot.Headline)
+			context.Topic = oldTopic
 			continue
 		}
 
