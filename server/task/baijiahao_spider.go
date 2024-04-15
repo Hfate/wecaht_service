@@ -34,6 +34,8 @@ func SpiderHotArticle() {
 		}
 		time.Sleep(3 * time.Second)
 	}
+
+	global.GVA_LOG.Info("SpiderHotArticle")
 }
 
 func spiderHotspot(hotspot ai.Hotspot) error {
@@ -140,13 +142,18 @@ func collectArticle(hotspot ai.Hotspot) []ai.Article {
 		publishTime = strings.TrimSpace(publishTime)
 		content = strings.TrimSpace(content)
 
+		topic := hotspot.Topic
+		if topic == "" {
+			topic = "时事"
+		}
+
 		item := ai.Article{
 			Title:       title,
 			Comment:     content,
 			AuthorName:  author,
 			PublishTime: publishTime,
 			HotspotId:   hotspot.ID,
-			Topic:       hotspot.Topic,
+			Topic:       topic,
 			PortalName:  "百家号",
 		}
 

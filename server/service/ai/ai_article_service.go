@@ -176,7 +176,7 @@ func (exa *AIArticleService) GenerateArticle(account ai.OfficialAccount) error {
 		batchId := timeutil.GetCurDate() + account.AppId
 
 		articleContext := ArticlePipelineApp.Run("", context)
-		if articleContext.Content == "" {
+		if articleContext.Content == "" || len(articleContext.Params) == 0 {
 			return errors.New("AI创作失败")
 		}
 
@@ -345,7 +345,7 @@ func (exa *AIArticleService) GetAIArticleList(sysUserAuthorityID uint, info aiRe
 	if err != nil {
 		return articleList, total, err
 	} else {
-		err = db.Limit(limit).Offset(offset).Order("batch_id desc").Find(&articleList).Error
+		err = db.Limit(limit).Offset(offset).Order("batch_id desc,target_account_id desc").Find(&articleList).Error
 	}
 
 	articleMap := make(map[string][]ai.AIArticle)
