@@ -1,18 +1,28 @@
 package ai
 
 import (
+	"fmt"
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/ai"
+	aiRes "github.com/flipped-aurora/gin-vue-admin/server/model/ai/response"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
 	systemService "github.com/flipped-aurora/gin-vue-admin/server/service/system"
 	"go.uber.org/zap"
+	"strconv"
+	"strings"
 )
 
 type OfficialAccountService struct {
 }
 
 var OfficialAccountServiceApp = new(OfficialAccountService)
+
+func (exa *OfficialAccountService) UpdateCreateTypes(id uint64, createTypeList []int) (err error) {
+	createTypes := strings.Trim(strings.Join(strings.Fields(fmt.Sprint(createTypeList)), ","), "[]")
+	err = global.GVA_DB.Model(&ai.OfficialAccount{}).Where("id = ?", id).Update("create_types", createTypes).Error
+	return err
+}
 
 //@function: CreateOfficialAccount
 //@description: 创建公众号
@@ -65,7 +75,7 @@ func (exa *OfficialAccountService) CreateArticle(id uint64) error {
 //@param: id uint
 //@return: customer model.OfficialAccount, err error
 
-func (exa *OfficialAccountService) GetOfficialAccount(id uint64) (officialAccount ai.OfficialAccount, err error) {
+func (exa *OfficialAccountService) GetOfficialAccount(id uint64) (officialAccount *ai.OfficialAccount, err error) {
 	err = global.GVA_DB.Where("id = ?", id).First(&officialAccount).Error
 	return
 }
@@ -100,7 +110,7 @@ func (exa *OfficialAccountService) GetOfficialAccountByAppId(appId string) (offi
 //@param: id uint
 //@return: customer model.OfficialAccount, err error
 
-func (exa *OfficialAccountService) List() (list []ai.OfficialAccount, err error) {
+func (exa *OfficialAccountService) List() (list []*ai.OfficialAccount, err error) {
 	err = global.GVA_DB.Where("1=1").Find(&list).Error
 	return
 }
@@ -125,7 +135,7 @@ func (exa *OfficialAccountService) GetOfficialAccountList(sysUserAuthorityID uin
 	for _, v := range auth.DataAuthorityId {
 		dataId = append(dataId, v.AuthorityId)
 	}
-	var officialAccountList []ai.OfficialAccount
+	var officialAccountList []*ai.OfficialAccount
 
 	db := global.GVA_DB.Model(&ai.OfficialAccount{})
 	err = db.Count(&total).Error
@@ -134,5 +144,22 @@ func (exa *OfficialAccountService) GetOfficialAccountList(sysUserAuthorityID uin
 	} else {
 		err = db.Limit(limit).Offset(offset).Order("updated_at desc").Find(&officialAccountList).Error
 	}
-	return officialAccountList, total, err
+
+	result := make([]*aiRes.OfficialAccountResponse, 0)
+
+	for _, v := range officialAccountList {
+		createTypeList := strings.Split(v.CreateTypes, ",")
+		createTypeNumList := make([]int, 0)
+		for _, v := range createTypeList {
+			num, _ := strconv.Atoi(v)
+			createTypeNumList = append(createTypeNumList, num)
+		}
+
+		result = append(result, &aiRes.OfficialAccountResponse{
+			OfficialAccount: v,
+			CreateTypeList:  createTypeNumList,
+		})
+	}
+
+	return result, total, err
 }

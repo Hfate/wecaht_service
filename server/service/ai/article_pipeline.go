@@ -144,16 +144,23 @@ func (da *DefaultArticlePipeline) Write(context *ArticleContext) error {
 	// 初始化
 	da.init()
 
-	size := len(da.ArticleWriteHandleList)
+	articleWriteHandleList := make([]ArticleWriteHandle, 0)
 
-	for i := 0; i < size; i++ {
-		handle := da.ArticleWriteHandleList[i]
+	if strings.Contains(context.CreateTypes, "1") {
+		articleWriteHandleList = append(articleWriteHandleList, &HotSpotWriteArticle{})
+	}
+
+	if strings.Contains(context.CreateTypes, "2") {
+		articleWriteHandleList = append(articleWriteHandleList, &RecreationArticle{})
+	}
+
+	for _, handle := range da.ArticleWriteHandleList {
 		err := handle.Handle(context)
 		if err != nil {
 			continue
 		}
 		// 完成写作
-		if context.Content != "" && len(context.Content) > 500 && len(context.Params) > 0 {
+		if context.Content != "" && len(context.Content) > 100 && len(context.Params) > 0 {
 			global.GVA_LOG.Info("完成AI创作", zap.String("appID", context.AppId), zap.String("title", context.Title))
 			break
 		}
@@ -179,14 +186,15 @@ type AddImagesHandle interface {
 }
 
 type ArticleContext struct {
-	AppId     string
-	Title     string
-	Content   string
-	Topic     string
-	HotspotId uint64
-	Link      string
-	Tags      []string
-	Params    []string
+	AppId       string
+	Title       string
+	Content     string
+	Topic       string
+	HotspotId   uint64
+	Link        string
+	Tags        []string
+	Params      []string
+	CreateTypes string
 }
 
 // RecreationArticle 文章改写 or  二创

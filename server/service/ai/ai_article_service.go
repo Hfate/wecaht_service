@@ -161,16 +161,17 @@ func (exa *AIArticleService) GenerateArticleById(hotspotId uint64, account ai.Of
 	return err
 }
 
-func (exa *AIArticleService) GenerateArticle(account ai.OfficialAccount) error {
+func (exa *AIArticleService) GenerateArticle(account *ai.OfficialAccount) error {
 	targetNum := account.TargetNum
 
 	i := 0
 
 	for i < targetNum {
 		context := &ArticleContext{
-			Topic:  account.Topic,
-			AppId:  account.AppId,
-			Params: []string{},
+			Topic:       account.Topic,
+			AppId:       account.AppId,
+			Params:      []string{},
+			CreateTypes: account.CreateTypes,
 		}
 
 		batchId := timeutil.GetCurDate() + account.AppId

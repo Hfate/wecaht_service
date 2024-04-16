@@ -65,6 +65,18 @@ func Timer() {
 		if err != nil {
 			fmt.Println("add timer error:", err)
 		}
+
+		// 每天凌晨四点执行生成文章的任务
+		_, err = global.GVA_Timer.AddTaskByFunc("GenerateArticle", "@daily", func() {
+			task.GenerateArticle()
+			if err != nil {
+				fmt.Println("timer error:", err)
+			}
+		}, "定时生成文章", option...)
+		if err != nil {
+			fmt.Println("add timer error:", err)
+		}
+
 	}()
 
 }

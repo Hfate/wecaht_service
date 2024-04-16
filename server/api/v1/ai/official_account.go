@@ -3,6 +3,7 @@ package ai
 import (
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/ai"
+	aiReq "github.com/flipped-aurora/gin-vue-admin/server/model/ai/request"
 	aiRes "github.com/flipped-aurora/gin-vue-admin/server/model/ai/response"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/response"
@@ -73,6 +74,32 @@ func (e *OfficialAccountApi) DeleteOfficialAccount(c *gin.Context) {
 	response.OkWithMessage("删除成功", c)
 }
 
+// UpdateCreateTypes
+// @Tags      OfficialAccount
+// @Summary   更新门户信息
+// @Security  ApiKeyAuth
+// @accept    application/json
+// @Produce   application/json
+// @Param     data  body      wechat.OfficialAccount            true  "门户ID, 门户信息"
+// @Success   200   {object}  response.Response{msg=string}  "更新门户信息"
+// @Router    /officialAccount/updateCreateTypes [put]
+func (e *OfficialAccountApi) UpdateCreateTypes(c *gin.Context) {
+	var setCreateTypes aiReq.SetCreateTypes
+	err := c.ShouldBindJSON(&setCreateTypes)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+
+	err = officialAccountService.UpdateCreateTypes(setCreateTypes.ID, setCreateTypes.CreateTypeList)
+	if err != nil {
+		global.GVA_LOG.Error("更新失败!", zap.Error(err))
+		response.FailWithMessage("更新失败", c)
+		return
+	}
+	response.OkWithMessage("更新成功", c)
+}
+
 // UpdateOfficialAccount
 // @Tags      OfficialAccount
 // @Summary   更新门户信息
@@ -135,6 +162,7 @@ func (e *OfficialAccountApi) GetOfficialAccount(c *gin.Context) {
 		response.FailWithMessage("获取失败", c)
 		return
 	}
+
 	response.OkWithDetailed(aiRes.OfficialAccountResponse{OfficialAccount: data}, "获取成功", c)
 }
 

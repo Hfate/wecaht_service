@@ -25,26 +25,26 @@
             align="left"
             label="微信公众号"
             prop="accountName"
-            width="180"
+            width="120"
         >
         </el-table-column>
         <el-table-column
             align="left"
             label="主题"
             prop="topic"
-            width="120"
+            width="70"
         />
         <el-table-column
             align="left"
             label="账号邮箱"
             prop="userEmail"
-            width="300"
+            width="250"
         />
         <el-table-column
             align="left"
             label="默认作者"
             prop="defaultAuthorName"
-            width="150"
+            width="80"
         />
         <el-table-column
             align="left"
@@ -54,14 +54,27 @@
         />
         <el-table-column
             align="left"
-            label="备注"
-            prop="remark"
-            width="120"
-        />
+            label="创作方式"
+            min-width="180"
+        >
+          <template #default="scope">
+            <el-cascader
+                v-model="scope.row.createTypeList"
+                :options="authOptions"
+                :show-all-levels="false"
+                collapse-tags
+                :props="{ multiple:true,checkStrictly: true,label:'createName',value:'createType',disabled:'disabled',emitPath:false}"
+                :clearable="false"
+                @visible-change="(flag)=>{changeCreateType(scope.row,flag,0)}"
+                @remove-tag="(removeAuth)=>{changeCreateType(scope.row,false,removeAuth)}"
+            />
+          </template>
+        </el-table-column>
+
         <el-table-column
             align="left"
             label="创建时间"
-            width="180"
+            width="160"
         >
           <template #default="scope">
             <span>{{ formatDate(scope.row.CreatedAt) }}</span>
@@ -78,7 +91,7 @@
                 link
                 icon="edit"
                 @click="updateWechatOfficialAccount(scope.row)"
-            >变更
+            >更新
             </el-button>
             <el-popover
                 v-model="scope.row.visible"
@@ -230,6 +243,7 @@
                 autocomplete="off"
             />
           </el-form-item>
+
         </el-form>
       </el-scrollbar>
       <template #footer>
@@ -253,9 +267,10 @@ import {
   getOfficialAccount,
   getOfficialAccountList,
   officialAccountCreate,
+  setCreateTypes,
   updateOfficialAccount
 } from '@/api/officialAccount'
-import {ref} from 'vue'
+import {nextTick, ref} from 'vue'
 import {ElMessage} from 'element-plus'
 import {formatDate} from '@/utils/format'
 import {getTopicList} from "@/api/topic";
@@ -271,6 +286,7 @@ const form = ref({
   defaultAuthorName: '',
   remark: '',
   targetNum: 1,
+  createTypeList: [],
   appId: '',
   appSecret: '',
   token: '',
@@ -308,9 +324,12 @@ const getTableData = async () => {
     page.value = table.data.page
     pageSize.value = table.data.pageSize
   }
+
+  setOptions()
 }
 
 getTableData()
+
 
 const dialogFormVisible = ref(false)
 const type = ref('')
@@ -318,7 +337,7 @@ const updateWechatOfficialAccount = async (row) => {
   const res = await getOfficialAccount({ID: row.ID})
   type.value = 'update'
   if (res.code === 0) {
-    form.value = res.data.officialAccount
+    form.value = res.data
     dialogFormVisible.value = true
   }
 }
@@ -392,6 +411,57 @@ const enterDialog = async () => {
 const openDialog = () => {
   type.value = 'create'
   dialogFormVisible.value = true
+}
+
+
+const authOptions = ref([])
+
+const setOptions = () => {
+  authOptions.value = []
+  setAuthorityOptions(authOptions.value)
+}
+
+
+const setAuthorityOptions = (optionsData) => {
+
+  const option1 = {
+    createType: 1,
+    createName: "热点创作",
+  }
+  optionsData.push(option1)
+
+
+  const option2 = {
+    createType: 2,
+    createName: "洗稿",
+  }
+  optionsData.push(option2)
+}
+
+
+const tempAuth = {}
+const changeCreateType = async (row, flag, removeAuth) => {
+  if (flag) {
+    if (!removeAuth) {
+      tempAuth[row.ID] = [...row.createTypeList]
+    }
+    return
+  }
+  await nextTick()
+  const res = await setCreateTypes({
+    ID: row.ID,
+    createTypeList: row.createTypeList
+  })
+  if (res.code === 0) {
+    ElMessage({type: 'success', message: '创作类型设置成功'})
+  } else {
+    if (!removeAuth) {
+      row.createTypeList = [...tempAuth[row.ID]]
+      delete tempAuth[row.ID]
+    } else {
+      row.createTypeList = [removeAuth, ...row.createTypeList]
+    }
+  }
 }
 
 </script>

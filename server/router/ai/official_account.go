@@ -16,6 +16,7 @@ func (e *OfficialAccountRouter) InitOfficialAccountRouter(Router *gin.RouterGrou
 	{
 		officialAccountRouter.POST("officialAccount", officialAccountApi.CreateOfficialAccount)   // 创建公众号
 		officialAccountRouter.PUT("officialAccount", officialAccountApi.UpdateOfficialAccount)    // 更新公众号
+		officialAccountRouter.PUT("updateCreateTypes", officialAccountApi.UpdateCreateTypes)      // 更新公众号的创建方式
 		officialAccountRouter.DELETE("officialAccount", officialAccountApi.DeleteOfficialAccount) // 删除公众号
 		officialAccountRouter.POST("create", officialAccountApi.CreateArticle)                    // 创建文章
 

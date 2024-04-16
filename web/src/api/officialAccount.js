@@ -15,6 +15,23 @@ export const createOfficialAccount = (data) => {
     })
 }
 
+
+// @Tags OfficialAccountApi
+// @Summary 创建公众号
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data body dbModel.OfficialAccount true "创建公众号"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"获取成功"}"
+// @Router /officialAccount/officialAccount [post]
+export const setCreateTypes = (data) => {
+    return service({
+        url: '/officialAccount/updateCreateTypes',
+        method: 'put',
+        data
+    })
+}
+
 // @Tags OfficialAccountApi
 // @Summary 更新公众号信息
 // @Security ApiKeyAuth

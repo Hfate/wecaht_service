@@ -15,6 +15,7 @@ type OfficialAccount struct {
 	DefaultAuthorName string `json:"defaultAuthorName"`
 	Remark            string `json:"remark"`
 	TargetNum         int    `json:"targetNum"`
+	CreateTypes       string `json:"createTypes"`
 }
 
 func (OfficialAccount) TableName() string {
