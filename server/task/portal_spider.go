@@ -76,7 +76,7 @@ func spiderPortal(db *gorm.DB, portal *ai.Portal) {
 		articleResp.ReadNum = strings.ReplaceAll(articleResp.ReadNum, "阅读", "")
 
 		article := &ai.Article{
-			BASEMODEL:   global.BASEMODEL{ID: utils.GenID(), CreatedAt: time.Now(), UpdatedAt: time.Now()},
+			BASEMODEL:   global.BASEMODEL{ID: cast.ToString(utils.GenID()), CreatedAt: time.Now(), UpdatedAt: time.Now()},
 			PortalName:  portal.PortalName,
 			AuthorName:  articleResp.AuthorName,
 			Topic:       portal.Topic,
@@ -96,7 +96,7 @@ func spiderPortal(db *gorm.DB, portal *ai.Portal) {
 
 		err = db.Model(&ai.Url{}).Create(&ai.Url{
 			Url:       articleUrl,
-			BASEMODEL: global.BASEMODEL{ID: utils.GenID(), CreatedAt: time.Now(), UpdatedAt: time.Now()},
+			BASEMODEL: global.BASEMODEL{ID: cast.ToString(utils.GenID()), CreatedAt: time.Now(), UpdatedAt: time.Now()},
 		}).Error
 
 		fmt.Println(portal.PortalName + "[collectSize" + ":" + cast.ToString(collectSize) + "]")

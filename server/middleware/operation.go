@@ -3,6 +3,7 @@ package middleware
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/spf13/cast"
 	"io"
 	"net/http"
 	"net/url"
@@ -100,6 +101,8 @@ func OperationRecord() gin.HandlerFunc {
 		record.Status = c.Writer.Status()
 		record.Latency = latency
 		record.Resp = writer.body.String()
+
+		record.ID = cast.ToString(utils.GenID())
 
 		if strings.Contains(c.Writer.Header().Get("Pragma"), "public") ||
 			strings.Contains(c.Writer.Header().Get("Expires"), "0") ||

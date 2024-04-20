@@ -1,6 +1,7 @@
 package system
 
 import (
+	"github.com/spf13/cast"
 	"strconv"
 	"time"
 
@@ -79,7 +80,7 @@ func (b *BaseApi) TokenNext(c *gin.Context, user system.SysUser) {
 	j := &utils.JWT{SigningKey: []byte(global.GVA_CONFIG.JWT.SigningKey)} // 唯一签名
 	claims := j.CreateClaims(systemReq.BaseClaims{
 		UUID:        user.UUID,
-		ID:          user.ID,
+		ID:          cast.ToUint64(user.ID),
 		NickName:    user.NickName,
 		Username:    user.Username,
 		AuthorityId: user.AuthorityId,
@@ -191,7 +192,7 @@ func (b *BaseApi) ChangePassword(c *gin.Context) {
 		return
 	}
 	uid := utils.GetUserID(c)
-	u := &system.SysUser{BASEMODEL: global.BASEMODEL{ID: uid}, Password: req.Password}
+	u := &system.SysUser{BASEMODEL: global.BASEMODEL{ID: cast.ToString(uid)}, Password: req.Password}
 	_, err = userService.ChangePassword(u, req.NewPassword)
 	if err != nil {
 		global.GVA_LOG.Error("修改失败!", zap.Error(err))
@@ -369,7 +370,7 @@ func (b *BaseApi) SetUserInfo(c *gin.Context) {
 	}
 	err = userService.SetUserInfo(system.SysUser{
 		BASEMODEL: global.BASEMODEL{
-			ID: user.ID,
+			ID: cast.ToString(user.ID),
 		},
 		NickName:  user.NickName,
 		HeaderImg: user.HeaderImg,
@@ -405,7 +406,7 @@ func (b *BaseApi) SetSelfInfo(c *gin.Context) {
 	user.ID = utils.GetUserID(c)
 	err = userService.SetSelfInfo(system.SysUser{
 		BASEMODEL: global.BASEMODEL{
-			ID: user.ID,
+			ID: cast.ToString(user.ID),
 		},
 		NickName:  user.NickName,
 		HeaderImg: user.HeaderImg,
@@ -456,7 +457,7 @@ func (b *BaseApi) ResetPassword(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	err = userService.ResetPassword(user.ID)
+	err = userService.ResetPassword(cast.ToUint64(user.ID))
 	if err != nil {
 		global.GVA_LOG.Error("重置失败!", zap.Error(err))
 		response.FailWithMessage("重置失败"+err.Error(), c)

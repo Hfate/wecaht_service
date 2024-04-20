@@ -2,6 +2,7 @@ package example
 
 import (
 	"fmt"
+	"github.com/spf13/cast"
 	"io"
 	"mime/multipart"
 	"strconv"
@@ -68,7 +69,7 @@ func (b *FileUploadAndDownloadApi) BreakpointContinue(c *gin.Context) {
 		return
 	}
 
-	if err = fileUploadAndDownloadService.CreateFileChunk(file.ID, pathC, chunkNumber); err != nil {
+	if err = fileUploadAndDownloadService.CreateFileChunk(cast.ToUint64(file.ID), pathC, chunkNumber); err != nil {
 		global.GVA_LOG.Error("创建文件记录失败!", zap.Error(err))
 		response.FailWithMessage("创建文件记录失败", c)
 		return

@@ -10,6 +10,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/service"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/cast"
 	"go.uber.org/zap"
 	"net/http"
 )
@@ -145,7 +146,7 @@ func (sysExportTemplateApi *SysExportTemplateApi) FindSysExportTemplate(c *gin.C
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	if resysExportTemplate, err := sysExportTemplateService.GetSysExportTemplate(sysExportTemplate.ID); err != nil {
+	if resysExportTemplate, err := sysExportTemplateService.GetSysExportTemplate(cast.ToUint64(sysExportTemplate.ID)); err != nil {
 		global.GVA_LOG.Error("查询失败!", zap.Error(err))
 		response.FailWithMessage("查询失败", c)
 	} else {

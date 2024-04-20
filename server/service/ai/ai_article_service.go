@@ -188,6 +188,7 @@ func (exa *AIArticleService) GenerateArticle(account *ai.OfficialAccount) error 
 			TargetAccountId:   account.AppId,
 			Topic:             account.Topic,
 			AuthorName:        account.DefaultAuthorName,
+			Link:              articleContext.Link,
 			Tags:              strings.Join(articleContext.Tags, ","),
 			Content:           exa.parseContent(articleContext.Content),
 			Params:            strings.Join(articleContext.Params, ","),

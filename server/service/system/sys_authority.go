@@ -3,6 +3,7 @@ package system
 import (
 	"errors"
 	systemReq "github.com/flipped-aurora/gin-vue-admin/server/model/system/request"
+	"github.com/spf13/cast"
 	"strconv"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
@@ -69,7 +70,7 @@ func (authorityService *AuthorityService) CopyAuthority(copyInfo response.SysAut
 	var baseMenu []system.SysBaseMenu
 	for _, v := range menus {
 		intNum, _ := strconv.Atoi(v.MenuId)
-		v.SysBaseMenu.ID = uint64(intNum)
+		v.SysBaseMenu.ID = cast.ToString(intNum)
 		baseMenu = append(baseMenu, v.SysBaseMenu)
 	}
 	copyInfo.Authority.SysBaseMenus = baseMenu

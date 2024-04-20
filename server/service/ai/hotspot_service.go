@@ -7,6 +7,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
 	systemService "github.com/flipped-aurora/gin-vue-admin/server/service/system"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
+	"github.com/spf13/cast"
 	"go.uber.org/zap"
 	"time"
 )
@@ -20,7 +21,7 @@ type HotspotService struct {
 //@return: err error
 
 func (exa *HotspotService) CreateHotspot(e ai.Hotspot) (err error) {
-	e.BASEMODEL = global.BASEMODEL{ID: utils.GenID(), CreatedAt: time.Now(), UpdatedAt: time.Now()}
+	e.BASEMODEL = global.BASEMODEL{ID: cast.ToString(utils.GenID()), CreatedAt: time.Now(), UpdatedAt: time.Now()}
 	err = global.GVA_DB.Create(&e).Error
 	return err
 }
@@ -43,7 +44,7 @@ func (exa *HotspotService) CreateArticle(id uint64) (err error) {
 	}
 
 	go func() {
-		err = AIArticleServiceApp.GenerateArticleById(hotspot.ID, officeAccount)
+		err = AIArticleServiceApp.GenerateArticleById(cast.ToUint64(hotspot.ID), officeAccount)
 		if err != nil {
 			global.GVA_LOG.Error("CreateArticle", zap.Error(err))
 		}

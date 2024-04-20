@@ -2,8 +2,6 @@ package system
 
 import (
 	"errors"
-	"strconv"
-
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
@@ -46,7 +44,7 @@ func (menuService *MenuService) getMenuTreeMap(authorityId uint) (treeMap map[st
 		allMenus = append(allMenus, system.SysMenu{
 			SysBaseMenu: baseMenu[i],
 			AuthorityId: authorityId,
-			MenuId:      strconv.Itoa(int(baseMenu[i].ID)),
+			MenuId:      baseMenu[i].ID,
 			Parameters:  baseMenu[i].Parameters,
 		})
 	}
@@ -55,7 +53,7 @@ func (menuService *MenuService) getMenuTreeMap(authorityId uint) (treeMap map[st
 	if err != nil {
 		return
 	}
-	var btnMap = make(map[uint64]map[string]uint)
+	var btnMap = make(map[string]map[string]uint)
 	for _, v := range btns {
 		if btnMap[v.SysMenuID] == nil {
 			btnMap[v.SysMenuID] = make(map[string]uint)
@@ -116,7 +114,7 @@ func (menuService *MenuService) GetInfoList() (list interface{}, total int64, er
 //@return: err error
 
 func (menuService *MenuService) getBaseChildrenList(menu *system.SysBaseMenu, treeMap map[string][]system.SysBaseMenu) (err error) {
-	menu.Children = treeMap[strconv.Itoa(int(menu.ID))]
+	menu.Children = treeMap[menu.ID]
 	for i := 0; i < len(menu.Children); i++ {
 		err = menuService.getBaseChildrenList(&menu.Children[i], treeMap)
 	}
@@ -200,7 +198,7 @@ func (menuService *MenuService) GetMenuAuthority(info *request.GetAuthorityId) (
 		menus = append(menus, system.SysMenu{
 			SysBaseMenu: baseMenu[i],
 			AuthorityId: info.AuthorityId,
-			MenuId:      strconv.Itoa(int(baseMenu[i].ID)),
+			MenuId:      baseMenu[i].ID,
 			Parameters:  baseMenu[i].Parameters,
 		})
 	}

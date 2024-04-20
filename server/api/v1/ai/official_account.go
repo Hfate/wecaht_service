@@ -9,6 +9,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/response"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/cast"
 	"go.uber.org/zap"
 )
 
@@ -156,7 +157,7 @@ func (e *OfficialAccountApi) GetOfficialAccount(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	data, err := officialAccountService.GetOfficialAccount(officialAccount.ID)
+	data, err := officialAccountService.GetOfficialAccount(cast.ToUint64(officialAccount.ID))
 	if err != nil {
 		global.GVA_LOG.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败", c)
@@ -187,7 +188,7 @@ func (e *OfficialAccountApi) CreateArticle(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	err = officialAccountService.CreateArticle(officialAccount.ID)
+	err = officialAccountService.CreateArticle(cast.ToUint64(officialAccount.ID))
 	if err != nil {
 		global.GVA_LOG.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败", c)

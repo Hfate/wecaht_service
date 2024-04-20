@@ -5,6 +5,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/response"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/cast"
 	"go.uber.org/zap"
 )
 
@@ -101,7 +102,7 @@ func (s *DictionaryApi) FindSysDictionary(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	sysDictionary, err := dictionaryService.GetSysDictionary(dictionary.Type, dictionary.ID, dictionary.Status)
+	sysDictionary, err := dictionaryService.GetSysDictionary(dictionary.Type, cast.ToUint64(dictionary.ID), dictionary.Status)
 	if err != nil {
 		global.GVA_LOG.Error("字典未创建或未开启!", zap.Error(err))
 		response.FailWithMessage("字典未创建或未开启", c)

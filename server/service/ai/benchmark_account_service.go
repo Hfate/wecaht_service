@@ -212,7 +212,7 @@ func getArticle(portalName, resp string) []*ai.Article {
 			}
 
 			result = append(result, &ai.Article{
-				BASEMODEL:   global.BASEMODEL{ID: utils.GenID(), CreatedAt: time.Now(), UpdatedAt: time.Now()},
+				BASEMODEL:   global.BASEMODEL{ID: cast.ToString(utils.GenID()), CreatedAt: time.Now(), UpdatedAt: time.Now()},
 				Title:       appMsg.Title,
 				AuthorName:  appMsg.AuthorName,
 				PortalName:  portalName,

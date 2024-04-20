@@ -9,6 +9,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/response"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/cast"
 	"go.uber.org/zap"
 )
 
@@ -90,7 +91,7 @@ func (e *AIArticleApi) GetAIArticle(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	data, err := aiArticleService.GetAIArticle(aiArticle.ID)
+	data, err := aiArticleService.GetAIArticle(cast.ToUint64(aiArticle.ID))
 	if err != nil {
 		global.GVA_LOG.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败", c)
@@ -185,7 +186,7 @@ func (e *AIArticleApi) Recreation(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	err = aiArticleService.Recreation(aiArticle.ID)
+	err = aiArticleService.Recreation(cast.ToUint64(aiArticle.ID))
 	if err != nil {
 		global.GVA_LOG.Error("改写失败!", zap.Error(err))
 		response.FailWithMessage("改写失败", c)

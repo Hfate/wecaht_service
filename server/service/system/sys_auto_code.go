@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/spf13/cast"
 	"io"
 	"mime/multipart"
 	"os"
@@ -561,7 +562,7 @@ func (autoCodeService *AutoCodeService) AutoCreateApi(a *system.AutoCodeStruct) 
 				if err = tx.Create(&v).Error; err != nil { // 遇到错误时回滚事务
 					return err
 				} else {
-					ids = append(ids, v.ID)
+					ids = append(ids, cast.ToUint64(v.ID))
 				}
 			}
 		}

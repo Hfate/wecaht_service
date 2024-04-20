@@ -2,6 +2,7 @@ package example
 
 import (
 	"errors"
+	"github.com/spf13/cast"
 	"mime/multipart"
 	"strings"
 
@@ -38,7 +39,7 @@ func (e *FileUploadAndDownloadService) FindFile(id uint64) (example.ExaFileUploa
 
 func (e *FileUploadAndDownloadService) DeleteFile(file example.ExaFileUploadAndDownload) (err error) {
 	var fileFromDb example.ExaFileUploadAndDownload
-	fileFromDb, err = e.FindFile(file.ID)
+	fileFromDb, err = e.FindFile(cast.ToUint64(file.ID))
 	if err != nil {
 		return
 	}

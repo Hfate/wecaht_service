@@ -8,6 +8,7 @@ import (
 	systemReq "github.com/flipped-aurora/gin-vue-admin/server/model/system/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/cast"
 	"go.uber.org/zap"
 )
 
@@ -109,7 +110,7 @@ func (s *OperationRecordApi) FindSysOperationRecord(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	reSysOperationRecord, err := operationRecordService.GetSysOperationRecord(sysOperationRecord.ID)
+	reSysOperationRecord, err := operationRecordService.GetSysOperationRecord(cast.ToUint64(sysOperationRecord.ID))
 	if err != nil {
 		global.GVA_LOG.Error("查询失败!", zap.Error(err))
 		response.FailWithMessage("查询失败", c)

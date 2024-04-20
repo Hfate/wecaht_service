@@ -7,6 +7,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/response"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/cast"
 	"go.uber.org/zap"
 )
 
@@ -128,7 +129,7 @@ func (e *PromptApi) GetPrompt(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	data, err := promptService.GetPrompt(prompt.ID)
+	data, err := promptService.GetPrompt(cast.ToUint64(prompt.ID))
 	if err != nil {
 		global.GVA_LOG.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败", c)

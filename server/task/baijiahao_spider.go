@@ -8,6 +8,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils/timeutil"
 	"github.com/gocolly/colly/v2"
+	"github.com/spf13/cast"
 	"go.uber.org/zap"
 	"net/url"
 	"strings"
@@ -149,9 +150,15 @@ func collectArticle(hotspot ai.Hotspot) []ai.Article {
 			Comment:     content,
 			AuthorName:  author,
 			PublishTime: publishTime,
-			HotspotId:   hotspot.ID,
+			HotspotId:   cast.ToUint64(hotspot.ID),
 			Topic:       topic,
 			PortalName:  "百家号",
+		}
+
+		publishTimeInt, _ := timeutil.StrToTimeStamp(publishTime, "2006-01-02 15:04:05")
+		// 发布时间需大于今年
+		if publishTimeInt < timeutil.GetYearStartTime(int64(time.Now().Year())) {
+			return
 		}
 
 		item.BASEMODEL = ai2.BaseModel()
