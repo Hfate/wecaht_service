@@ -166,6 +166,13 @@ func (exa *AIArticleService) GenerateArticle(account *ai.OfficialAccount) error 
 
 	i := 0
 
+	batchId := timeutil.GetCurDate() + account.AppId
+	// 重置当天的素材池，将use time 更新为0
+	err := global.GVA_DB.Model(&ai.DailyArticle{}).Where("batch_id = ?", batchId).Update("use_times", 0).Error
+	if err != nil {
+		return err
+	}
+
 	for i < targetNum {
 		context := &ArticleContext{
 			Topic:       account.Topic,
@@ -173,8 +180,6 @@ func (exa *AIArticleService) GenerateArticle(account *ai.OfficialAccount) error 
 			Params:      []string{},
 			CreateTypes: account.CreateTypes,
 		}
-
-		batchId := timeutil.GetCurDate() + account.AppId
 
 		articleContext := ArticlePipelineApp.Run("", context)
 		if articleContext.Content == "" || len(articleContext.Params) == 0 {
