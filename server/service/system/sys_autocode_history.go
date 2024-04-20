@@ -6,7 +6,6 @@ import (
 	systemReq "github.com/flipped-aurora/gin-vue-admin/server/model/system/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils/ast"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"time"
 
@@ -74,10 +73,7 @@ func (autoCodeHistoryService *AutoCodeHistoryService) RollBack(info *systemReq.R
 	ids := request.IdsReq{}
 	idsStr := strings.Split(md.ApiIDs, ";")
 	for i := range idsStr[0 : len(idsStr)-1] {
-		id, err := strconv.Atoi(idsStr[i])
-		if err != nil {
-			return err
-		}
+		id := idsStr[i]
 		ids.Ids = append(ids.Ids, id)
 	}
 	err := ApiServiceApp.DeleteApisByIds(ids)

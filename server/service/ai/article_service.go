@@ -12,6 +12,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils/convertor"
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/cast"
 	"github.com/xuri/excelize/v2"
 	"go.uber.org/zap"
 	"mime/multipart"
@@ -130,7 +131,7 @@ func (exa *ArticleService) Recreation(id uint64) error {
 	}
 
 	aiArticle := ai.AIArticle{
-		OriginId:   article.ID,
+		OriginId:   cast.ToUint64(article.ID),
 		Title:      chatGptResp.Title,
 		PortalName: article.PortalName,
 		Topic:      chatGptResp.Topic,

@@ -42,7 +42,7 @@ func (exa *AIArticleService) DeleteAIArticlesByIds(ids request.IdsReq) (err erro
 	return err
 }
 
-func (exa *AIArticleService) PublishArticle(ids []int) error {
+func (exa *AIArticleService) PublishArticle(ids []string) error {
 	var articles []ai.AIArticle
 	err := global.GVA_DB.Model(&ai.AIArticle{}).Where("id in ?", ids).Find(&articles).Error
 

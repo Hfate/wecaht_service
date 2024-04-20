@@ -24,12 +24,12 @@ func (*ArticlePipeline) Run(model string, context *ArticleContext) *ArticleConte
 	case "hotspot":
 		err := HotSpotArticlePipelineApp.Write(context)
 		if err != nil {
-			fmt.Println(err)
+			global.GVA_LOG.Error("文章写作失败", zap.Error(err))
 		}
 	default:
 		err := DefaultArticlePipelineApp.Write(context)
 		if err != nil {
-			fmt.Println(err)
+			global.GVA_LOG.Error("文章写作失败", zap.Error(err))
 		}
 	}
 	return context
@@ -157,6 +157,7 @@ func (da *DefaultArticlePipeline) Write(context *ArticleContext) error {
 	for _, handle := range da.ArticleWriteHandleList {
 		err := handle.Handle(context)
 		if err != nil {
+			global.GVA_LOG.Error("文章写作失败", zap.Error(err))
 			continue
 		}
 		// 完成写作
@@ -169,7 +170,7 @@ func (da *DefaultArticlePipeline) Write(context *ArticleContext) error {
 	for _, handle := range da.AddImageHandleList {
 		err := handle.Handle(context)
 		if err != nil {
-			fmt.Println("DefaultArticlePipeline Add Image", err)
+			global.GVA_LOG.Error("文章配图失败", zap.Error(err))
 			continue
 		}
 	}
@@ -260,7 +261,7 @@ func (r *HotSpotWriteArticle) Handle(context *ArticleContext) error {
 
 		err := global.GVA_DB.Model(&ai.Article{}).Where("hotspot_id = ?", hotspot.ID).Last(&article).Error
 		if err != nil {
-			global.GVA_LOG.Info("没有找到热点词条相关的文章" + hotspot.Headline)
+			global.GVA_LOG.Info("没有找到热点词条相关的文章[" + hotspot.Headline + "]")
 			continue
 		}
 

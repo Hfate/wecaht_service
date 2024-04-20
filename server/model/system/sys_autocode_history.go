@@ -1,6 +1,7 @@
 package system
 
 import (
+	"github.com/spf13/cast"
 	"strconv"
 	"strings"
 
@@ -30,11 +31,11 @@ func (m *SysAutoCodeHistory) ToRequestIds() request.IdsReq {
 		return request.IdsReq{}
 	}
 	slice := strings.Split(m.ApiIDs, ";")
-	ids := make([]int, 0, len(slice))
+	ids := make([]string, 0, len(slice))
 	length := len(slice)
 	for i := 0; i < length; i++ {
 		id, _ := strconv.ParseInt(slice[i], 10, 32)
-		ids = append(ids, int(id))
+		ids = append(ids, cast.ToString(id))
 	}
 	return request.IdsReq{Ids: ids}
 }

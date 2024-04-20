@@ -81,7 +81,10 @@ func collectArticle(hotspot ai.Hotspot) []ai.Article {
 
 	// 请求完成后回调
 	subCollector.OnResponse(func(response *colly.Response) {
-		fmt.Println(response.Request.URL.Path + "----> 开始返回了")
+		global.GVA_LOG.Info(response.Request.URL.Path+"----> 开始返回了",
+			zap.String("headLine", hotspot.Headline),
+			zap.Int("status_code", response.StatusCode),
+			zap.Int("content_length", len(response.Body)))
 	})
 
 	result := make([]ai.Article, 0)
@@ -129,6 +132,7 @@ func collectArticle(hotspot ai.Hotspot) []ai.Article {
 
 	// 提取标题
 	subCollector.OnHTML("div.EaCvy", func(element *colly.HTMLElement) {
+		link := element.Request.URL.String()
 
 		title := element.ChildText(".sKHSJ")
 		author := element.ChildText("._2gGWi")
@@ -147,6 +151,7 @@ func collectArticle(hotspot ai.Hotspot) []ai.Article {
 
 		item := ai.Article{
 			Title:       title,
+			Link:        link,
 			Comment:     content,
 			AuthorName:  author,
 			PublishTime: publishTime,
