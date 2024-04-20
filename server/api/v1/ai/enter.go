@@ -5,6 +5,7 @@ import "github.com/flipped-aurora/gin-vue-admin/server/service"
 type ApiGroup struct {
 	PortalApi
 	ArticleApi
+	DailyArticleApi
 	BenchmarkAccountApi
 	OfficialAccountApi
 	HotspotApi
@@ -20,6 +21,7 @@ var (
 	promptService           = service.ServiceGroupApp.AIServiceGroup.PromptService
 	aiArticleService        = service.ServiceGroupApp.AIServiceGroup.AIArticleService
 	articleService          = service.ServiceGroupApp.AIServiceGroup.ArticleService
+	dailyArticleService     = service.ServiceGroupApp.AIServiceGroup.DailyArticleService
 	benchmarkAccountService = service.ServiceGroupApp.AIServiceGroup.BenchmarkAccountService
 	officialAccountService  = service.ServiceGroupApp.AIServiceGroup.OfficialAccountService
 	wxTokenService          = service.ServiceGroupApp.AIServiceGroup.WxTokenService

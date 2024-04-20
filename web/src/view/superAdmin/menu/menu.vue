@@ -1,4 +1,4 @@
-<template>
+  <template>
   <div>
     <div class="gva-table-box">
       <div class="gva-btn-list">
@@ -581,7 +581,7 @@ const deleteBtn = async(btns, index) => {
 }
 
 const form = ref({
-  ID: 0,
+  ID: '',
   path: '',
   name: '',
   hidden: false,

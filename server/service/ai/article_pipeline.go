@@ -5,6 +5,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/ai"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
+	"github.com/flipped-aurora/gin-vue-admin/server/utils/timeutil"
 	"go.uber.org/zap"
 	"regexp"
 	"strings"
@@ -146,12 +147,12 @@ func (da *DefaultArticlePipeline) Write(context *ArticleContext) error {
 
 	articleWriteHandleList := make([]ArticleWriteHandle, 0)
 
-	if strings.Contains(context.CreateTypes, "1") {
-		articleWriteHandleList = append(articleWriteHandleList, &HotSpotWriteArticle{})
-	}
-
 	if strings.Contains(context.CreateTypes, "2") {
 		articleWriteHandleList = append(articleWriteHandleList, &RecreationArticle{})
+	}
+
+	if strings.Contains(context.CreateTypes, "1") {
+		articleWriteHandleList = append(articleWriteHandleList, &HotSpotWriteArticle{})
 	}
 
 	for _, handle := range da.ArticleWriteHandleList {
@@ -203,11 +204,14 @@ type RecreationArticle struct {
 }
 
 func (r *RecreationArticle) Handle(context *ArticleContext) error {
-	article := ai.Article{}
-	err := global.GVA_DB.Where("topic like ?", "%"+context.Topic).Where("use_times=0").Order("publish_time desc").Last(&article).Error
+	batchId := timeutil.GetCurDate() + context.AppId
+
+	article := ai.DailyArticle{}
+	err := global.GVA_DB.Where("batch_id = ?", batchId).Where("use_times=0").Order("publish_time desc").Last(&article).Error
 	if err != nil {
 		return err
 	}
+
 	// 更新使用次数
 	article.UseTimes = article.UseTimes + 1
 	err = global.GVA_DB.Save(&article).Error

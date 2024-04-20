@@ -168,7 +168,7 @@ func (a *AuthorityMenuApi) DeleteBaseMenu(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	err = baseMenuService.DeleteBaseMenu(menu.ID)
+	err = baseMenuService.DeleteBaseMenu(menu.Uint64())
 	if err != nil {
 		global.GVA_LOG.Error("删除失败!", zap.Error(err))
 		response.FailWithMessage("删除失败", c)
@@ -233,7 +233,7 @@ func (a *AuthorityMenuApi) GetBaseMenuById(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	menu, err := baseMenuService.GetBaseMenuById(idInfo.ID)
+	menu, err := baseMenuService.GetBaseMenuById(idInfo.Uint64())
 	if err != nil {
 		global.GVA_LOG.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败", c)

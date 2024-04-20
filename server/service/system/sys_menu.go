@@ -5,6 +5,8 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
+	"github.com/flipped-aurora/gin-vue-admin/server/utils"
+	"github.com/spf13/cast"
 	"gorm.io/gorm"
 )
 
@@ -130,6 +132,7 @@ func (menuService *MenuService) AddBaseMenu(menu system.SysBaseMenu) error {
 	if !errors.Is(global.GVA_DB.Where("name = ?", menu.Name).First(&system.SysBaseMenu{}).Error, gorm.ErrRecordNotFound) {
 		return errors.New("存在重复name，请修改name")
 	}
+	menu.ID = cast.ToString(utils.GenID())
 	return global.GVA_DB.Create(&menu).Error
 }
 

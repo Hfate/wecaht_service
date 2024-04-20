@@ -101,6 +101,7 @@ func Routers() *gin.Engine {
 		aiRouter.InitPortalRouter(PrivateGroup)                     // 门户网站管理
 		aiRouter.InitPromptRouter(PrivateGroup)                     // prompt管理
 		aiRouter.InitArticleRouter(PrivateGroup)                    // 文章管理
+		aiRouter.InitDailyArticleRouter(PrivateGroup)               // 每日一文
 		aiRouter.InitAIArticleRouter(PrivateGroup)                  // ai文章管理
 		aiRouter.InitBenchmarkAccountRouter(PrivateGroup)           // 对标账号管理
 		aiRouter.InitOfficialAccountRouter(PrivateGroup)            // 公众号管理

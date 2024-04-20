@@ -6,6 +6,8 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
+	"github.com/flipped-aurora/gin-vue-admin/server/utils"
+	"github.com/spf13/cast"
 
 	"gorm.io/gorm"
 )
@@ -23,6 +25,8 @@ func (apiService *ApiService) CreateApi(api system.SysApi) (err error) {
 	if !errors.Is(global.GVA_DB.Where("path = ? AND method = ?", api.Path, api.Method).First(&system.SysApi{}).Error, gorm.ErrRecordNotFound) {
 		return errors.New("存在相同api")
 	}
+	api.ID = cast.ToString(utils.GenID())
+
 	return global.GVA_DB.Create(&api).Error
 }
 

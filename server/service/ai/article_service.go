@@ -25,16 +25,10 @@ type ArticleService struct {
 
 var ArticleServiceApp = new(ArticleService)
 
-func (exa *ArticleService) FindHotArticle() []ai.Article {
-	result := make([]ai.Article, 0)
-
-	err := global.GVA_DB.Model(&ai.Article{}).Where("is_hot = ? and read_num=0", true).Find(&result).Error
-
-	if err != nil {
-		return result
-	}
-
-	return result
+func (exa *ArticleService) FindHotArticleByTopic(topic string) (ai.Article, error) {
+	var article ai.Article
+	err := global.GVA_DB.Model(&ai.Article{}).Where("topic = ?", topic).Where("use_times = 0").Order("is_hot desc,read_num desc,created_at desc").First(&article).Error
+	return article, err
 }
 
 func (exa *ArticleService) Create(article ai.Article) error {

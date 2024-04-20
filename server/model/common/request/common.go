@@ -1,5 +1,7 @@
 package request
 
+import "github.com/spf13/cast"
+
 // PageInfo Paging common input parameter structure
 type PageInfo struct {
 	Page     int    `json:"page" form:"page"`         // 页码
@@ -9,11 +11,15 @@ type PageInfo struct {
 
 // GetById Find by id structure
 type GetById struct {
-	ID uint64 `json:"id" form:"id"` // 主键ID
+	ID string `json:"id" form:"id"` // 主键ID
 }
 
 func (r *GetById) Uint() uint {
-	return uint(r.ID)
+	return cast.ToUint(r.ID)
+}
+
+func (r *GetById) Uint64() uint64 {
+	return cast.ToUint64(r.ID)
 }
 
 type IdsReq struct {

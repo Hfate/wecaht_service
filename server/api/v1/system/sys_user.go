@@ -325,11 +325,11 @@ func (b *BaseApi) DeleteUser(c *gin.Context) {
 		return
 	}
 	jwtId := utils.GetUserID(c)
-	if jwtId == uint64(reqId.ID) {
+	if jwtId == reqId.Uint64() {
 		response.FailWithMessage("删除失败, 自杀失败", c)
 		return
 	}
-	err = userService.DeleteUser(reqId.ID)
+	err = userService.DeleteUser(reqId.Uint64())
 	if err != nil {
 		global.GVA_LOG.Error("删除失败!", zap.Error(err))
 		response.FailWithMessage("删除失败", c)

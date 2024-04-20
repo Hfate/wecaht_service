@@ -3,6 +3,7 @@ package ai
 type RouterGroup struct {
 	PortalRouter
 	ArticleRouter
+	DailyArticleRouter
 	BenchmarkAccountRouter
 	OfficialAccountRouter
 	HotspotRouter

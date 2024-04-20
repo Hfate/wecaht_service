@@ -201,7 +201,7 @@
             <el-input
                 v-model="form.promptList[index]"
                 type="textarea"
-                :rows="15"
+                :rows="10"
                 autocomplete="off"
             />
             <el-button type="danger" icon="el-icon-delete" @click="removePrompt(index)">删除</el-button>

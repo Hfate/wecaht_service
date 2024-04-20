@@ -3,6 +3,7 @@ package ai
 type ServiceGroup struct {
 	PortalService
 	ArticleService
+	DailyArticleService
 	BenchmarkAccountService
 	OfficialAccountService
 	HotspotService
