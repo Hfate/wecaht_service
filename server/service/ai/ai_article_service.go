@@ -276,6 +276,8 @@ func (exa *AIArticleService) parseContent(content string) string {
 
 	htmlContent, _ := utils.RenderMarkdownContent(markdownContent)
 
+	htmlContent = utils.HtmlAddStyle(htmlContent)
+
 	return htmlContent
 }
 

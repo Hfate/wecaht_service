@@ -6,6 +6,18 @@ import (
 	"unicode"
 )
 
+var CSSStyleMap = map[string]string{}
+
+func init() {
+
+	CSSStyleMap = make(map[string]string)
+	CSSStyleMap["<h1>"] = "<h1 style=\"letter-spacing: normal;text-wrap: wrap;text-align: center;line-height: 1.75;font-family: -apple-system-font, BlinkMacSystemFont, \"Helvetica Neue\", \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", Arial, sans-serif;font-size: 1.2em;font-weight: bold;display: table;margin: 2em auto 1em;padding-right: 1em;padding-left: 1em;border-bottom: 2px solid rgb(15, 76, 129);color: rgb(63, 63, 63);\">"
+	CSSStyleMap["<h2>"] = "<h2 style=\"letter-spacing: normal;text-wrap: wrap;text-align: center;line-height: 1.75;font-family: -apple-system-font, BlinkMacSystemFont, \"Helvetica Neue\", \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", Arial, sans-serif;font-size: 1.2em;font-weight: bold;display: table;margin: 4em auto 2em;padding-right: 0.2em;padding-left: 0.2em;background: rgb(15, 76, 129);color: rgb(255, 255, 255);\">"
+	CSSStyleMap["<p>"] = "<p style=\"line-height: 1.75;font-family: -apple-system-font, BlinkMacSystemFont, \"Helvetica Neue\", \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", Arial, sans-serif;font-size: 1em;letter-spacing: 0.1em;color: rgb(80, 80, 80);\">"
+	CSSStyleMap["<strong>"] = "<strong style=\"line-height: 1.75;color: rgb(15, 76, 129);\">"
+
+}
+
 func RemoveChinese(s string) string {
 	result := ""
 	for _, r := range s {
@@ -38,4 +50,12 @@ func EscapeSpecialCharacters(input string) string {
 	escaped = strings.ReplaceAll(escaped, "\t", "\\t") // 转义制表符
 
 	return escaped
+}
+
+func HtmlAddStyle(html string) string {
+	// 使用Go的字符串替换功能来转义特殊字符
+	for k, v := range CSSStyleMap {
+		html = strings.ReplaceAll(html, k, v)
+	}
+	return html
 }
