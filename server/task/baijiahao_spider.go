@@ -30,7 +30,6 @@ func SpiderHotArticle() {
 
 	for _, item := range hotspotList {
 		err = spiderHotspot(item)
-		global.GVA_LOG.Info("spiderHotspot", zap.String("hotspot", utils.Parse2Json(item)), zap.Error(err))
 		time.Sleep(3 * time.Second)
 	}
 
@@ -44,7 +43,9 @@ func spiderHotspot(hotspot ai.Hotspot) error {
 		hotspot.SpiderNum = len(articleList)
 		global.GVA_DB.Save(hotspot)
 
-		global.GVA_LOG.Info("spiderHotspot", zap.String("hotspot", utils.Parse2Json(hotspot)))
+		if hotspot.SpiderNum > 0 {
+			global.GVA_LOG.Info("spiderHotspot", zap.String("hotspot", utils.Parse2Json(hotspot)))
+		}
 		return err
 	}
 
