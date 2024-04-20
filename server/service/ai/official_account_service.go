@@ -18,6 +18,18 @@ type OfficialAccountService struct {
 
 var OfficialAccountServiceApp = new(OfficialAccountService)
 
+func (exa *OfficialAccountService) FindTopicList() []string {
+	result := make([]string, 0)
+
+	err := global.GVA_DB.Model(&ai.OfficialAccount{}).Distinct("topic").Find(&result).Error
+	if err != nil {
+		global.GVA_LOG.Error("查询失败!", zap.Error(err))
+		return result
+	}
+
+	return result
+}
+
 func (exa *OfficialAccountService) UpdateCreateTypes(id uint64, createTypeList []int) (err error) {
 	createTypes := strings.Trim(strings.Join(strings.Fields(fmt.Sprint(createTypeList)), ","), "[]")
 	err = global.GVA_DB.Model(&ai.OfficialAccount{}).Where("id = ?", id).Update("create_types", createTypes).Error

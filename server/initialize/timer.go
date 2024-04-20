@@ -77,6 +77,17 @@ func Timer() {
 			fmt.Println("add timer error:", err)
 		}
 
+		// 每天凌晨执行生成文章的任务
+		_, err = global.GVA_Timer.AddTaskByFunc("SpiderWechatHotArticle", "@daily", func() {
+			task.SpiderWechatHotArticle()
+			if err != nil {
+				fmt.Println("timer error:", err)
+			}
+		}, "定时爬取爆文", option...)
+		if err != nil {
+			fmt.Println("add timer error:", err)
+		}
+
 	}()
 
 }

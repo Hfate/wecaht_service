@@ -21,6 +21,11 @@ type BenchmarkAccountService struct {
 
 var BenchmarkAccountServiceApp = new(BenchmarkAccountService)
 
+func (exa *BenchmarkAccountService) CheckBizId(bizId string) bool {
+	var count int64
+	global.GVA_DB.Model(&ai.BenchmarkAccount{}).Where("account_id = ?", bizId).Count(&count)
+	return count > 0
+}
 func (exa *BenchmarkAccountService) UpdateBenchmarkAccount(e ai.BenchmarkAccount) error {
 	err := global.GVA_DB.Save(e).Error
 	return err

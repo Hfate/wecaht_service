@@ -25,6 +25,35 @@ type ArticleService struct {
 
 var ArticleServiceApp = new(ArticleService)
 
+func (exa *ArticleService) FindHotArticle() []ai.Article {
+	result := make([]ai.Article, 0)
+
+	err := global.GVA_DB.Model(&ai.Article{}).Where("is_hot = ? and read_num=0", true).Find(&result).Error
+
+	if err != nil {
+		return result
+	}
+
+	return result
+}
+
+func (exa *ArticleService) Create(article ai.Article) error {
+	return global.GVA_DB.Model(&ai.Article{}).Create(article).Error
+}
+
+func (exa *ArticleService) Update(article ai.Article) error {
+	return global.GVA_DB.Save(article).Error
+}
+
+func (exa *ArticleService) CheckUrl(url string) bool {
+	var count int64
+	err := global.GVA_DB.Model(&ai.Article{}).Where("link = ?", url).Count(&count).Error
+	if err != nil {
+		return false
+	}
+	return count > 0
+}
+
 func (exa *ArticleService) UploadArticle(file *multipart.FileHeader) error {
 
 	fileReader, err := file.Open()
@@ -107,8 +136,8 @@ func (exa *ArticleService) DeleteArticlesByIds(ids request.IdsReq) (err error) {
 //@param: id uint
 //@return: customer model.Article, err error
 
-func (exa *ArticleService) GetArticle(id uint64) (portal ai.Article, err error) {
-	err = global.GVA_DB.Where("id = ?", id).First(&portal).Error
+func (exa *ArticleService) GetArticle(id uint64) (article ai.Article, err error) {
+	err = global.GVA_DB.Where("id = ?", id).First(&article).Error
 	return
 }
 
@@ -191,7 +220,7 @@ func (exa *ArticleService) GetArticleList(sysUserAuthorityID uint, info aiReq.Ar
 	if err != nil {
 		return articleList, total, err
 	} else {
-		err = db.Limit(limit).Offset(offset).Order("created_at desc").Find(&articleList).Error
+		err = db.Limit(limit).Offset(offset).Order("is_hot desc,created_at desc").Find(&articleList).Error
 	}
 	return articleList, total, err
 }

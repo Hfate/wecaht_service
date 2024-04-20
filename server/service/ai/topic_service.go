@@ -16,6 +16,13 @@ type TopicService struct {
 //@param: e model.Topic
 //@return: err error
 
+var TopicServiceApp = new(TopicService)
+
+func (exa *TopicService) FindByTopics(topics []string) (list []ai.Topic, err error) {
+	err = global.GVA_DB.Model(&ai.Topic{}).Where("topic in ?", topics).Find(&list).Error
+	return
+}
+
 func (exa *TopicService) CreateTopic(e ai.Topic) (err error) {
 	e.BASEMODEL = BaseModel()
 	err = global.GVA_DB.Create(&e).Error
