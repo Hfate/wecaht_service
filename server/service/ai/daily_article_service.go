@@ -7,8 +7,10 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
 	systemService "github.com/flipped-aurora/gin-vue-admin/server/service/system"
+	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils/timeutil"
 	"github.com/spf13/cast"
+	"sort"
 	"strings"
 )
 
@@ -172,12 +174,21 @@ func (exa *DailyArticleService) GetDailyArticleList(sysUserAuthorityID uint) (li
 
 	articleMap := make(map[string][]ai.DailyArticle)
 
+	batchIdList := make([]string, 0)
 	for _, item := range articleList {
 		articleMap[item.BatchId] = append(articleMap[item.BatchId], item)
+		batchIdList = append(batchIdList, item.BatchId)
 	}
 
+	batchIdList = utils.RemoveRepByMap(batchIdList)
+
+	// 排序 batchIdList
+	sort.Strings(batchIdList)
+
 	result := make([]aiRes.DailyArticleParentResponse, 0)
-	for _, subList := range articleMap {
+	for _, batchId := range batchIdList {
+		subList := articleMap[batchId]
+
 		children := make([]ai.DailyArticle, 0)
 		if len(subList) > 1 {
 			children = subList[1:]
@@ -187,6 +198,7 @@ func (exa *DailyArticleService) GetDailyArticleList(sysUserAuthorityID uint) (li
 			Children:     children,
 		}
 		result = append(result, item)
+
 	}
 
 	return result, int64(len(result)), err

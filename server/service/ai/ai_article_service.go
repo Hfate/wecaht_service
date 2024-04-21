@@ -12,6 +12,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils/timeutil"
 	"go.uber.org/zap"
+	"sort"
 	"strings"
 	"time"
 )
@@ -363,12 +364,21 @@ func (exa *AIArticleService) GetAIArticleList(sysUserAuthorityID uint, info aiRe
 
 	articleMap := make(map[string][]ai.AIArticle)
 
+	batchIdList := make([]string, 0)
 	for _, item := range articleList {
 		articleMap[item.BatchId] = append(articleMap[item.BatchId], item)
+		batchIdList = append(batchIdList, item.BatchId)
 	}
 
+	batchIdList = utils.RemoveRepByMap(batchIdList)
+
+	// 排序 batchIdList
+	sort.Strings(batchIdList)
+
 	result := make([]aiRes.AIArticleParentResponse, 0)
-	for _, subList := range articleMap {
+	for _, batchId := range batchIdList {
+		subList := articleMap[batchId]
+
 		children := make([]ai.AIArticle, 0)
 		if len(subList) > 1 {
 			children = subList[1:]
@@ -378,6 +388,7 @@ func (exa *AIArticleService) GetAIArticleList(sysUserAuthorityID uint, info aiRe
 			Children:  children,
 		}
 		result = append(result, item)
+
 	}
 
 	return result, total, err

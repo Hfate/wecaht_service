@@ -71,3 +71,15 @@ func HtmlRemoveStyle(html string) string {
 	}
 	return html
 }
+
+func RemoveRepByMap(slc []string) []string {
+	var result []string
+	tempMap := map[string]struct{}{}
+	for _, e := range slc {
+		if _, ok := tempMap[e]; !ok {
+			tempMap[e] = struct{}{}
+			result = append(result, e)
+		}
+	}
+	return result
+}
