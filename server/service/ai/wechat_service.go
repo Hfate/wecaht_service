@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
+	"github.com/silenceper/wechat/v2/officialaccount/freepublish"
 	"github.com/silenceper/wechat/v2/officialaccount/server"
 
 	aiModel "github.com/flipped-aurora/gin-vue-admin/server/model/ai"
@@ -200,4 +201,18 @@ func reply(msg *message.MixMessage) *message.Reply {
 	//回复消息：演示回复用户发送的消息
 	text := message.NewText(msg.Content)
 	return &message.Reply{MsgType: message.MsgTypeText, MsgData: text}
+}
+
+func (*WechatService) BatchGetHistoryArticleList(dbOfficialAccount *aiModel.OfficialAccount) (list freepublish.ArticleList, err error) {
+	cfg := &offConfig.Config{
+		AppID:          dbOfficialAccount.AppId,
+		AppSecret:      dbOfficialAccount.AppSecret,
+		Token:          dbOfficialAccount.Token,
+		EncodingAESKey: dbOfficialAccount.EncodingAESKey,
+	}
+	officialAccount := wc.GetOfficialAccount(cfg)
+	// 获取发布接口
+	p := officialAccount.GetFreePublish()
+	// 获取最近五篇文章
+	return p.Paginate(0, 5, true)
 }

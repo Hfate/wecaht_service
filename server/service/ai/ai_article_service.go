@@ -205,14 +205,34 @@ func (exa *AIArticleService) GenerateArticle(account *ai.OfficialAccount) error 
 			Link:              articleContext.Link,
 			Tags:              strings.Join(articleContext.Tags, ","),
 			OriginalContent:   articleContext.Content,
-			Content:           exa.parseContent(articleContext.Content),
+			Content:           articleContext.Content,
 			Params:            strings.Join(articleContext.Params, ","),
 		}
 		aiArticle.BASEMODEL = BaseModel()
 
-		err := AIArticleServiceApp.CreateAIArticle(aiArticle)
-		if err != nil {
+		// 获取历史已发布消息5条图文消息
+		publishArticleList, err2 := WechatServiceApp.BatchGetHistoryArticleList(account)
+		if err2 != nil || len(publishArticleList.Item) == 0 {
+			global.GVA_LOG.Error("BatchGetHistoryArticleList", zap.Error(err2))
+		} else {
+			originalContent := articleContext.Content
+			originalContent += "<blockquote style=\\\"font-family: &quot;PingFang SC&quot;;font-size: 14px;letter-spacing: normal;text-wrap: wrap;text-align: left;line-height: 1.75;border-left: none;padding: 1em;border-radius: 8px;color: rgba(0, 0, 0, 0.5);background: rgb(247, 247, 247);margin: 2em 8px;\\\"><p style=\\\"line-height: 1.75;font-family: -apple-system-font, BlinkMacSystemFont, &quot;Helvetica Neue&quot;, &quot;PingFang SC&quot;, &quot;Hiragino Sans GB&quot;, &quot;Microsoft YaHei UI&quot;, &quot;Microsoft YaHei&quot;, Arial, sans-serif;font-size: 1em;letter-spacing: 0.1em;color: rgb(80, 80, 80);\\\">\n"
+			originalContent += "#### 推荐阅读\n"
+			for _, item := range publishArticleList.Item {
 
+				if len(item.Content.NewsItem) == 0 {
+					continue
+				}
+
+				originalContent += "-[" + item.Content.NewsItem[0].Title + "](" + item.Content.NewsItem[0].URL + ")\n"
+			}
+		}
+
+		//  处理排版
+		aiArticle.Content = exa.parseContent(articleContext.Content)
+
+		err = AIArticleServiceApp.CreateAIArticle(aiArticle)
+		if err != nil {
 			global.GVA_LOG.Error("CreateAIArticle", zap.Error(err))
 			continue
 		}
