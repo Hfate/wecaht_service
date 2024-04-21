@@ -83,6 +83,13 @@
         />
         <el-table-column
             align="left"
+            label="目标公众号"
+            width="100"
+            prop="targetAccountName"
+        >
+        </el-table-column>
+        <el-table-column
+            align="left"
             label="文章标题"
             prop="title"
             width="300"
@@ -110,13 +117,7 @@
             prop="authorName"
             width="200"
         />
-        <el-table-column
-            align="left"
-            label="目标公众号"
-            width="100"
-            prop="targetAccountName"
-        >
-        </el-table-column>
+
         <el-table-column
             align="left"
             label="阅读量"
