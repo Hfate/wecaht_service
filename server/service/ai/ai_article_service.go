@@ -216,7 +216,7 @@ func (exa *AIArticleService) GenerateArticle(account *ai.OfficialAccount) error 
 			global.GVA_LOG.Error("BatchGetHistoryArticleList", zap.Error(err2))
 		} else {
 			originalContent := articleContext.Content
-			originalContent += "<blockquote style=\\\"font-family: &quot;PingFang SC&quot;;font-size: 14px;letter-spacing: normal;text-wrap: wrap;text-align: left;line-height: 1.75;border-left: none;padding: 1em;border-radius: 8px;color: rgba(0, 0, 0, 0.5);background: rgb(247, 247, 247);margin: 2em 8px;\\\"><p style=\\\"line-height: 1.75;font-family: -apple-system-font, BlinkMacSystemFont, &quot;Helvetica Neue&quot;, &quot;PingFang SC&quot;, &quot;Hiragino Sans GB&quot;, &quot;Microsoft YaHei UI&quot;, &quot;Microsoft YaHei&quot;, Arial, sans-serif;font-size: 1em;letter-spacing: 0.1em;color: rgb(80, 80, 80);\\\">\n"
+			originalContent += "---\n"
 			originalContent += "#### 推荐阅读\n"
 			for _, item := range publishArticleList.Item {
 

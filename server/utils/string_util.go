@@ -21,6 +21,8 @@ func init() {
 	CSSStyleMap["<ul>"] = "<ul style=\"font-size: 14px;letter-spacing: normal;text-wrap: wrap;text-align: left;line-height: 1.75;font-family: -apple-system-font, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei UI', 'Microsoft YaHei', Arial, sans-serif;padding-left: 1em;list-style: circle;color: rgb(63, 63, 63);\" class=\"list-paddingleft-1\">"
 	CSSStyleMap["<li>"] = "<li style=\"text-align: left;line-height: 1.75;text-indent: -1em;display: block;margin: 0.2em 8px;\">"
 	CSSStyleMap["<span>"] = "<span style=\"line-height: 1.75;color: rgb(87, 107, 149);\">"
+	CSSStyleMap["<hr />"] = "<blockquote style=\"font-family: 'PingFang SC';font-size: 14px;letter-spacing: normal;text-wrap: wrap;text-align: left;line-height: 1.75;border-left: none;padding: 1em;border-radius: 8px;color: rgba(0, 0, 0, 0.5);background: rgb(247, 247, 247);margin: 2em 8px;\"><p style=\"line-height: 1.75;font-family: -apple-system-font, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei UI', 'Microsoft YaHei', Arial, sans-serif;font-size: 1em;letter-spacing: 0.1em;color: rgb(80, 80, 80);\">\n"
+
 }
 
 func RemoveChinese(s string) string {
