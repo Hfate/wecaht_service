@@ -112,7 +112,7 @@ func (exa *OfficialAccountService) FindByTopic(topic string) (officialAccount ai
 //@param: id uint
 //@return: customer model.OfficialAccount, err error
 
-func (exa *OfficialAccountService) GetOfficialAccountByAppId(appId string) (officialAccount ai.OfficialAccount, err error) {
+func (exa *OfficialAccountService) GetOfficialAccountByAppId(appId string) (officialAccount *ai.OfficialAccount, err error) {
 	err = global.GVA_DB.Where("app_id = ?", appId).Last(&officialAccount).Error
 	return
 }

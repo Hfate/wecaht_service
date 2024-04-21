@@ -76,7 +76,7 @@ func (*WechatService) ServeList(rw http.ResponseWriter, req *http.Request) []*se
 	return result
 }
 
-func (*WechatService) AddMaterial(dbOfficialAccount aiModel.OfficialAccount, fileName string) (mediaID string, url string, err error) {
+func (*WechatService) AddMaterial(dbOfficialAccount *aiModel.OfficialAccount, fileName string) (mediaID string, url string, err error) {
 	cfg := &offConfig.Config{
 		AppID:          dbOfficialAccount.AppId,
 		AppSecret:      dbOfficialAccount.AppSecret,
@@ -91,7 +91,7 @@ func (*WechatService) AddMaterial(dbOfficialAccount aiModel.OfficialAccount, fil
 	return
 }
 
-func (*WechatService) ImageUpload(dbOfficialAccount aiModel.OfficialAccount, fileName string) (url string, err error) {
+func (*WechatService) ImageUpload(dbOfficialAccount *aiModel.OfficialAccount, fileName string) (url string, err error) {
 	cfg := &offConfig.Config{
 		AppID:          dbOfficialAccount.AppId,
 		AppSecret:      dbOfficialAccount.AppSecret,
@@ -106,7 +106,7 @@ func (*WechatService) ImageUpload(dbOfficialAccount aiModel.OfficialAccount, fil
 	return
 }
 
-func (*WechatService) PublishArticle(dbOfficialAccount aiModel.OfficialAccount, aiArticleList []aiModel.AIArticle) (publishId int64,
+func (*WechatService) PublishArticle(dbOfficialAccount *aiModel.OfficialAccount, aiArticleList []aiModel.AIArticle) (publishId int64,
 	mediaID string, msgId, msgDataID int64, err error) {
 
 	cfg := &offConfig.Config{

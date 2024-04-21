@@ -176,6 +176,12 @@ func (exa *AIArticleService) GenerateArticle(account *ai.OfficialAccount) error 
 		return err
 	}
 
+	// 删除当天生成的文章
+	err = global.GVA_DB.Where("batch_id = ?", batchId).Delete(&ai.AIArticle{}).Error
+	if err != nil {
+		return err
+	}
+
 	for i < targetNum {
 		context := &ArticleContext{
 			Topic:       account.Topic,
@@ -282,6 +288,7 @@ func (exa *AIArticleService) parseContent(content string) string {
 	//```markdown
 	markdownContent = strings.ReplaceAll(markdownContent, "```markdown", "")
 	markdownContent = strings.ReplaceAll(markdownContent, "```", "")
+	markdownContent = strings.ReplaceAll(markdownContent, "<li><p>", "<li>")
 
 	htmlContent, _ := utils.RenderMarkdownContent(markdownContent)
 
@@ -297,24 +304,12 @@ func (exa *AIArticleService) Recreation(id uint64) (err error) {
 		return err
 	}
 
-	context := &ArticleContext{
-		Title:   aiArticle.Title,
-		Topic:   aiArticle.Topic,
-		Content: aiArticle.Content,
-		Link:    aiArticle.Link,
-	}
-
-	chatGptResp, err := KimiServiceApp.Recreation(context)
+	officeAccount, err := OfficialAccountServiceApp.GetOfficialAccountByAppId(aiArticle.TargetAccountId)
 	if err != nil {
 		return err
 	}
 
-	aiArticle.Topic = chatGptResp.Topic
-	aiArticle.Content = chatGptResp.Content
-	aiArticle.Title = chatGptResp.Title
-	aiArticle.Tags = strings.Join(chatGptResp.Tags, ",")
-
-	global.GVA_DB.Save(&aiArticle)
+	err = exa.GenerateArticle(officeAccount)
 
 	return
 }
