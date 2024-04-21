@@ -20,6 +20,7 @@ type AIArticle struct {
 	LikeNum           int       `json:"likeNum"`
 	ReadNum           int       `json:"readNum"`
 	CommentNum        int       `json:"commentNum"`
+	OriginalContent   string    `json:"originalContent"`
 	Content           string    `json:"content"`
 	Tags              string    `json:"tags"`
 	ArticleStatus     int       `json:"articleStatus"` // 0  刚生成  1 发送至草稿箱  2 发布成功 3 群发成功  4 发布失败

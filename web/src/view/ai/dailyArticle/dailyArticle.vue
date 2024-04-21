@@ -126,12 +126,6 @@
         />
         <el-table-column
             align="left"
-            label="评论量"
-            prop="commentNum"
-            width="70"
-        />
-        <el-table-column
-            align="left"
             label="点赞量"
             prop="likeNum"
             width="70"

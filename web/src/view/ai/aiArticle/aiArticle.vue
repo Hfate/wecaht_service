@@ -316,7 +316,21 @@
               />
             </el-select>
           </el-form-item>
-          <el-form-item label="内容">
+          <el-form-item label="标签">
+            <el-input
+                v-model="form.tags"
+                autocomplete="off"
+            />
+          </el-form-item>
+          <el-form-item label="原始文本">
+            <el-input
+                v-model="form.originalContent"
+                type="textarea"
+                :rows="30"
+                autocomplete="off"
+            />
+          </el-form-item>
+          <el-form-item label="排版文本">
             <el-input
                 v-model="form.content"
                 type="textarea"
@@ -324,12 +338,7 @@
                 autocomplete="off"
             />
           </el-form-item>
-          <el-form-item label="标签">
-            <el-input
-                v-model="form.tags"
-                autocomplete="off"
-            />
-          </el-form-item>
+
         </el-form>
       </el-scrollbar>
       <template #footer>
@@ -376,6 +385,7 @@ const form = ref({
   topic: '',
   targetAccountName: '',
   targetAccountId: '',
+  originalContent: '',
   content: '',
   tags: '',
 })

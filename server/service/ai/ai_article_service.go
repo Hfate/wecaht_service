@@ -77,6 +77,7 @@ func (exa *AIArticleService) PublishArticle(ids []string) error {
 func (exa *AIArticleService) UpdateArticle(aiArticle ai.AIArticle) (err error) {
 	// 更新
 	aiArticle.PublishTime = time.Now()
+	aiArticle.Content = exa.parseContent(aiArticle.Content)
 	err = global.GVA_DB.Save(&aiArticle).Error
 	return err
 }
@@ -151,6 +152,7 @@ func (exa *AIArticleService) GenerateArticleById(hotspotId uint64, account ai.Of
 		Topic:             articleContext.Topic,
 		AuthorName:        account.DefaultAuthorName,
 		Tags:              strings.Join(articleContext.Tags, ","),
+		OriginalContent:   articleContext.Content,
 		Content:           exa.parseContent(articleContext.Content),
 	}
 	aiArticle.BASEMODEL = BaseModel()
@@ -196,6 +198,7 @@ func (exa *AIArticleService) GenerateArticle(account *ai.OfficialAccount) error 
 			AuthorName:        account.DefaultAuthorName,
 			Link:              articleContext.Link,
 			Tags:              strings.Join(articleContext.Tags, ","),
+			OriginalContent:   articleContext.Content,
 			Content:           exa.parseContent(articleContext.Content),
 			Params:            strings.Join(articleContext.Params, ","),
 		}
