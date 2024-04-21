@@ -77,7 +77,7 @@ func (exa *AIArticleService) PublishArticle(ids []string) error {
 func (exa *AIArticleService) UpdateArticle(aiArticle ai.AIArticle) (err error) {
 	// 更新
 	aiArticle.PublishTime = time.Now()
-	aiArticle.Content = exa.parseContent(aiArticle.Content)
+	aiArticle.Content = exa.parseContent(aiArticle.Content, "")
 	err = global.GVA_DB.Save(&aiArticle).Error
 	return err
 }
@@ -153,7 +153,7 @@ func (exa *AIArticleService) GenerateArticleById(hotspotId uint64, account ai.Of
 		AuthorName:        account.DefaultAuthorName,
 		Tags:              strings.Join(articleContext.Tags, ","),
 		OriginalContent:   articleContext.Content,
-		Content:           exa.parseContent(articleContext.Content),
+		Content:           exa.parseContent(articleContext.Content, account.CssFormat),
 	}
 	aiArticle.BASEMODEL = BaseModel()
 
@@ -229,7 +229,7 @@ func (exa *AIArticleService) GenerateArticle(account *ai.OfficialAccount) error 
 		}
 
 		//  处理排版
-		aiArticle.Content = exa.parseContent(articleContext.Content)
+		aiArticle.Content = exa.parseContent(articleContext.Content, account.CssFormat)
 
 		err = AIArticleServiceApp.CreateAIArticle(aiArticle)
 		if err != nil {
@@ -288,7 +288,7 @@ func (exa *AIArticleService) parseTitle(title string) string {
 	return title
 }
 
-func (exa *AIArticleService) parseContent(content string) string {
+func (exa *AIArticleService) parseContent(content, cssFormat string) string {
 	// 以换行符为分隔符，将文章内容拆分成多行
 	lines := strings.Split(content, "\n")
 
@@ -310,11 +310,13 @@ func (exa *AIArticleService) parseContent(content string) string {
 	markdownContent = strings.ReplaceAll(markdownContent, "```", "")
 	markdownContent = strings.ReplaceAll(markdownContent, "<li><p>", "<li>")
 
-	htmlContent, _ := utils.RenderMarkdownContent(markdownContent)
-
-	htmlContent = utils.HtmlAddStyle(htmlContent)
-
-	return htmlContent
+	if cssFormat != "" {
+		return utils.MarkdownRun(markdownContent, cssFormat)
+	} else {
+		htmlContent, _ := utils.RenderMarkdownContent(markdownContent)
+		htmlContent = utils.HtmlAddStyle(htmlContent)
+		return htmlContent
+	}
 }
 
 func (exa *AIArticleService) Recreation(id uint64) (err error) {

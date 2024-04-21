@@ -16,6 +16,7 @@ type OfficialAccount struct {
 	Remark            string `json:"remark"`
 	TargetNum         int    `json:"targetNum"`
 	CreateTypes       string `json:"createTypes"`
+	CssFormat         string `json:"cssFormat"`
 }
 
 func (OfficialAccount) TableName() string {

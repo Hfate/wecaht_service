@@ -243,7 +243,14 @@
                 autocomplete="off"
             />
           </el-form-item>
-
+          <el-form-item label="css排版">
+            <el-input
+                v-model.number="form.cssFormat"
+                type="textarea"
+                :rows="30"
+                autocomplete="off"
+            />
+          </el-form-item>
         </el-form>
       </el-scrollbar>
       <template #footer>
@@ -290,7 +297,8 @@ const form = ref({
   appId: '',
   appSecret: '',
   token: '',
-  encodingAesKey: ''
+  encodingAesKey: '',
+  cssFormat: ''
 })
 
 const page = ref(1)
