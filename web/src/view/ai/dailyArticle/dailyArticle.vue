@@ -84,7 +84,7 @@
         <el-table-column
             align="left"
             label="目标公众号"
-            width="100"
+            width="120"
             prop="targetAccountName"
         >
         </el-table-column>
