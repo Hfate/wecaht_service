@@ -139,11 +139,16 @@ func (*WechatService) PublishArticle(dbOfficialAccount *aiModel.OfficialAccount,
 
 		imgMediaID, _, err2 := MediaServiceApp.CreateMediaByPath(dbOfficialAccount.AppId, filePath)
 		if err2 != nil {
-			global.GVA_LOG.Error("上传封面图片失败", zap.String("title", aiArticle.Title),
-				zap.String("filePath", filePath),
-				zap.String("appId", dbOfficialAccount.AppId),
-				zap.String("appName", dbOfficialAccount.AccountName), zap.Error(err2))
-			continue
+			// 默认图片
+			media := MediaServiceApp.FindByAccountId(dbOfficialAccount.AppId, 1)
+			if media != nil {
+				imgMediaID = media.MediaID
+			} else {
+				global.GVA_LOG.Error("上传封面图片失败", zap.String("title", aiArticle.Title),
+					zap.String("filePath", filePath),
+					zap.String("appId", dbOfficialAccount.AppId),
+					zap.String("appName", dbOfficialAccount.AccountName), zap.Error(err2))
+			}
 		}
 
 		draftList = append(draftList, &draft.Article{
