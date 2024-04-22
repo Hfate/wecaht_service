@@ -92,7 +92,7 @@ func (e *OfficialAccountApi) UpdateCreateTypes(c *gin.Context) {
 		return
 	}
 
-	err = officialAccountService.UpdateCreateTypes(setCreateTypes.ID, setCreateTypes.CreateTypeList)
+	err = officialAccountService.UpdateCreateTypes(cast.ToUint64(setCreateTypes.ID), setCreateTypes.CreateTypeList)
 	if err != nil {
 		global.GVA_LOG.Error("更新失败!", zap.Error(err))
 		response.FailWithMessage("更新失败", c)
