@@ -10,6 +10,7 @@ import (
 	systemService "github.com/flipped-aurora/gin-vue-admin/server/service/system"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"github.com/spf13/cast"
+	"go.uber.org/zap"
 	"net/http"
 	"net/url"
 	"strings"
@@ -146,7 +147,7 @@ func (exa *BenchmarkAccountService) SpiderOfficialAccount(wxToken *ai.WxToken, e
 	for curPage < pages {
 		begin := cast.ToString(5 * curPage)
 
-		time.Sleep(10 * time.Second)
+		time.Sleep(60 * time.Second)
 
 		pageUrl := fmt.Sprintf("https://mp.weixin.qq.com/cgi-bin/appmsgpublish?sub=list&search_field=null&begin=%s&count=5&query=&fakeid=%s&type=101_1&free_publish_type=1&sub_action=list_ex&token=%s&lang=zh_CN&f=json&ajax=1", begin, accountId, token)
 
@@ -168,7 +169,7 @@ func (exa *BenchmarkAccountService) SpiderOfficialAccount(wxToken *ai.WxToken, e
 
 		gotBody, err := utils.GetWithCookie(pageUrl, cookieList)
 		if err != nil {
-			fmt.Println(err)
+			global.GVA_LOG.Error("SpiderOfficialAccount", zap.Error(err))
 		}
 
 		subList := getArticle(e.AccountName, gotBody)
