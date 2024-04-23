@@ -372,7 +372,7 @@ func (exa *AIArticleService) Recreation(id uint64) (err error) {
 // @return: list interface{}, total int64, err error
 
 func (exa *AIArticleService) GetAIArticleList(sysUserAuthorityID uint, info aiReq.AIArticleSearch) (list interface{}, total int64, err error) {
-	limit := info.PageSize
+	limit := 50
 	offset := info.PageSize * (info.Page - 1)
 
 	var a system.SysAuthority
