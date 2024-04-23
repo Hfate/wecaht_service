@@ -375,6 +375,8 @@ func (exa *AIArticleService) GetAIArticleList(sysUserAuthorityID uint, info aiRe
 	limit := 50
 	offset := info.PageSize * (info.Page - 1)
 
+	batchId := timeutil.GetCurDate()
+
 	var a system.SysAuthority
 	a.AuthorityId = sysUserAuthorityID
 	auth, err := systemService.AuthorityServiceApp.GetAuthorityInfo(a)
@@ -388,6 +390,8 @@ func (exa *AIArticleService) GetAIArticleList(sysUserAuthorityID uint, info aiRe
 	var articleList []ai.AIArticle
 
 	db := global.GVA_DB.Model(&ai.AIArticle{})
+
+	db = db.Where("batch_id LIKE ?", "%"+batchId+"%")
 
 	// 如果有条件搜索 下方会自动创建搜索语句
 	if info.PortalName != "" {
