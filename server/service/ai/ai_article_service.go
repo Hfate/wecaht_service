@@ -190,6 +190,8 @@ func (exa *AIArticleService) GenerateArticle(account *ai.OfficialAccount) error 
 			CreateTypes: account.CreateTypes,
 		}
 
+		time.Sleep(5 * time.Second)
+
 		articleContext := ArticlePipelineApp.Run("", context)
 		if articleContext.Content == "" || len(articleContext.Params) == 0 {
 			return errors.New("AI创作失败")
@@ -213,7 +215,7 @@ func (exa *AIArticleService) GenerateArticle(account *ai.OfficialAccount) error 
 		// 获取历史已发布消息5条图文消息
 		publishArticleList, err2 := WechatServiceApp.BatchGetHistoryArticleList(account)
 		if err2 != nil || len(publishArticleList.Item) == 0 {
-			global.GVA_LOG.Error("BatchGetHistoryArticleList", zap.Error(err2))
+			global.GVA_LOG.Error("BatchGetHistoryArticleList", zap.Error(err2), zap.String("errMsg", publishArticleList.ErrMsg))
 		} else {
 			originalContent := articleContext.Content
 			originalContent += "---\n"
@@ -254,6 +256,9 @@ func (exa *AIArticleService) GenerateDailyArticle() error {
 		return err
 	}
 
+	concurrency := 3
+	semaphore := make(chan struct{}, concurrency)
+
 	for _, account := range list {
 
 		if account.AppId == "" {
@@ -262,9 +267,14 @@ func (exa *AIArticleService) GenerateDailyArticle() error {
 
 		item := account
 
-		time.Sleep(500 * time.Millisecond)
+		time.Sleep(5 * time.Second)
+
+		semaphore <- struct{}{} // 占用一个并发信号量
 
 		go func() {
+			defer func() {
+				<-semaphore // 释放一个并发信号量
+			}()
 
 			err2 := exa.GenerateArticle(item)
 			if err2 != nil {
