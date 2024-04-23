@@ -372,8 +372,6 @@ func (exa *AIArticleService) Recreation(id uint64) (err error) {
 // @return: list interface{}, total int64, err error
 
 func (exa *AIArticleService) GetAIArticleList(sysUserAuthorityID uint, info aiReq.AIArticleSearch) (list interface{}, total int64, err error) {
-	limit := 50
-	offset := info.PageSize * (info.Page - 1)
 
 	batchId := timeutil.GetCurDate()
 
@@ -413,7 +411,7 @@ func (exa *AIArticleService) GetAIArticleList(sysUserAuthorityID uint, info aiRe
 	if err != nil {
 		return articleList, total, err
 	} else {
-		err = db.Limit(limit).Offset(offset).Order("batch_id desc,target_account_id desc").Find(&articleList).Error
+		err = db.Order("batch_id desc,target_account_id desc").Find(&articleList).Error
 	}
 
 	articleMap := make(map[string][]ai.AIArticle)
