@@ -295,7 +295,21 @@ func (exa *AIArticleService) parseTitle(title string) string {
 	title = strings.ReplaceAll(title, "#", "")
 	title = utils.RemoveBookTitleBrackets(title)
 	title = strings.ReplaceAll(title, "标题建议：", "")
-	return title
+	return removeQuotes(title)
+}
+
+func removeQuotes(str string) string {
+	// 判断字符串是否为空或长度小于2，无法包含前后双引号
+	if len(str) < 2 {
+		return str
+	}
+
+	// 判断首尾字符是否为双引号，并进行去除
+	if str[0] == '"' && str[len(str)-1] == '"' {
+		return str[1 : len(str)-1]
+	}
+
+	return str
 }
 
 func (exa *AIArticleService) parseContent(content, cssFormat string) string {
