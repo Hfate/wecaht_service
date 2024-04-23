@@ -15,6 +15,7 @@ import (
 	"sort"
 	"strings"
 	"time"
+	"unicode"
 )
 
 type AIArticleService struct {
@@ -77,7 +78,7 @@ func (exa *AIArticleService) PublishArticle(ids []string) error {
 func (exa *AIArticleService) UpdateArticle(aiArticle ai.AIArticle) (err error) {
 	// 更新
 	aiArticle.PublishTime = time.Now()
-	aiArticle.Content = exa.parseContent(aiArticle.Content, "")
+	aiArticle.Content = exa.parseContent(aiArticle.OriginalContent, "")
 	err = global.GVA_DB.Save(&aiArticle).Error
 	return err
 }
@@ -305,8 +306,12 @@ func removeQuotes(str string) string {
 	}
 
 	// 判断首尾字符是否为双引号，并进行去除
-	if str[0] == '"' && str[len(str)-1] == '"' {
-		return str[1 : len(str)-1]
+	firstChar := rune(str[0])
+	lastChar := rune(str[len(str)-1])
+	if (firstChar == '"' || firstChar == '“' || firstChar == '”') && (lastChar == '"' || lastChar == '“' || lastChar == '”') {
+		return strings.TrimFunc(str, func(r rune) bool {
+			return unicode.Is(unicode.Quotation_Mark, r)
+		})
 	}
 
 	return str
@@ -321,7 +326,8 @@ func (exa *AIArticleService) parseContent(content, cssFormat string) string {
 	for _, line := range lines {
 		if !strings.Contains(line, "标题：") &&
 			!strings.Contains(line, "占位符") &&
-			!strings.Contains(line, "配图") {
+			!strings.Contains(line, "配图") &&
+			!strings.Contains(line, "小标题") {
 			contentLines = append(contentLines, line)
 		}
 	}

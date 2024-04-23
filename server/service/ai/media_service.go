@@ -187,7 +187,7 @@ func (exa *MediaService) GetMediaPage(sysUserAuthorityID uint, info request.Page
 	if err != nil {
 		return mediaList, total, err
 	} else {
-		err = db.Limit(limit).Offset(offset).Order("created_at").Find(&mediaList).Error
+		err = db.Limit(limit).Offset(offset).Order("created_at desc").Find(&mediaList).Error
 	}
 	return mediaList, total, err
 }

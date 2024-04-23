@@ -14,7 +14,7 @@ var GRAPH_QUERY = "{content `xpath(\"//*[@id='js_content']\")`}"
 
 func WechatSpider(db *gorm.DB) error {
 	benchmarkList := make([]ai.BenchmarkAccount, 0)
-	err := db.Model(ai.BenchmarkAccount{}).Where("init_num>0").Find(&benchmarkList).Error
+	err := db.Model(ai.BenchmarkAccount{}).Where("init_num>0").Order("id desc").Find(&benchmarkList).Error
 	if err != nil {
 		return err
 	}
