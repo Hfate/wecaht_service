@@ -1,73 +1,251 @@
 package ai
 
-import "github.com/flipped-aurora/gin-vue-admin/server/model/ai"
+import (
+	"bytes"
+	"encoding/json"
+	"errors"
+	"github.com/flipped-aurora/gin-vue-admin/server/config"
+	"github.com/flipped-aurora/gin-vue-admin/server/global"
+	"text/template"
 
-type ChatService interface {
-	Recreation(article ai.Article) (*ArticleContext, error)
-	HotSpotWrite(topic string) (*ArticleContext, error)
-	TopicWrite(topic string) (*ArticleContext, error)
+	"github.com/flipped-aurora/gin-vue-admin/server/model/ai"
+	"github.com/flipped-aurora/gin-vue-admin/server/utils"
+)
+
+type ChatService struct {
 }
 
-var QianfanChat = "qianfan"
-var Kimi = "kimi"
-var Qianwen = "qianwen"
-var AllModel = "all"
+var ChatServiceApp = new(ChatService)
 
-var ChatModelServiceApp = new(ChatModelService)
+func (*ChatService) GetKeyWord(title string, chatModel config.ChatModel) string {
+	chatGptPrompt := "你现在是一名爆文写手，特别擅长从文章标题中找到关键词。我将给一个文章标题，需要你帮忙提取标题中的一个关键词用以做图片搜索。如果找不到关键词，可以返回该标题的主题，例如：历史，职场，明星等等" +
+		"\n举例   " +
+		"\n文章标题：中瑙友谊再升华，开启双边合作新篇章。  关键词：友谊再升华" +
+		"\n文章标题：周处传奇：除三害、转人生，英雄之路的跌宕起伏  关键词：周处除三害" +
+		"\n文章标题：" + title
 
-type ChatModelService struct {
-}
+	chatMessageHistory := []*ChatMessage{ChatSystemMessage}
 
-func (*ChatModelService) Recreation(context *ArticleContext, chatModel string) (*ArticleContext, error) {
-	// 可以通过 WithModel 指定模型
-	switch chatModel {
-	case QianfanChat:
-		return KimiServiceApp.Recreation(context)
-	case Kimi:
-		return KimiServiceApp.Recreation(context)
-	case Qianwen:
-		return QianwenServiceApp.Recreation(context)
-	default:
-		result, err := KimiServiceApp.Recreation(context)
-		if err == nil && len(context.Params) > 0 {
-			return result, nil
-		}
-		return QianwenServiceApp.Recreation(context)
+	resp, chatMessageHistory, err := ChatServiceApp.ChatWithModel(chatGptPrompt, chatMessageHistory, chatModel)
+	if err != nil || len(resp) > 10 {
+		resp = "夜晚的城市"
 	}
+
+	return resp
 }
 
-func (*ChatModelService) HotSpotWrite(context *ArticleContext, chatModel string) (*ArticleContext, error) {
-	// 可以通过 WithModel 指定模型
-	switch chatModel {
-	case QianfanChat:
-		return KimiServiceApp.HotSpotWrite(context)
-	case Kimi:
-		return KimiServiceApp.HotSpotWrite(context)
-	case Qianwen:
-		return QianwenServiceApp.HotSpotWrite(context)
-	default:
-		result, err := KimiServiceApp.HotSpotWrite(context)
-		if err == nil && len(context.Params) > 0 {
-			return result, nil
-		}
-		return QianwenServiceApp.HotSpotWrite(context)
+func (*ChatService) HotSpotWrite(context *ArticleContext, chatModel config.ChatModel) (*ArticleContext, error) {
+
+	chatGptPromptList, err := parsePrompt(context, ai.ContentRecreation)
+	if err != nil {
+		return &ArticleContext{}, err
 	}
+
+	chatMessageHistory := []*ChatMessage{ChatSystemMessage}
+	resp := ""
+
+	for _, chatGptPrompt := range chatGptPromptList {
+		resp, chatMessageHistory, err = ChatServiceApp.ChatWithModel(chatGptPrompt, chatMessageHistory, chatModel)
+		if err != nil {
+			return nil, err
+		}
+		context.Content = resp
+	}
+
+	chatGptPromptList, err = parsePrompt(context, ai.TitleCreate)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, chatGptPrompt := range chatGptPromptList {
+		resp, chatMessageHistory, err = ChatServiceApp.ChatWithModel(chatGptPrompt, chatMessageHistory, chatModel)
+		if err != nil {
+			return nil, err
+		}
+		context.Title = resp
+	}
+
+	chatGptPromptList, err = parsePrompt(context, ai.AddImage)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, chatGptPrompt := range chatGptPromptList {
+		resp, chatMessageHistory, err = ChatServiceApp.ChatWithModel(chatGptPrompt, chatMessageHistory, chatModel)
+		if err != nil {
+			return nil, err
+		}
+
+		context.Content = resp
+	}
+
+	context.Params = []string{chatModel.ModelType, "HotSpotWrite"}
+	return context, nil
 }
 
-func (*ChatModelService) TopicWrite(context *ArticleContext, chatModel string) (*ArticleContext, error) {
-	// 可以通过 WithModel 指定模型
-	switch chatModel {
-	case QianfanChat:
-		return KimiServiceApp.TopicWrite(context)
-	case Kimi:
-		return KimiServiceApp.TopicWrite(context)
-	case Qianwen:
-		return QianwenServiceApp.TopicWrite(context)
-	default:
-		result, err := KimiServiceApp.TopicWrite(context)
-		if err == nil && len(context.Params) > 0 {
-			return result, nil
-		}
-		return QianwenServiceApp.TopicWrite(context)
+func (*ChatService) Recreation(articleContext *ArticleContext, chatModel config.ChatModel) (*ArticleContext, error) {
+
+	chatGptPromptList, err := parsePrompt(articleContext, ai.ContentRecreation)
+	if err != nil {
+		return &ArticleContext{}, err
 	}
+
+	chatMessageHistory := []*ChatMessage{ChatSystemMessage}
+	resp := ""
+
+	for _, chatGptPrompt := range chatGptPromptList {
+		resp, chatMessageHistory, err = ChatServiceApp.ChatWithModel(chatGptPrompt, chatMessageHistory, chatModel)
+		if err != nil {
+			return nil, err
+		}
+		articleContext.Content = resp
+	}
+
+	chatGptPromptList, err = parsePrompt(articleContext, ai.TitleCreate)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, chatGptPrompt := range chatGptPromptList {
+		resp, chatMessageHistory, err = ChatServiceApp.ChatWithModel(chatGptPrompt, chatMessageHistory, chatModel)
+		if err != nil {
+			return nil, err
+		}
+		articleContext.Title = resp
+	}
+
+	chatGptPromptList, err = parsePrompt(articleContext, ai.AddImage)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, chatGptPrompt := range chatGptPromptList {
+		resp, chatMessageHistory, err = ChatServiceApp.ChatWithModel(chatGptPrompt, chatMessageHistory, chatModel)
+		if err != nil {
+			return nil, err
+		}
+
+		articleContext.Content = resp
+	}
+
+	articleContext.Params = []string{chatModel.ModelType, "Recreation"}
+	return articleContext, nil
+}
+
+var ChatSystemMessage = &ChatMessage{
+	Role:    "system",
+	Content: "你是一个人工智能助手，你更擅长中文的对话。你会为用户提供安全，有帮助，准确的回答.",
+}
+
+func (*ChatService) ChatWithModel(message string, history []*ChatMessage, chatModel config.ChatModel) (string, []*ChatMessage, error) {
+	apiUrl := chatModel.ApiUrl
+	model := chatModel.Model
+	refreshToken := chatModel.RefreshToken
+
+	history = append(history, &ChatMessage{
+		Role:    "user",
+		Content: message,
+	})
+
+	chatReq := &ChatReq{
+		Model:    model,
+		Messages: history,
+	}
+
+	statusCode, respBody, err := utils.PostWithHeaders(apiUrl, utils.Parse2Json(chatReq), map[string]string{
+		"Authorization": "Bearer " + refreshToken,
+	})
+
+	if err != nil {
+		return "", history, err
+	}
+
+	if statusCode != 200 {
+		return "", history, errors.New(string(respBody))
+	}
+
+	chatResp := &ChatResp{}
+	err = utils.JsonStrToStruct(string(respBody), chatResp)
+	if err != nil {
+		return "", history, err
+	}
+
+	if len(chatResp.Choices) > 0 {
+		history = append(history, &ChatMessage{
+			Role:    "assistant",
+			Content: chatResp.Choices[0].Message.Content,
+		})
+		return chatResp.Choices[0].Message.Content, history, err
+	}
+
+	return "", history, errors.New("chat回复为空")
+}
+
+type ChatReq struct {
+	Model       string         `json:"model"`
+	Messages    []*ChatMessage `json:"messages"`
+	Temperature float64        `json:"temperature"`
+}
+
+type ChatMessage struct {
+	Role    string `json:"role"`
+	Content string `json:"content"`
+}
+
+type ChatResp struct {
+	Id      string `json:"id"`
+	Object  string `json:"object"`
+	Created int    `json:"created"`
+	Model   string `json:"model"`
+	Choices []struct {
+		Index   int `json:"index"`
+		Message struct {
+			Role    string `json:"role"`
+			Content string `json:"content"`
+		} `json:"message"`
+		FinishReason string `json:"finish_reason"`
+	} `json:"choices"`
+	Usage struct {
+		PromptTokens     int `json:"prompt_tokens"`
+		CompletionTokens int `json:"completion_tokens"`
+		TotalTokens      int `json:"total_tokens"`
+	} `json:"usage"`
+}
+
+func parsePrompt(context *ArticleContext, promptType int) ([]string, error) {
+	topic := context.Topic
+	prompt, err := PromptServiceApp.FindPromptByTopicAndType(topic, promptType)
+	if err != nil {
+		return []string{}, err
+	}
+
+	promptList := make([]string, 0)
+	// 使用json.Unmarshal将JSON字符串解析到字符串切片
+	err = json.Unmarshal([]byte(utils.EscapeSpecialCharacters(prompt)), &promptList)
+
+	if len(promptList) == 0 {
+		promptList = []string{prompt}
+	}
+
+	result := make([]string, 0)
+
+	for _, item := range promptList {
+		temp := template.New("ChatGptPrompt")
+		tmpl, err2 := temp.Parse(item)
+		if err2 != nil {
+			global.GVA_LOG.Info("模板解析失败")
+			return []string{}, err2
+		}
+
+		// 创建一个缓冲区来保存模板生成的结果
+		var buf bytes.Buffer
+		// 使用模板和数据生成输出
+		err = tmpl.Execute(&buf, context)
+
+		chatGptPrompt := buf.String()
+
+		result = append(result, chatGptPrompt)
+	}
+
+	return result, err
 }

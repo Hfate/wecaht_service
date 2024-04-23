@@ -148,7 +148,7 @@ func (exa *ArticleService) Recreation(id uint64) error {
 		Title: article.Title,
 	}
 
-	chatGptResp, err := KimiServiceApp.Recreation(context)
+	chatGptResp, err := ChatModelServiceApp.Recreation(context)
 	if err != nil {
 		return err
 	}

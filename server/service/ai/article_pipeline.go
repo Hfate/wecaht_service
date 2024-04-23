@@ -220,7 +220,7 @@ func (r *RecreationArticle) Handle(context *ArticleContext) error {
 	context.Content = article.Content
 	context.Link = article.Link
 
-	result, err := ChatModelServiceApp.Recreation(context, AllModel)
+	result, err := ChatModelServiceApp.Recreation(context)
 	if err != nil {
 		return err
 	}
@@ -271,7 +271,7 @@ func (r *HotSpotWriteArticle) Handle(context *ArticleContext) error {
 
 		context.Content = article.Content
 
-		result, err := ChatModelServiceApp.HotSpotWrite(context, AllModel)
+		result, err := ChatModelServiceApp.HotSpotWrite(context)
 		if err != nil {
 			global.GVA_LOG.Info("热点词条创作失败" + hotspot.Headline)
 			context.Topic = oldTopic
@@ -286,21 +286,4 @@ func (r *HotSpotWriteArticle) Handle(context *ArticleContext) error {
 	}
 
 	return nil
-}
-
-// AIWriteArticle ai 写作
-type AIWriteArticle struct {
-}
-
-func (r *AIWriteArticle) Handle(context *ArticleContext) error {
-
-	result, err := ChatModelServiceApp.TopicWrite(context, AllModel)
-	if err != nil {
-		return err
-	}
-
-	context.Content = result.Content
-	context.Title = result.Title
-
-	return err
 }

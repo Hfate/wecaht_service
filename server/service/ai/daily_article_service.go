@@ -63,7 +63,7 @@ func (exa *DailyArticleService) Recreation(id uint64) error {
 		Title: DailyArticle.Title,
 	}
 
-	chatGptResp, err := KimiServiceApp.Recreation(context)
+	chatGptResp, err := ChatModelServiceApp.Recreation(context)
 	if err != nil {
 		return err
 	}
