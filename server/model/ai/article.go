@@ -40,9 +40,13 @@ type ArticleExcl struct {
 }
 
 type ArticleExclUpload struct {
-	Title   string `json:"title"  xlsx:"Title"` //
-	Topic   string `json:"topic" xlsx:"Topic"`  //
-	Link    string `json:"link" xlsx:"Link"`    //
-	Comment string `json:"comment" xlsx:"Comment"`
-	Content string `json:"content" xlsx:"Content"`
+	Title       string `json:"title"  xlsx:"Title"`
+	Topic       string `json:"topic" xlsx:"Topic"`
+	Link        string `json:"link" xlsx:"Link"`
+	ReadNum     string `json:"readNum" xlsx:"ReadNum"`
+	Comment     string `json:"comment" xlsx:"Comment"`
+	Content     string `json:"content" xlsx:"Content"`
+	LikeNum     string `json:"LikeNum" xlsx:"LikeNum"`
+	PortalName  string `json:"portalName" xlsx:"PortalName"`
+	PublishTime string `json:"publishTime" xlsx:"PublishTime"`
 }

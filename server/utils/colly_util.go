@@ -7,6 +7,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/model/ai"
 	"github.com/gocolly/colly/v2"
 	"github.com/gocolly/colly/v2/extensions"
+	"github.com/spf13/cast"
 	"go.uber.org/zap"
 	"log"
 	"net/url"
@@ -29,6 +30,46 @@ type Links struct {
 
 type Urls struct {
 	Regular string
+}
+
+func CollectWechatArticle(link string) string {
+	collector := colly.NewCollector(
+		colly.UserAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"),
+	)
+
+	collector.SetRequestTimeout(time.Second * 3)
+
+	// 请求发起时回调,一般用来设置请求头等
+	collector.OnRequest(func(request *colly.Request) {
+		fmt.Println("----> 开始请求了")
+	})
+
+	// 请求完成后回调
+	collector.OnResponse(func(response *colly.Response) {
+		fmt.Println("----> 开始返回了" + cast.ToString(response.StatusCode))
+	})
+
+	result := ""
+	// 定义一个回调函数，处理页面响应
+	collector.OnHTML("div.rich_media_content", func(e *colly.HTMLElement) {
+		result = e.Text
+	})
+
+	//请求发生错误回调
+	collector.OnError(func(response *colly.Response, err error) {
+		fmt.Printf("发生错误了:%v", err)
+	})
+
+	err := collector.Visit(link)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	if len(result) == 0 {
+		fmt.Println("spider err" + link)
+	}
+
+	return result
 }
 
 func CollectUnsplashImgUrl(keyWord string) []string {

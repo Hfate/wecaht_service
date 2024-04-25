@@ -116,21 +116,28 @@ func (exa *DailyArticleService) GetDailyArticleList(sysUserAuthorityID uint) (li
 	for _, account := range officialAccountList {
 		batchId := timeutil.GetCurDate() + account.AppId
 
+		portNameList := make([]string, 0)
+		portNameList = append(portNameList, "")
+
 		var dailyArticleList []ai.DailyArticle
 		err = global.GVA_DB.Where("batch_id = ?", batchId).Find(&dailyArticleList).Error
 		if err != nil {
 			return
 		}
 		articleList = append(articleList, dailyArticleList...)
+		for _, item := range dailyArticleList {
+			portNameList = append(portNameList, item.PortalName)
+		}
 
 		targetNum := account.TargetNum
 
 		diffNum := targetNum - len(dailyArticleList)
 
 		if diffNum > 0 {
+
 			for i := 0; i < diffNum; i++ {
 				// 找到主题相关的文章素材
-				article, err := ArticleServiceApp.FindHotArticleByTopic(account.Topic)
+				article, err := ArticleServiceApp.FindHotArticleByTopic(account.Topic, portNameList)
 				if err != nil {
 					continue
 				}
@@ -152,6 +159,8 @@ func (exa *DailyArticleService) GetDailyArticleList(sysUserAuthorityID uint) (li
 					TargetAccountId:   account.AppId,
 					TargetAccountName: account.AccountName,
 				}
+
+				portNameList = append(portNameList, article.PortalName)
 
 				article.UseTimes = article.UseTimes + 1
 

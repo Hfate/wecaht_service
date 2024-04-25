@@ -15,6 +15,7 @@ import (
 	"github.com/spf13/cast"
 	"github.com/xuri/excelize/v2"
 	"go.uber.org/zap"
+	"gorm.io/gorm"
 	"mime/multipart"
 	"strings"
 	"time"
@@ -25,9 +26,13 @@ type ArticleService struct {
 
 var ArticleServiceApp = new(ArticleService)
 
-func (exa *ArticleService) FindHotArticleByTopic(topic string) (ai.Article, error) {
+func (exa *ArticleService) FindHotArticleByTopic(topic string, portNameList []string) (ai.Article, error) {
 	var article ai.Article
-	err := global.GVA_DB.Model(&ai.Article{}).Where("topic = ?", topic).Where("use_times = 0").Order("is_hot desc,read_num desc,created_at desc").First(&article).Error
+	err := global.GVA_DB.Model(&ai.Article{}).Where("topic = ?", topic).
+		Where("portal_name not in ?", portNameList).
+		Where("use_times = 0").
+		Where("content != ''").
+		Order("read_num desc,publish_time desc").First(&article).Error
 	return article, err
 }
 
@@ -80,23 +85,19 @@ func (exa *ArticleService) UploadArticle(file *multipart.FileHeader) error {
 
 	articleList := make([]*ai.Article, 0)
 	for _, item := range list {
-		// 获取当前时间
-		currentTime := time.Now()
-
-		// 定义时间格式
-		layout := "2006-01-02 15:04:00"
-
-		// 格式化时间
-		formattedTime := currentTime.Format(layout)
 
 		article := &ai.Article{
 			Title:       item.Title,
 			Topic:       item.Topic,
 			Link:        item.Link,
-			PublishTime: formattedTime,
+			PublishTime: item.PublishTime,
 			Content:     item.Content,
 			Comment:     item.Comment,
+			LikeNum:     cast.ToInt(item.LikeNum),
+			ReadNum:     cast.ToInt(item.ReadNum),
+			PortalName:  item.PortalName,
 		}
+
 		article.BASEMODEL = BaseModel()
 		articleList = append(articleList, article)
 	}
@@ -214,7 +215,7 @@ func (exa *ArticleService) GetArticleList(sysUserAuthorityID uint, info aiReq.Ar
 	if err != nil {
 		return articleList, total, err
 	} else {
-		err = db.Limit(limit).Offset(offset).Order("is_hot desc,created_at desc").Find(&articleList).Error
+		err = db.Limit(limit).Offset(offset).Order("publish_time desc,read_num desc").Find(&articleList).Error
 	}
 	return articleList, total, err
 }
@@ -268,4 +269,29 @@ func (exa *ArticleService) Download(c *gin.Context, sysUserAuthorityID uint, inf
 
 	return
 
+}
+
+func (exa *ArticleService) Spider() {
+	// 处理记录，批处理大小为100
+	results := make([]*ai.Article, 0)
+
+	result := global.GVA_DB.Where("content = ''").FindInBatches(&results, 100, func(tx *gorm.DB, batch int) error {
+		for _, result := range results {
+			// 对批中的每条记录进行操作
+
+			content := utils.CollectWechatArticle(result.Link)
+
+			result.Content = content
+
+			time.Sleep(3 * time.Second)
+		}
+
+		// 保存对当前批记录的修改
+		tx.Save(&results)
+
+		fmt.Println("当前处理批次" + cast.ToString(batch))
+		return nil
+	})
+
+	fmt.Println(result.Error.Error())
 }
