@@ -77,8 +77,6 @@ func (exa *AIArticleService) PublishArticle(ids []string) error {
 
 func (exa *AIArticleService) UpdateArticle(aiArticle ai.AIArticle) (err error) {
 	// 更新
-	aiArticle.PublishTime = time.Now()
-	aiArticle.Content = exa.parseContent(aiArticle.OriginalContent, "")
 	err = global.GVA_DB.Save(&aiArticle).Error
 	return err
 }

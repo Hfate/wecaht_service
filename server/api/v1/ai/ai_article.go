@@ -156,13 +156,9 @@ func (e *AIArticleApi) UpdateArticle(c *gin.Context) {
 // @Success   200   {object}  response.Response{msg=string}  "生成每日文章"
 // @Router    /aiArticle/generate [post]
 func (e *AIArticleApi) GenerateArticle(c *gin.Context) {
-	err := aiArticleService.GenerateDailyArticle()
-	if err != nil {
-		global.GVA_LOG.Error("生成失败!", zap.Error(err))
-		response.FailWithMessage("生成失败", c)
-		return
-	}
-	response.OkWithMessage("生成成功", c)
+	go aiArticleService.GenerateDailyArticle()
+
+	response.OkWithMessage("后台创作ing", c)
 }
 
 // Recreation

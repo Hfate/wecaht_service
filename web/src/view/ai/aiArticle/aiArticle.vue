@@ -322,20 +322,17 @@
                 autocomplete="off"
             />
           </el-form-item>
-          <el-form-item label="原始文本">
-            <el-input
-                v-model="form.originalContent"
-                type="textarea"
-                :rows="30"
-                autocomplete="off"
-            />
-          </el-form-item>
           <el-form-item label="排版文本">
-            <el-input
-                v-model="form.content"
-                type="textarea"
-                :rows="30"
-                autocomplete="off"
+            <Editor v-model="form.content" api-key="nujoppecgjjvzjg005s5fie8aqqwbsu8f28aya3no68zzi4v"
+                    :init="{
+                            toolbar_mode: 'sliding',
+                            plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount checklist mediaembed casechange export formatpainter pageembed linkchecker a11ychecker tinymcespellchecker permanentpen powerpaste advtable advcode editimage advtemplate ai mentions tinycomments tableofcontents footnotes mergetags autocorrect typography inlinecss markdown',
+                            toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table mergetags | addcomment showcomments | spellcheckdialog a11ycheck typography | align lineheight | checklist numlist bullist indent outdent | emoticons charmap | removeformat',
+                            tinycomments_mode: 'embedded',
+                            tinycomments_author: 'Author name',
+                            mergetags_list: [
+                                 { value: 'First.Name', title: 'First Name' },
+                                 { value: 'Email', title: 'Email'}],ai_request: (request, respondWith) => respondWith.string(() => Promise.reject('See docs to implement AI Assistan'))}"
             />
           </el-form-item>
 
@@ -355,6 +352,18 @@
   </div>
 </template>
 
+
+<style scoped>
+@media (min-width: 1024px) {
+  #sample {
+    display: flex;
+    flex-direction: column;
+    place-items: center;
+    width: 100%;
+  }
+}
+</style>
+
 <script setup>
 import {
   deleteAIArticle,
@@ -370,6 +379,7 @@ import {ref} from 'vue'
 import {ElMessage} from 'element-plus'
 import {formatDate} from '@/utils/format'
 import {getTopicList} from "@/api/topic";
+import Editor from '@tinymce/tinymce-vue'
 
 import {getOfficialAccountList,} from '@/api/officialAccount'
 
