@@ -198,8 +198,8 @@
                 type="primary"
                 link
                 icon="edit"
-                @click="updateWechatArticle(scope.row)"
-            >更新
+                @click="openNewTab('#/layout/ai/aiArticleDetail?id='+scope.row.ID)"
+            >详情
             </el-button>
             <el-popover
                 v-model="scope.row.visible"
@@ -367,8 +367,7 @@ import {
   getAIArticle,
   getAIArticleList,
   publishAIArticles,
-  recreationAIArticle,
-  updateArticle
+  recreationAIArticle
 } from '@/api/aiArticle'
 // 导入 OSS 客户端和 md5 时间戳方法
 import {client} from '@/api/oss';
@@ -393,6 +392,7 @@ defineOptions({
 const aiAIArticles = ref([])
 
 const form = ref({
+  ID: '',
   title: '',
   topic: '',
   targetAccountName: '',
@@ -421,6 +421,13 @@ const enterDialog = async () => {
     getTableData()
   }
 }
+
+const openNewTab = (detailPath) => {
+  // 使用window.open方法打开新标签页
+  const url = window.location.origin + '/' + detailPath; // 构建完整的URL
+  window.open(url, '_blank'); // 在新标签页中打开
+}
+
 
 const page = ref(1)
 const total = ref(0)
@@ -511,10 +518,10 @@ const init = {
   //language_url: '/static/tinymce/langs/zh_CN.js',
   //language: 'zh_CN',
   //skin_url: '/static/tinymce/skins/ui/oxide',
-  height: 380,
-  width: 940,
-  plugins: 'lists image media table textcolor wordcount contextmenu preview',
-  toolbar: 'undo redo | formatselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | lists image media table | removeformat preview',
+  height: 500,
+  width: 900,
+  plugins: 'lists image media table textcolor wordcount contextmenu preview code',
+  toolbar: 'code | undo redo | formatselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | lists image media table | removeformat preview',
   branding: false,
   menubar: true,
   images_upload_handler: (blobInfo, success, failure) => {
