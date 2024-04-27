@@ -3,20 +3,21 @@ package ai
 import (
 	"errors"
 	"fmt"
+	"github.com/PuerkitoBio/goquery"
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	"github.com/flipped-aurora/gin-vue-admin/server/utils"
-	"github.com/silenceper/wechat/v2/officialaccount/freepublish"
-	"github.com/silenceper/wechat/v2/officialaccount/server"
-
 	aiModel "github.com/flipped-aurora/gin-vue-admin/server/model/ai"
+	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	wechatApi "github.com/silenceper/wechat/v2"
 	"github.com/silenceper/wechat/v2/cache"
 	offConfig "github.com/silenceper/wechat/v2/officialaccount/config"
 	"github.com/silenceper/wechat/v2/officialaccount/draft"
+	"github.com/silenceper/wechat/v2/officialaccount/freepublish"
 	"github.com/silenceper/wechat/v2/officialaccount/material"
 	"github.com/silenceper/wechat/v2/officialaccount/message"
+	"github.com/silenceper/wechat/v2/officialaccount/server"
 	"go.uber.org/zap"
 	"net/http"
+	"strings"
 )
 
 type WechatService struct {
@@ -107,7 +108,7 @@ func (*WechatService) ImageUpload(dbOfficialAccount *aiModel.OfficialAccount, fi
 	return
 }
 
-func (*WechatService) PublishArticle(dbOfficialAccount *aiModel.OfficialAccount, aiArticleList []aiModel.AIArticle) (publishId int64,
+func (ws *WechatService) PublishArticle(dbOfficialAccount *aiModel.OfficialAccount, aiArticleList []aiModel.AIArticle) (publishId int64,
 	mediaID string, msgId, msgDataID int64, err error) {
 
 	cfg := &offConfig.Config{
@@ -132,9 +133,6 @@ func (*WechatService) PublishArticle(dbOfficialAccount *aiModel.OfficialAccount,
 					zap.String("appId", dbOfficialAccount.AppId),
 					zap.String("appName", dbOfficialAccount.AccountName))
 			}
-
-			continue
-
 		}
 
 		imgMediaID, _, err2 := MediaServiceApp.CreateMediaByPath(dbOfficialAccount.AppId, filePath)
@@ -151,14 +149,18 @@ func (*WechatService) PublishArticle(dbOfficialAccount *aiModel.OfficialAccount,
 			}
 		}
 
+		// 替换富文本图片
+		content := ws.replaceImg(dbOfficialAccount.AppId, aiArticle.Content)
+
 		draftList = append(draftList, &draft.Article{
 			Title:        aiArticle.Title,
 			ThumbMediaID: imgMediaID,
 			//ThumbURL:     "https://mmbiz.qpic.cn/sz_mmbiz_jpg/uO29ibicRxJ0QfibQSCptBtjsyia61jSn4V7RRX8aLcMUwN7adJhfyaj788qibHVibnOicDyeTAWAor7GGDP6fz1N499A/640?wx_fmt=webp&amp",
 			Author: dbOfficialAccount.DefaultAuthorName,
 			//Digest:       "test",
-			ShowCoverPic: 1,
-			Content:      aiArticle.Content,
+			NeedOpenComment: 1,
+			ShowCoverPic:    1,
+			Content:         content,
 		})
 
 	}
@@ -200,6 +202,35 @@ func (*WechatService) PublishArticle(dbOfficialAccount *aiModel.OfficialAccount,
 	//}
 
 	return 0, mediaID, 0, 0, err
+}
+
+func (ws *WechatService) replaceImg(appId, content string) string {
+	// 使用 goquery.NewDocumentFromReader 从字符串创建一个 Document 实例
+	doc, err := goquery.NewDocumentFromReader(strings.NewReader(content))
+	if err != nil {
+		global.GVA_LOG.Error("replaceImg", zap.Error(err))
+	}
+
+	// 使用 Find 查找所有的 img 标签
+	doc.Find("img").Each(func(index int, img *goquery.Selection) {
+		// 获取现有的 src 属性值
+		originSrc, _ := img.Attr("src")
+
+		// 上传至公众号
+		newSrc, err2 := MediaServiceApp.ImageUpload(appId, originSrc)
+
+		global.GVA_LOG.Info("替换公众号配图",
+			zap.String("originSrc", originSrc),
+			zap.String("URL", newSrc),
+			zap.String("appId", appId), zap.Error(err2))
+
+		// 设置新的 src 属性值
+		img.SetAttr("src", newSrc)
+
+	})
+
+	// 输出修改后的 HTML 文档
+	return doc.Text()
 }
 
 func reply(msg *message.MixMessage) *message.Reply {

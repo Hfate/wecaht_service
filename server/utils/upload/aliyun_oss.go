@@ -2,7 +2,9 @@ package upload
 
 import (
 	"errors"
-	"mime/multipart"
+	"github.com/flipped-aurora/gin-vue-admin/server/utils"
+	"github.com/spf13/cast"
+	"os"
 	"time"
 
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
@@ -12,26 +14,20 @@ import (
 
 type AliyunOSS struct{}
 
-func (*AliyunOSS) UploadFile(file *multipart.FileHeader) (string, string, error) {
+func (*AliyunOSS) UploadFile(file *os.File) (string, string, error) {
 	bucket, err := NewBucket()
 	if err != nil {
 		global.GVA_LOG.Error("function AliyunOSS.NewBucket() Failed", zap.Any("err", err.Error()))
 		return "", "", errors.New("function AliyunOSS.NewBucket() Failed, err:" + err.Error())
 	}
 
-	// 读取本地文件。
-	f, openError := file.Open()
-	if openError != nil {
-		global.GVA_LOG.Error("function file.Open() Failed", zap.Any("err", openError.Error()))
-		return "", "", errors.New("function file.Open() Failed, err:" + openError.Error())
-	}
-	defer f.Close() // 创建文件 defer 关闭
+	fileName := cast.ToString(utils.GenID()) + ".jpg"
 	// 上传阿里云路径 文件名格式 自己可以改 建议保证唯一性
 	// yunFileTmpPath := filepath.Join("uploads", time.Now().Format("2006-01-02")) + "/" + file.Filename
-	yunFileTmpPath := global.GVA_CONFIG.AliyunOSS.BasePath + "/" + "uploads" + "/" + time.Now().Format("2006-01-02") + "/" + file.Filename
+	yunFileTmpPath := global.GVA_CONFIG.AliyunOSS.BasePath + "/" + "uploads" + "/" + time.Now().Format("220060102150405") + "/" + fileName
 
 	// 上传文件流。
-	err = bucket.PutObject(yunFileTmpPath, f)
+	err = bucket.PutObject(yunFileTmpPath, file)
 	if err != nil {
 		global.GVA_LOG.Error("function formUploader.Put() Failed", zap.Any("err", err.Error()))
 		return "", "", errors.New("function formUploader.Put() Failed, err:" + err.Error())

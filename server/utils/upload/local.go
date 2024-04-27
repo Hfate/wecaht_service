@@ -3,7 +3,6 @@ package upload
 import (
 	"errors"
 	"io"
-	"mime/multipart"
 	"os"
 	"path"
 	"strings"
@@ -24,11 +23,11 @@ type Local struct{}
 //@param: file *multipart.FileHeader
 //@return: string, string, error
 
-func (*Local) UploadFile(file *multipart.FileHeader) (string, string, error) {
+func (*Local) UploadFile(file *os.File) (string, string, error) {
 	// 读取文件后缀
-	ext := path.Ext(file.Filename)
+	ext := path.Ext(file.Name())
 	// 读取文件名并加密
-	name := strings.TrimSuffix(file.Filename, ext)
+	name := strings.TrimSuffix(file.Name(), ext)
 	name = utils.MD5V([]byte(name))
 	// 拼接新文件名
 	filename := name + "_" + time.Now().Format("20060102150405") + ext
@@ -42,13 +41,6 @@ func (*Local) UploadFile(file *multipart.FileHeader) (string, string, error) {
 	p := global.GVA_CONFIG.Local.StorePath + "/" + filename
 	filepath := global.GVA_CONFIG.Local.Path + "/" + filename
 
-	f, openError := file.Open() // 读取文件
-	if openError != nil {
-		global.GVA_LOG.Error("function file.Open() failed", zap.Any("err", openError.Error()))
-		return "", "", errors.New("function file.Open() failed, err:" + openError.Error())
-	}
-	defer f.Close() // 创建文件 defer 关闭
-
 	out, createErr := os.Create(p)
 	if createErr != nil {
 		global.GVA_LOG.Error("function os.Create() failed", zap.Any("err", createErr.Error()))
@@ -57,7 +49,7 @@ func (*Local) UploadFile(file *multipart.FileHeader) (string, string, error) {
 	}
 	defer out.Close() // 创建文件 defer 关闭
 
-	_, copyErr := io.Copy(out, f) // 传输（拷贝）文件
+	_, copyErr := io.Copy(out, file) // 传输（拷贝）文件
 	if copyErr != nil {
 		global.GVA_LOG.Error("function io.Copy() failed", zap.Any("err", copyErr.Error()))
 		return "", "", errors.New("function io.Copy() failed, err:" + copyErr.Error())

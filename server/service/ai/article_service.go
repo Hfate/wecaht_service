@@ -276,7 +276,7 @@ func (exa *ArticleService) Spider() {
 
 	index := 0
 
-	result := global.GVA_DB.Where("content = ''").Where("tags=''").Order("publish_time desc").FindInBatches(&results, 100, func(tx *gorm.DB, batch int) error {
+	global.GVA_DB.Where("content = ''").Where("tags=''").Order("publish_time desc").FindInBatches(&results, 100, func(tx *gorm.DB, batch int) error {
 		for _, result := range results {
 			// 对批中的每条记录进行操作
 
@@ -300,5 +300,4 @@ func (exa *ArticleService) Spider() {
 		return nil
 	})
 
-	fmt.Println(result.Error.Error())
 }

@@ -47,7 +47,6 @@ func Routers() *gin.Engine {
 
 	InstallPlugin(Router) // 安装插件
 	systemRouter := router.RouterGroupApp.System
-	exampleRouter := router.RouterGroupApp.Example
 	aiRouter := router.RouterGroupApp.AI
 	wechatRouter := router.RouterGroupApp.Wechat
 	// 如果想要不使用nginx代理前端网页，可以修改 web/.env.production 下的
@@ -82,33 +81,31 @@ func Routers() *gin.Engine {
 	PrivateGroup := Router.Group(global.GVA_CONFIG.System.RouterPrefix)
 	PrivateGroup.Use(middleware.JWTAuth()).Use(middleware.CasbinHandler())
 	{
-		systemRouter.InitApiRouter(PrivateGroup, PublicGroup)       // 注册功能api路由
-		systemRouter.InitJwtRouter(PrivateGroup)                    // jwt相关路由
-		systemRouter.InitUserRouter(PrivateGroup)                   // 注册用户路由
-		systemRouter.InitMenuRouter(PrivateGroup)                   // 注册menu路由
-		systemRouter.InitSystemRouter(PrivateGroup)                 // system相关路由
-		systemRouter.InitCasbinRouter(PrivateGroup)                 // 权限相关路由
-		systemRouter.InitAutoCodeRouter(PrivateGroup)               // 创建自动化代码
-		systemRouter.InitAuthorityRouter(PrivateGroup)              // 注册角色路由
-		systemRouter.InitSysDictionaryRouter(PrivateGroup)          // 字典管理
-		systemRouter.InitAutoCodeHistoryRouter(PrivateGroup)        // 自动化代码历史
-		systemRouter.InitSysOperationRecordRouter(PrivateGroup)     // 操作记录
-		systemRouter.InitSysDictionaryDetailRouter(PrivateGroup)    // 字典详情管理
-		systemRouter.InitAuthorityBtnRouterRouter(PrivateGroup)     // 字典详情管理
-		systemRouter.InitSysExportTemplateRouter(PrivateGroup)      // 导出模板
-		exampleRouter.InitCustomerRouter(PrivateGroup)              // 客户路由
-		exampleRouter.InitFileUploadAndDownloadRouter(PrivateGroup) // 文件上传下载功能路由
-		aiRouter.InitPortalRouter(PrivateGroup)                     // 门户网站管理
-		aiRouter.InitPromptRouter(PrivateGroup)                     // prompt管理
-		aiRouter.InitArticleRouter(PrivateGroup)                    // 文章管理
-		aiRouter.InitDailyArticleRouter(PrivateGroup)               // 每日一文
-		aiRouter.InitAIArticleRouter(PrivateGroup)                  // ai文章管理
-		aiRouter.InitBenchmarkAccountRouter(PrivateGroup)           // 对标账号管理
-		aiRouter.InitOfficialAccountRouter(PrivateGroup)            // 公众号管理
-		aiRouter.InitHotspotRouter(PrivateGroup)                    // 热点追踪
-		aiRouter.InitTopicRouter(PrivateGroup)                      // 主题管理
-		aiRouter.InitMediaRouter(PrivateGroup)                      //素材管理
-		wechatRouter.InitWeChatRouter(PublicGroup)                  // 微信公众号
+		systemRouter.InitApiRouter(PrivateGroup, PublicGroup)    // 注册功能api路由
+		systemRouter.InitJwtRouter(PrivateGroup)                 // jwt相关路由
+		systemRouter.InitUserRouter(PrivateGroup)                // 注册用户路由
+		systemRouter.InitMenuRouter(PrivateGroup)                // 注册menu路由
+		systemRouter.InitSystemRouter(PrivateGroup)              // system相关路由
+		systemRouter.InitCasbinRouter(PrivateGroup)              // 权限相关路由
+		systemRouter.InitAutoCodeRouter(PrivateGroup)            // 创建自动化代码
+		systemRouter.InitAuthorityRouter(PrivateGroup)           // 注册角色路由
+		systemRouter.InitSysDictionaryRouter(PrivateGroup)       // 字典管理
+		systemRouter.InitAutoCodeHistoryRouter(PrivateGroup)     // 自动化代码历史
+		systemRouter.InitSysOperationRecordRouter(PrivateGroup)  // 操作记录
+		systemRouter.InitSysDictionaryDetailRouter(PrivateGroup) // 字典详情管理
+		systemRouter.InitAuthorityBtnRouterRouter(PrivateGroup)  // 字典详情管理
+		systemRouter.InitSysExportTemplateRouter(PrivateGroup)   // 导出模板
+		aiRouter.InitPortalRouter(PrivateGroup)                  // 门户网站管理
+		aiRouter.InitPromptRouter(PrivateGroup)                  // prompt管理
+		aiRouter.InitArticleRouter(PrivateGroup)                 // 文章管理
+		aiRouter.InitDailyArticleRouter(PrivateGroup)            // 每日一文
+		aiRouter.InitAIArticleRouter(PrivateGroup)               // ai文章管理
+		aiRouter.InitBenchmarkAccountRouter(PrivateGroup)        // 对标账号管理
+		aiRouter.InitOfficialAccountRouter(PrivateGroup)         // 公众号管理
+		aiRouter.InitHotspotRouter(PrivateGroup)                 // 热点追踪
+		aiRouter.InitTopicRouter(PrivateGroup)                   // 主题管理
+		//aiRouter.InitFileRouter(PrivateGroup)                    //文件管理
+		wechatRouter.InitWeChatRouter(PublicGroup) // 微信公众号
 	}
 
 	global.GVA_LOG.Info("router register success")

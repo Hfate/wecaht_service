@@ -6,7 +6,10 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/model/ai"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils/timeutil"
+	"github.com/flipped-aurora/gin-vue-admin/server/utils/upload"
 	"go.uber.org/zap"
+	"log"
+	"os"
 	"regexp"
 	"strings"
 )
@@ -102,7 +105,7 @@ func (da *DefaultArticlePipeline) init() {
 type BaiduAddImage struct {
 }
 
-func (*BaiduAddImage) Handle(context *ArticleContext) error {
+func (ba *BaiduAddImage) Handle(context *ArticleContext) error {
 
 	// 正则表达式匹配Markdown中的图片占位符描述
 	re := regexp.MustCompile(`\[img\](.*?)\[/img\]`)
@@ -116,29 +119,87 @@ func (*BaiduAddImage) Handle(context *ArticleContext) error {
 
 	for _, match := range matches {
 		// 搜索图片
-		filePath := utils.SearchAndSave(match[1])
+		filePath := ba.SearchAndSave(match[1])
 
 		if filePath == "" {
 			continue
 		}
 
-		link, err := MediaServiceApp.ImageUpload(context.AppId, filePath)
-
-		global.GVA_LOG.Info("公众号配图", zap.String("URL", link), zap.String("文案", match[1]),
-			zap.String("appId", context.AppId), zap.Error(err))
-
-		if err != nil {
-			fmt.Println(err)
-			continue
+		if !strings.Contains(filePath, "http") {
+			filePath = "https://" + filePath
 		}
 
 		wxImgFmt := "<img src=\"%s\">"
-		wxImgUrl := fmt.Sprintf(wxImgFmt, link)
+		wxImgUrl := fmt.Sprintf(wxImgFmt, filePath)
 
 		context.Content = strings.ReplaceAll(context.Content, match[1], "\n"+wxImgUrl+"\n")
 	}
 
 	return nil
+}
+
+func (ba *BaiduAddImage) SearchAndSave(keyword string) string {
+	imgUrlList := make([]string, 0)
+
+	baiduImgUrlList := utils.CollectBaiduImgUrl(keyword)
+	if len(baiduImgUrlList) > 0 {
+		imgUrlList = append(imgUrlList, baiduImgUrlList...)
+	}
+
+	unsplashImgUrlList := utils.CollectUnsplashImgUrl(keyword)
+	if len(unsplashImgUrlList) > 0 {
+		imgUrlList = append(imgUrlList, unsplashImgUrlList...)
+	}
+
+	// 通过第一张图片链接下载图片
+	return ba.saveImage(imgUrlList)
+}
+
+func (ba *BaiduAddImage) saveImage(imgUrlList []string) string {
+	// 通过第一张图片链接下载图片
+	filePath := ""
+
+	for _, imgUrl := range imgUrlList {
+		ossFilePath, err := ba.downloadImage(imgUrl)
+		if err != nil {
+			global.GVA_LOG.Info("downloadImage failed", zap.Any("err", err.Error()))
+		} else {
+			filePath = ossFilePath
+			break
+		}
+	}
+	return filePath
+}
+
+// DownloadImage 从 URL 下载图片并上传到 OSS
+func (ba *BaiduAddImage) downloadImage(imageUrl string) (string, error) {
+	// 发起 HTTP GET 请求
+	tempFilePath, err := utils.CreateTempImgFile(imageUrl)
+	if err != nil {
+		return "", err
+	}
+
+	defer os.Remove(tempFilePath)
+
+	// 使用 multipart.FileHeader 封装文件信息
+	fileHeader, err := os.Open(tempFilePath)
+	if err != nil {
+		log.Println("Error opening file header:", err)
+		return "", err
+	}
+
+	defer fileHeader.Close() // 创建文件 defer 关闭
+
+	// 调用 OSS 上传方法
+	oss := upload.NewOss()
+	uploadUrl, _, err := oss.UploadFile(fileHeader)
+	if err != nil {
+		log.Println("Error uploading to OSS:", err)
+		return "", err
+	}
+
+	// 返回上传的 URL 和 OSS 路径
+	return uploadUrl, nil
 }
 
 func (da *DefaultArticlePipeline) Write(context *ArticleContext) error {

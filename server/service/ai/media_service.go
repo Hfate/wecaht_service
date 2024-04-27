@@ -1,13 +1,14 @@
 package ai
 
 import (
+	"errors"
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/ai"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
 	systemService "github.com/flipped-aurora/gin-vue-admin/server/service/system"
-	"github.com/flipped-aurora/gin-vue-admin/server/utils/upload"
-	"mime/multipart"
+	"github.com/flipped-aurora/gin-vue-admin/server/utils"
+	"os"
 	"strings"
 )
 
@@ -20,56 +21,69 @@ var MediaServiceApp = new(MediaService)
 //@description: 创建素材
 //@param: e model.Media
 //@return: err error
+//
+//func (exa *MediaService) CreateMedia(targetAccountId string, header *multipart.FileHeader) (err error) {
+//	officialAccount, err := OfficialAccountServiceApp.GetOfficialAccountByAppId(targetAccountId)
+//	if err != nil {
+//		return err
+//	}
+//
+//	tagArr := strings.Split(header.Filename, ".")
+//
+//	oss := upload.NewOss()
+//	filePath, _, uploadErr := oss.UploadFile(header)
+//	if uploadErr != nil {
+//		return uploadErr
+//	}
+//
+//	mediaID, url, err := WechatServiceApp.AddMaterial(officialAccount, filePath)
+//	if err != nil {
+//		return err
+//	}
+//
+//	count := exa.CountByAccountId(targetAccountId)
+//
+//	media := &ai.Media{
+//		Topic:             officialAccount.Topic,
+//		MediaID:           mediaID,
+//		Link:              url,
+//		FileName:          header.Filename,
+//		Tag:               tagArr[len(tagArr)-1],
+//		TargetAccountId:   targetAccountId,
+//		TargetAccountName: officialAccount.AccountName,
+//		SeqNum:            int(count) + 1,
+//	}
+//
+//	media.BASEMODEL = BaseModel()
+//	err = global.GVA_DB.Create(&media).Error
+//	return err
+//}
 
-func (exa *MediaService) CreateMedia(targetAccountId string, header *multipart.FileHeader) (err error) {
-	officialAccount, err := OfficialAccountServiceApp.GetOfficialAccountByAppId(targetAccountId)
-	if err != nil {
-		return err
-	}
-
-	tagArr := strings.Split(header.Filename, ".")
-
-	oss := upload.NewOss()
-	filePath, _, uploadErr := oss.UploadFile(header)
-	if uploadErr != nil {
-		return uploadErr
-	}
-
-	mediaID, url, err := WechatServiceApp.AddMaterial(officialAccount, filePath)
-	if err != nil {
-		return err
-	}
-
-	count := exa.CountByAccountId(targetAccountId)
-
-	media := &ai.Media{
-		Topic:             officialAccount.Topic,
-		MediaID:           mediaID,
-		Link:              url,
-		FileName:          header.Filename,
-		Tag:               tagArr[len(tagArr)-1],
-		TargetAccountId:   targetAccountId,
-		TargetAccountName: officialAccount.AccountName,
-		SeqNum:            int(count) + 1,
-	}
-
-	media.BASEMODEL = BaseModel()
-	err = global.GVA_DB.Create(&media).Error
-	return err
-}
-
-func (exa *MediaService) ImageUpload(targetAccountId string, filePath string) (url string, err error) {
+func (exa *MediaService) ImageUpload(targetAccountId string, fileUrl string) (url string, err error) {
 	officialAccount, err := OfficialAccountServiceApp.GetOfficialAccountByAppId(targetAccountId)
 	if err != nil {
 		return "", err
 	}
-	url, err = WechatServiceApp.ImageUpload(officialAccount, filePath)
+
+	// 发起 HTTP GET 请求
+	tempFilePath, err := utils.CreateTempImgFile(fileUrl)
+	if err != nil {
+		return "", err
+	}
+
+	defer os.Remove(tempFilePath)
+
+	url, err = WechatServiceApp.ImageUpload(officialAccount, tempFilePath)
 
 	return
 
 }
 
 func (exa *MediaService) CreateMediaByPath(targetAccountId string, filePath string) (mediaID, url string, err error) {
+	if filePath == "" {
+		return "", "", errors.New("搜索不到图片，使用默认图片")
+	}
+
 	officialAccount, err := OfficialAccountServiceApp.GetOfficialAccountByAppId(targetAccountId)
 	if err != nil {
 		return "", "", err

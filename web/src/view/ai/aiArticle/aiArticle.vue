@@ -323,17 +323,12 @@
             />
           </el-form-item>
           <el-form-item label="排版文本">
-            <Editor v-model="form.content" api-key="nujoppecgjjvzjg005s5fie8aqqwbsu8f28aya3no68zzi4v"
-                    :init="{
-                            toolbar_mode: 'sliding',
-                            plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount checklist mediaembed casechange export formatpainter pageembed linkchecker a11ychecker tinymcespellchecker permanentpen powerpaste advtable advcode editimage advtemplate ai mentions tinycomments tableofcontents footnotes mergetags autocorrect typography inlinecss markdown',
-                            toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table mergetags | addcomment showcomments | spellcheckdialog a11ycheck typography | align lineheight | checklist numlist bullist indent outdent | emoticons charmap | removeformat',
-                            tinycomments_mode: 'embedded',
-                            tinycomments_author: 'Author name',
-                            mergetags_list: [
-                                 { value: 'First.Name', title: 'First Name' },
-                                 { value: 'Email', title: 'Email'}],ai_request: (request, respondWith) => respondWith.string(() => Promise.reject('See docs to implement AI Assistan'))}"
-            />
+            <editor v-model="form.content"
+                    api-key="nujoppecgjjvzjg005s5fie8aqqwbsu8f28aya3no68zzi4v"
+                    :init="init"
+                    :disabled="false"
+                    @onClick="onClick">
+            </editor>
           </el-form-item>
 
         </el-form>
@@ -375,11 +370,18 @@ import {
   recreationAIArticle,
   updateArticle
 } from '@/api/aiArticle'
-import {ref} from 'vue'
+// 导入 OSS 客户端和 md5 时间戳方法
+import {client} from '@/api/oss';
+
+import {ref, watch} from 'vue'
 import {ElMessage} from 'element-plus'
 import {formatDate} from '@/utils/format'
 import {getTopicList} from "@/api/topic";
+
+
 import Editor from '@tinymce/tinymce-vue'
+import md5 from 'blueimp-md5';
+
 
 import {getOfficialAccountList,} from '@/api/officialAccount'
 
@@ -502,6 +504,53 @@ const handleSelectionChange = (val) => {
 
 const deleteVisible = ref(false)
 const publishVisible = ref(false)
+
+
+// 初始化配置
+const init = {
+  //language_url: '/static/tinymce/langs/zh_CN.js',
+  //language: 'zh_CN',
+  //skin_url: '/static/tinymce/skins/ui/oxide',
+  height: 380,
+  width: 940,
+  plugins: 'lists image media table textcolor wordcount contextmenu preview',
+  toolbar: 'undo redo | formatselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | lists image media table | removeformat preview',
+  branding: false,
+  menubar: true,
+  images_upload_handler: (blobInfo, success, failure) => {
+    const filename = blobInfo.filename();
+    const suffix = filename.substring(filename.lastIndexOf('.') + 1);
+    const nameWithMd5AndTime = `${md5(blobInfo.base64())}${getTime()}.${suffix}`;
+    client.multipartUpload(nameWithMd5AndTime, blobInfo.blob()).then((result) => {
+      if (result.res.requestUrls) {
+        console.log('返回结果', result);
+        success(result.res.requestUrls[0].split('?')[0]);
+      }
+    }).catch((err) => {
+      console.log(err);
+    });
+  },
+};
+
+
+// 时间戳方法
+const getTime = () => {
+  const time = new Date();
+  // ... 生成时间字符串的逻辑 ...
+  return time;
+};
+
+// onClick 事件处理
+const onClick = (e) => {
+  // 触发 onClick 事件，传递当前事件和 tinymce 实例
+  // 这里可以根据需要进行事件处理
+};
+
+// 监视器，保持双向数据绑定的一致性
+watch(() => form.value.content, (newValue) => {
+  // 这里可以进行一些操作，比如将内容同步到其他状态管理中
+});
+
 
 const onDelete = async () => {
   const ids = aiAIArticles.value.map(item => item.ID)
