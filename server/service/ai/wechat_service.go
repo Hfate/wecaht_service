@@ -229,8 +229,10 @@ func (ws *WechatService) replaceImg(appId, content string) string {
 
 	})
 
+	htmlResult, _ := doc.Html()
+
 	// 输出修改后的 HTML 文档
-	return doc.Text()
+	return htmlResult
 }
 
 func reply(msg *message.MixMessage) *message.Reply {

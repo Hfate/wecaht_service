@@ -151,7 +151,6 @@ func (exa *AIArticleService) GenerateArticleById(hotspotId uint64, account ai.Of
 		Topic:             articleContext.Topic,
 		AuthorName:        account.DefaultAuthorName,
 		Tags:              strings.Join(articleContext.Tags, ","),
-		OriginalContent:   articleContext.Content,
 		Content:           exa.parseContent(articleContext.Content, account.CssFormat),
 	}
 	aiArticle.BASEMODEL = BaseModel()
@@ -205,7 +204,6 @@ func (exa *AIArticleService) GenerateArticle(account *ai.OfficialAccount) error 
 			AuthorName:        account.DefaultAuthorName,
 			Link:              articleContext.Link,
 			Tags:              strings.Join(articleContext.Tags, ","),
-			OriginalContent:   articleContext.Content,
 			Content:           articleContext.Content,
 			Params:            strings.Join(articleContext.Params, ","),
 		}
