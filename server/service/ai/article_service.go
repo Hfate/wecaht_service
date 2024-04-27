@@ -18,7 +18,6 @@ import (
 	"gorm.io/gorm"
 	"mime/multipart"
 	"strings"
-	"time"
 )
 
 type ArticleService struct {
@@ -275,7 +274,9 @@ func (exa *ArticleService) Spider() {
 	// 处理记录，批处理大小为100
 	results := make([]*ai.Article, 0)
 
-	result := global.GVA_DB.Where("content = ''").FindInBatches(&results, 100, func(tx *gorm.DB, batch int) error {
+	index := 0
+
+	result := global.GVA_DB.Where("content = ''").Where("tags=''").Order("publish_time desc").FindInBatches(&results, 100, func(tx *gorm.DB, batch int) error {
 		for _, result := range results {
 			// 对批中的每条记录进行操作
 
@@ -283,7 +284,13 @@ func (exa *ArticleService) Spider() {
 
 			result.Content = content
 
-			time.Sleep(3 * time.Second)
+			if len(content) == 0 {
+				result.Tags = "delete"
+			}
+
+			index++
+
+			fmt.Println(index)
 		}
 
 		// 保存对当前批记录的修改
