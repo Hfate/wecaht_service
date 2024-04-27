@@ -75,10 +75,6 @@
   margin-top: 30px; /* 根据需要调整间距 */
   margin-right: 130px; /* 根据需要调整边距 */
 }
-
-.footer-button {
-
-}
 </style>
 
 <script setup>
@@ -90,6 +86,7 @@ import {useRoute} from 'vue-router';
 import {onMounted, ref, watch} from 'vue';
 import {getOfficialAccountList} from "@/api/officialAccount";
 import {getTopicList} from "@/api/topic";
+import {ElMessage} from "element-plus";
 
 defineOptions({
   name: 'AIArticleDetail'
@@ -148,6 +145,10 @@ const init = {
 const enterDialog = async () => {
   let res = await updateArticle(form.value)
   if (res.code === 0) {
+    ElMessage({
+      type: 'success',
+      message: res.msg
+    })
     closeDialog()
     getTableData()
   }
