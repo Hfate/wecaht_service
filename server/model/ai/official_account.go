@@ -19,6 +19,7 @@ type OfficialAccount struct {
 	TargetNum         int    `json:"targetNum"`
 	CreateTypes       string `json:"createTypes"`
 	CssFormat         string `json:"cssFormat"`
+	NeedOpenComment   uint   `json:"needOpenComment"`
 }
 
 func (OfficialAccount) TableName() string {

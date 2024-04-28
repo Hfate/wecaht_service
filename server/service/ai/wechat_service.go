@@ -158,7 +158,7 @@ func (ws *WechatService) PublishArticle(dbOfficialAccount *aiModel.OfficialAccou
 			//ThumbURL:     "https://mmbiz.qpic.cn/sz_mmbiz_jpg/uO29ibicRxJ0QfibQSCptBtjsyia61jSn4V7RRX8aLcMUwN7adJhfyaj788qibHVibnOicDyeTAWAor7GGDP6fz1N499A/640?wx_fmt=webp&amp",
 			Author: dbOfficialAccount.DefaultAuthorName,
 			//Digest:       "test",
-			NeedOpenComment: 1,
+			NeedOpenComment: dbOfficialAccount.NeedOpenComment,
 			ShowCoverPic:    1,
 			Content:         content,
 		})
