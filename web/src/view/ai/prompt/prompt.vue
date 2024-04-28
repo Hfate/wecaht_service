@@ -178,6 +178,10 @@
                   :value="6"
                   label="文章配图"
               />
+              <el-option
+                  :value="7"
+                  label="文章扩写"
+              />
             </el-select>
           </el-form-item>
           <el-form-item label="语言">
@@ -248,7 +252,8 @@ const translatedTypes = ref({
   3: '热点创作',
   4: 'AI创作',
   5: '标题生成',
-  6: '文章配图'
+  6: '文章配图',
+  7: '文章扩写',
 })
 
 const page = ref(1)

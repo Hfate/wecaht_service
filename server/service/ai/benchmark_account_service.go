@@ -84,11 +84,11 @@ func (exa *BenchmarkAccountService) CreateBenchmarkAccount(e ai.BenchmarkAccount
 }
 
 func (exa *BenchmarkAccountService) updateMoreInfo(wxToken *ai.WxToken, e ai.BenchmarkAccount, list []*ai.Article) {
-	key := e.Key
-	pass_ticket := wxToken.PassTicket
+	//key := e.Key
+	//pass_ticket := wxToken.PassTicket
 
-	wechatApi := fmt.Sprintf("https://mp.weixin.qq.com/mp/getappmsgext?uin=MjI3NDAxNzUwNw%3D%3D&key=%s&pass_ticket=%s", key, pass_ticket)
-
+	//wechatApi := fmt.Sprintf("https://mp.weixin.qq.com/mp/getappmsgext?uin=MjI3NDAxNzUwNw%3D%3D&key=%s&pass_ticket=%s", key, pass_ticket)
+	wechatApi := ""
 	headers := make(map[string]string)
 	headers["user-agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36 NetType/WIFI MicroMessenger/7.0.20.1781(0x6700143B) WindowsWechat(0x6309092b) XWEB/8555 Flue"
 	for _, item := range list {

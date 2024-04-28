@@ -207,6 +207,18 @@
                 autocomplete="off"
             />
           </el-form-item>
+          <el-form-item label="签名">
+            <el-input
+                v-model="form.signature"
+                autocomplete="off"
+            />
+          </el-form-item>
+          <el-form-item label="头像链接">
+            <el-input
+                v-model="form.headImgUrl"
+                autocomplete="off"
+            />
+          </el-form-item>
           <el-form-item label="AppId">
             <el-input
                 v-model="form.appId"
@@ -291,6 +303,8 @@ const form = ref({
   topic: '',
   userEmail: '',
   defaultAuthorName: '',
+  signature: '',
+  headImgUrl: '',
   remark: '',
   targetNum: 1,
   createTypeList: [],

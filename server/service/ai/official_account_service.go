@@ -97,7 +97,7 @@ func (exa *OfficialAccountService) GetOfficialAccount(id uint64) (officialAccoun
 //@param: id uint
 //@return: customer model.OfficialAccount, err error
 
-func (exa *OfficialAccountService) FindByTopic(topic string) (officialAccount ai.OfficialAccount, err error) {
+func (exa *OfficialAccountService) FindByTopic(topic string) (officialAccount *ai.OfficialAccount, err error) {
 	err = global.GVA_DB.Where("topic = ?", topic).Last(&officialAccount).Error
 
 	if err != nil {

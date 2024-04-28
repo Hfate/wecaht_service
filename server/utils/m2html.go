@@ -122,12 +122,9 @@ func RemoveLine(dom *goquery.Document) *goquery.Document {
 	})
 	return dom
 }
-func MarkdownRun(mdContent string, cssFormat string) string {
-	mdContent, _ = RenderMarkdownContent(mdContent)
+func UssCssFormat(htmlContent string, cssFormat string) string {
 
-	content := AddHtmlTag(mdContent)
-	//将\n换行,更换成
-	// content = ChangeLine(content)
+	content := AddHtmlTag(htmlContent)
 
 	dom, err := goquery.NewDocumentFromReader(strings.NewReader(content))
 	if err != nil {
@@ -144,11 +141,6 @@ func MarkdownRun(mdContent string, cssFormat string) string {
 	dom.Find("title").Each(func(i int, selection *goquery.Selection) {
 		selection.AfterHtml("<style>" + code_css + "\n" + cssFormat + "</style>")
 	})
-
-	// dom.Find("p:contains(a)").Each(func(i int, selection *goquery.Selection) {
-	// 	selection.SetText(strings.Replace(selection.Text(), " ", "@s-;", -1))
-
-	// })
 
 	dom.Find("br:not(code)").Each(func(i int, selection *goquery.Selection) {
 		selection.Remove()

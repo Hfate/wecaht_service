@@ -132,7 +132,7 @@ func (exa *AIArticleService) GetAIArticle(id uint64) (aiArticle ai.AIArticle, er
 	return
 }
 
-func (exa *AIArticleService) GenerateArticleById(hotspotId uint64, account ai.OfficialAccount) error {
+func (exa *AIArticleService) GenerateArticleById(hotspotId uint64, account *ai.OfficialAccount) error {
 	context := &ArticleContext{
 		Topic:     account.Topic,
 		AppId:     account.AppId,
@@ -151,7 +151,7 @@ func (exa *AIArticleService) GenerateArticleById(hotspotId uint64, account ai.Of
 		Topic:             articleContext.Topic,
 		AuthorName:        account.DefaultAuthorName,
 		Tags:              strings.Join(articleContext.Tags, ","),
-		Content:           exa.parseContent(articleContext.Content, account.CssFormat),
+		Content:           ArticleContentHandlerApp.Handle(account, articleContext.Content),
 	}
 	aiArticle.BASEMODEL = BaseModel()
 
@@ -209,26 +209,8 @@ func (exa *AIArticleService) GenerateArticle(account *ai.OfficialAccount) error 
 		}
 		aiArticle.BASEMODEL = BaseModel()
 
-		// 获取历史已发布消息5条图文消息
-		publishArticleList, err2 := WechatServiceApp.BatchGetHistoryArticleList(account)
-		if err2 != nil || len(publishArticleList.Item) == 0 {
-			global.GVA_LOG.Error("BatchGetHistoryArticleList", zap.Error(err2), zap.String("errMsg", publishArticleList.ErrMsg))
-		} else {
-			originalContent := articleContext.Content
-			originalContent += "---\n"
-			originalContent += "#### 推荐阅读\n"
-			for _, item := range publishArticleList.Item {
-
-				if len(item.Content.NewsItem) == 0 {
-					continue
-				}
-
-				originalContent += "-[" + item.Content.NewsItem[0].Title + "](" + item.Content.NewsItem[0].URL + ")\n"
-			}
-		}
-
 		//  处理排版
-		aiArticle.Content = exa.parseContent(articleContext.Content, account.CssFormat)
+		aiArticle.Content = ArticleContentHandlerApp.Handle(account, articleContext.Content)
 
 		err = AIArticleServiceApp.CreateAIArticle(aiArticle)
 		if err != nil {
@@ -311,38 +293,6 @@ func removeQuotes(str string) string {
 	}
 
 	return str
-}
-
-func (exa *AIArticleService) parseContent(content, cssFormat string) string {
-	// 以换行符为分隔符，将文章内容拆分成多行
-	lines := strings.Split(content, "\n")
-
-	// 排除标题行
-	var contentLines []string
-	for _, line := range lines {
-		if !strings.Contains(line, "标题：") &&
-			!strings.Contains(line, "占位符") &&
-			!strings.Contains(line, "配图") &&
-			!strings.Contains(line, "小标题") {
-			contentLines = append(contentLines, line)
-		}
-	}
-
-	// 将剩余的行重新连接成一篇文章
-	markdownContent := strings.Join(contentLines, "\n")
-
-	//```markdown
-	markdownContent = strings.ReplaceAll(markdownContent, "```markdown", "")
-	markdownContent = strings.ReplaceAll(markdownContent, "```", "")
-	markdownContent = strings.ReplaceAll(markdownContent, "<li><p>", "<li>")
-
-	if cssFormat != "" {
-		return utils.MarkdownRun(markdownContent, cssFormat)
-	} else {
-		htmlContent, _ := utils.RenderMarkdownContent(markdownContent)
-		htmlContent = utils.HtmlAddStyle(htmlContent)
-		return htmlContent
-	}
 }
 
 func (exa *AIArticleService) Recreation(id uint64) (err error) {

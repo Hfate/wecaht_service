@@ -22,4 +22,5 @@ const (
 	TopicWrite        = 4
 	TitleCreate       = 5
 	AddImage          = 6
+	ArticleExpansion  = 7
 )

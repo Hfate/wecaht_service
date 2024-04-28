@@ -431,7 +431,7 @@ const openNewTab = (detailPath) => {
 
 const page = ref(1)
 const total = ref(0)
-const pageSize = ref(10)
+const pageSize = ref(50)
 const tableData = ref([])
 const searchInfo = ref({})
 const topicArr = ref([])

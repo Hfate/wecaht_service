@@ -25,6 +25,14 @@ type ArticleService struct {
 
 var ArticleServiceApp = new(ArticleService)
 
+func (exa *ArticleService) FindLimit5ByPortalName(portalName string) []*ai.Article {
+	result := make([]*ai.Article, 0)
+	global.GVA_DB.Model(&ai.Article{}).Unscoped().
+		Where("portal_name = ?", portalName).
+		Order("read_num desc,publish_time desc").Limit(5).Find(&result)
+	return result
+}
+
 func (exa *ArticleService) FindHotArticleByTopic(topic string, portNameList []string) (ai.Article, error) {
 	var article ai.Article
 	err := global.GVA_DB.Model(&ai.Article{}).Where("topic = ?", topic).

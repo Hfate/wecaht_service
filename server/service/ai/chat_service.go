@@ -85,6 +85,7 @@ func (*ChatService) HotSpotWrite(context *ArticleContext, chatModel config.ChatM
 
 func (*ChatService) Recreation(articleContext *ArticleContext, chatModel config.ChatModel) (*ArticleContext, error) {
 
+	// 文章改写
 	chatGptPromptList, err := parsePrompt(articleContext, ai.ContentRecreation)
 	if err != nil {
 		return &ArticleContext{}, err
@@ -101,6 +102,22 @@ func (*ChatService) Recreation(articleContext *ArticleContext, chatModel config.
 		articleContext.Content = resp
 	}
 
+	if len(articleContext.Content) < 1200 {
+		// 文章扩写
+		chatGptPromptList, err = parsePrompt(articleContext, ai.ArticleExpansion)
+		if err != nil {
+			return nil, err
+		}
+		for _, chatGptPrompt := range chatGptPromptList {
+			resp, chatMessageHistory, err = ChatServiceApp.ChatWithModel(chatGptPrompt, chatMessageHistory, chatModel)
+			if err != nil {
+				return nil, err
+			}
+			articleContext.Content = resp
+		}
+	}
+
+	// 标题创建
 	chatGptPromptList, err = parsePrompt(articleContext, ai.TitleCreate)
 	if err != nil {
 		return nil, err
@@ -114,6 +131,7 @@ func (*ChatService) Recreation(articleContext *ArticleContext, chatModel config.
 		articleContext.Title = resp
 	}
 
+	// 文章配图
 	chatGptPromptList, err = parsePrompt(articleContext, ai.AddImage)
 	if err != nil {
 		return nil, err

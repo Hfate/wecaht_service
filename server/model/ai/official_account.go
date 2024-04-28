@@ -9,6 +9,8 @@ type OfficialAccount struct {
 	Topic             string `json:"topic"`
 	UserEmail         string `json:"userEmail"`
 	AppId             string `json:"appId"`
+	HeadImgUrl        string `json:"headImgUrl"`
+	Signature         string `json:"signature"`
 	AppSecret         string `json:"appSecret"`
 	Token             string `json:"token"`
 	EncodingAESKey    string `json:"encodingAesKey"`
