@@ -18,6 +18,16 @@ var OfficialAccountCard = "<section class='mp_profile_iframe_wrp'>" +
 	"data-signature='%s' " +
 	"data-from='0' data-is_biz_ban='0'></mp-common-profile></section>"
 
+var followA = "<section style='margin-bottom: 0px;outline: 0px;font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei UI', 'Microsoft YaHei', Arial, sans-serif;background-color: rgb(255, 255, 255);letter-spacing: 0.578px;text-align: center;'><span style='outline: 0px;font-size: 14px;font-family: 'Helvetica Neue', Helvetica, 'Hiragino Sans GB', 'Microsoft YaHei', Arial, sans-serif;'>" +
+	"关注不迷路 随时找得到</span>" +
+	"</section>"
+var followB = "<section style='margin-bottom: 0px;outline: 0px;font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei UI', 'Microsoft YaHei', Arial, sans-serif;background-color: rgb(255, 255, 255);letter-spacing: 0.578px;text-align: center;'><span style='outline: 0px;font-size: 14px;font-family: 'Helvetica Neue', Helvetica, 'Hiragino Sans GB', 'Microsoft YaHei', Arial, sans-serif;'>" +
+	"点赞、关注、转发</span>" +
+	"</section>"
+var followC = "<section style='margin-bottom: 0px;outline: 0px;font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei UI', 'Microsoft YaHei', Arial, sans-serif;background-color: rgb(255, 255, 255);letter-spacing: 0.578px;text-align: center;'><span style='outline: 0px;font-size: 14px;font-family: 'Helvetica Neue', Helvetica, 'Hiragino Sans GB', 'Microsoft YaHei', Arial, sans-serif;'>" +
+	"↓↓↓↓↓↓</span>" +
+	"</section>"
+
 type ArticleContentHandler struct {
 }
 
@@ -93,25 +103,12 @@ func (ac *ArticleContentHandler) handleWechatSetType(account *ai.OfficialAccount
 	// 往body中添加一个公众号名片
 	accountCard := fmt.Sprintf(OfficialAccountCard, account.AccountId,
 		account.HeadImgUrl, account.AccountName, account.Signature)
-	dom.Find("body").AppendHtml(accountCard)
 
-	// 输出整个修改后的HTML文档
-	modifiedHtml, err := dom.Html()
-
-	return modifiedHtml
-}
-
-func handleWechatSetType(account *ai.OfficialAccount, htmlContent string) string {
-	dom, err := goquery.NewDocumentFromReader(strings.NewReader(htmlContent))
-	if err != nil {
-		global.GVA_LOG.Error("handleWechatSetType", zap.Error(err))
-		return htmlContent
-	}
-
-	// 往body中添加一个公众号名片
-	accountCard := fmt.Sprintf(OfficialAccountCard, account.AccountId,
-		account.HeadImgUrl, account.AccountName, account.Signature)
-	dom.Find("body").PrependHtml(accountCard)
+	body := dom.Find("body")
+	body.AppendHtml(followA)
+	body.AppendHtml(followB)
+	body.AppendHtml(followC)
+	body.AppendHtml(accountCard)
 
 	// 输出整个修改后的HTML文档
 	modifiedHtml, err := dom.Html()
