@@ -114,19 +114,19 @@ func (*ChatService) Recreation(articleContext *ArticleContext, chatModel config.
 		articleContext.Title = resp
 	}
 
-	//chatGptPromptList, err = parsePrompt(articleContext, ai.AddImage)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//
-	//for _, chatGptPrompt := range chatGptPromptList {
-	//	resp, chatMessageHistory, err = ChatServiceApp.ChatWithModel(chatGptPrompt, chatMessageHistory, chatModel)
-	//	if err != nil {
-	//		return nil, err
-	//	}
-	//
-	//	articleContext.Content = resp
-	//}
+	chatGptPromptList, err = parsePrompt(articleContext, ai.AddImage)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, chatGptPrompt := range chatGptPromptList {
+		resp, chatMessageHistory, err = ChatServiceApp.ChatWithModel(chatGptPrompt, chatMessageHistory, chatModel)
+		if err != nil {
+			return nil, err
+		}
+
+		articleContext.Content = resp
+	}
 
 	articleContext.Params = []string{chatModel.ModelType, "Recreation"}
 	return articleContext, nil
