@@ -27,15 +27,15 @@ func Timer() {
 			fmt.Println("add timer error:", err)
 		}
 
-		_, err = global.GVA_Timer.AddTaskByFunc("定时任务标识", "@hourly", func() {
-			err = task.PortalSpider(global.GVA_DB)
-			if err != nil {
-				fmt.Println("timer error:", err)
-			}
-		}, "定时爬取门户数据", option...)
-		if err != nil {
-			fmt.Println("add timer error:", err)
-		}
+		//_, err = global.GVA_Timer.AddTaskByFunc("定时任务标识", "@hourly", func() {
+		//	err = task.PortalSpider(global.GVA_DB)
+		//	if err != nil {
+		//		fmt.Println("timer error:", err)
+		//	}
+		//}, "定时爬取门户数据", option...)
+		//if err != nil {
+		//	fmt.Println("add timer error:", err)
+		//}
 
 		_, err = global.GVA_Timer.AddTaskByFunc("定时任务标识", "@every 5m", func() {
 			err = task.HotspotSpider(global.GVA_DB)
@@ -43,6 +43,13 @@ func Timer() {
 				fmt.Println("timer error:", err)
 			}
 		}, "定时收集热点", option...)
+		if err != nil {
+			fmt.Println("add timer error:", err)
+		}
+
+		_, err = global.GVA_Timer.AddTaskByFunc("定时重置对标账号标记", "@every 5h", func() {
+			task.ResetSpider(global.GVA_DB)
+		}, "定时重置对标账号标记", option...)
 		if err != nil {
 			fmt.Println("add timer error:", err)
 		}
@@ -68,26 +75,26 @@ func Timer() {
 		}
 
 		// 每天凌晨四点执行生成文章的任务
-		_, err = global.GVA_Timer.AddTaskByFunc("GenerateArticle", "@daily", func() {
-			task.GenerateArticle()
-			if err != nil {
-				fmt.Println("timer error:", err)
-			}
-		}, "定时生成文章", option...)
-		if err != nil {
-			fmt.Println("add timer error:", err)
-		}
+		//_, err = global.GVA_Timer.AddTaskByFunc("GenerateArticle", "@daily", func() {
+		//	task.GenerateArticle()
+		//	if err != nil {
+		//		fmt.Println("timer error:", err)
+		//	}
+		//}, "定时生成文章", option...)
+		//if err != nil {
+		//	fmt.Println("add timer error:", err)
+		//}
 
 		// 每天凌晨执行生成文章的任务
-		_, err = global.GVA_Timer.AddTaskByFunc("SpiderWechatHotArticle", "@daily", func() {
-			task.SpiderWechatHotArticle()
-			if err != nil {
-				fmt.Println("timer error:", err)
-			}
-		}, "定时爬取爆文", option...)
-		if err != nil {
-			fmt.Println("add timer error:", err)
-		}
+		//_, err = global.GVA_Timer.AddTaskByFunc("SpiderWechatHotArticle", "@daily", func() {
+		//	task.SpiderWechatHotArticle()
+		//	if err != nil {
+		//		fmt.Println("timer error:", err)
+		//	}
+		//}, "定时爬取爆文", option...)
+		//if err != nil {
+		//	fmt.Println("add timer error:", err)
+		//}
 
 	}()
 

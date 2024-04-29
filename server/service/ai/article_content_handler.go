@@ -85,7 +85,7 @@ func (ac *ArticleContentHandler) addRecommendedReading(account *ai.OfficialAccou
 	}
 
 	mdContent += "---\n"
-	mdContent += "#### 推荐阅读\n"
+	mdContent += "#### 推荐阅读"
 	for _, item := range articleList {
 		mdContent += "-[" + item.Title + "](" + item.Link + ")\n"
 	}

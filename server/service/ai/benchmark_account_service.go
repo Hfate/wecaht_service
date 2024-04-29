@@ -9,6 +9,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
 	systemService "github.com/flipped-aurora/gin-vue-admin/server/service/system"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
+	"github.com/flipped-aurora/gin-vue-admin/server/utils/timeutil"
 	"github.com/spf13/cast"
 	"go.uber.org/zap"
 	"net/http"
@@ -217,13 +218,15 @@ func getArticle(portalName, resp string) []*ai.Article {
 				tags += tag.Title + ","
 			}
 
+			publishTime := int64(appMsg.UpdateTime) * 1000
+			publishTimeStr := timeutil.Format(publishTime, timeutil.DateTimeLong)
 			result = append(result, &ai.Article{
 				BASEMODEL:   global.BASEMODEL{ID: cast.ToString(utils.GenID()), CreatedAt: time.Now(), UpdatedAt: time.Now()},
 				Title:       appMsg.Title,
 				AuthorName:  appMsg.AuthorName,
 				PortalName:  portalName,
 				Link:        appMsg.Link,
-				PublishTime: cast.ToString(appMsg.UpdateTime),
+				PublishTime: publishTimeStr,
 				Tags:        tags,
 			})
 		}

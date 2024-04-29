@@ -110,6 +110,7 @@ func (exa *AIArticleService) Publish1Article(aiArticleList []ai.AIArticle) (err 
 		aiArticle.MsgId = msgId
 		aiArticle.PublishId = publishId
 		aiArticle.MsgDataID = msgDataID
+		aiArticle.ErrMessage = ""
 		err = global.GVA_DB.Save(&aiArticle).Error
 	}
 
