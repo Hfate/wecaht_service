@@ -1,7 +1,6 @@
 package ai
 
 import (
-	"errors"
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/ai"
 	aiReq "github.com/flipped-aurora/gin-vue-admin/server/model/ai/request"
@@ -145,8 +144,9 @@ func (exa *AIArticleService) GenerateArticleById(hotspotId uint64, account *ai.O
 
 func (exa *AIArticleService) GenerateArticle(account *ai.OfficialAccount) error {
 	targetNum := account.TargetNum
-
-	i := 0
+	if targetNum == 0 {
+		return nil
+	}
 
 	batchId := timeutil.GetCurDate() + account.AppId
 	// 重置当天的素材池，将use time 更新为0
@@ -161,7 +161,8 @@ func (exa *AIArticleService) GenerateArticle(account *ai.OfficialAccount) error 
 		return err
 	}
 
-	for i < targetNum {
+	i := 0
+	for i < targetNum && i < 10 {
 		context := &ArticleContext{
 			Topic:       account.Topic,
 			Account:     account,
@@ -169,14 +170,10 @@ func (exa *AIArticleService) GenerateArticle(account *ai.OfficialAccount) error 
 			CreateTypes: account.CreateTypes,
 		}
 
-		time.Sleep(5 * time.Second)
-
-		articleContext := ArticlePipelineApp.Run("", context)
-		if articleContext.Content == "" || len(articleContext.Params) == 0 {
-			return errors.New("AI创作失败")
+		err = ArticlePipelineApp.Run("", context)
+		if err != nil {
+			return err
 		}
-
-		global.GVA_LOG.Info("AI创作完成", zap.String("accountName", account.AccountName))
 
 		i++
 	}

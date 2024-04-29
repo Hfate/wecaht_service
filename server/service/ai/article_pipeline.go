@@ -1,7 +1,6 @@
 package ai
 
 import (
-	"fmt"
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/ai"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils/timeutil"
@@ -19,35 +18,24 @@ var ArticlePipelineApp = new(ArticlePipeline)
 type ArticlePipeline struct {
 }
 
-func (*ArticlePipeline) Run(model string, context *ArticleContext) *ArticleContext {
+func (*ArticlePipeline) Run(model string, context *ArticleContext) error {
 	switch model {
 	case "hotspot":
-		err := HotSpotArticlePipelineApp.Write(context)
-		if err != nil {
-			global.GVA_LOG.Error("文章写作失败", zap.Error(err))
-		}
+		return HotSpotArticlePipelineApp.Write(context)
 	default:
-		err := DefaultArticlePipelineApp.Write(context)
-		if err != nil {
-			global.GVA_LOG.Error("文章写作失败", zap.Error(err))
-		}
+		return DefaultArticlePipelineApp.Write(context)
 	}
-	return context
 }
 
 var HotSpotArticlePipelineApp = new(HotSpotArticlePipeline)
 
 type HotSpotArticlePipeline struct {
 	ArticleWriteHandleList []ArticleWriteHandle
-	AddImageHandleList     []AddImagesHandle
 }
 
 func (da *HotSpotArticlePipeline) init() {
 	da.ArticleWriteHandleList = []ArticleWriteHandle{
 		&HotSpotWriteArticle{},
-	}
-	da.AddImageHandleList = []AddImagesHandle{
-		&BaiduAddImage{},
 	}
 }
 
@@ -67,14 +55,6 @@ func (da *HotSpotArticlePipeline) Write(context *ArticleContext) error {
 		if context.Content != "" && len(context.Content) > 500 {
 			global.GVA_LOG.Info("完成AI创作", zap.String("AccountName", context.Account.AccountName), zap.String("title", context.Title))
 			break
-		}
-	}
-
-	for _, handle := range da.AddImageHandleList {
-		err := handle.Handle(context)
-		if err != nil {
-			fmt.Println("DefaultArticlePipeline Add Image", err)
-			continue
 		}
 	}
 
