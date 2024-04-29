@@ -1,6 +1,8 @@
 package ai
 
-import "github.com/flipped-aurora/gin-vue-admin/server/global"
+import (
+	"github.com/flipped-aurora/gin-vue-admin/server/global"
+)
 
 var ChatModelServiceApp = new(ChatModelService)
 

@@ -8,6 +8,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"go.uber.org/zap"
 	"strings"
+	"unicode"
 )
 
 var OfficialAccountCard = "<section class='mp_profile_iframe_wrp'>" +
@@ -32,6 +33,34 @@ type ArticleContentHandler struct {
 }
 
 var ArticleContentHandlerApp = new(ArticleContentHandler)
+
+func (ac *ArticleContentHandler) HandleTitle(title string) string {
+	title = strings.ReplaceAll(title, "#", "")
+	title = strings.ReplaceAll(title, "*", "")
+	title = strings.ReplaceAll(title, "标题：", "")
+	title = strings.ReplaceAll(title, "#", "")
+	title = utils.RemoveBookTitleBrackets(title)
+	title = strings.ReplaceAll(title, "标题建议：", "")
+	return removeQuotes(title)
+}
+
+func removeQuotes(str string) string {
+	// 判断字符串是否为空或长度小于2，无法包含前后双引号
+	if len(str) < 2 {
+		return str
+	}
+
+	// 判断首尾字符是否为双引号，并进行去除
+	firstChar := rune(str[0])
+	lastChar := rune(str[len(str)-1])
+	if (firstChar == '"' || firstChar == '“' || firstChar == '”') && (lastChar == '"' || lastChar == '“' || lastChar == '”') {
+		return strings.TrimFunc(str, func(r rune) bool {
+			return unicode.Is(unicode.Quotation_Mark, r)
+		})
+	}
+
+	return str
+}
 
 func (ac *ArticleContentHandler) Handle(account *ai.OfficialAccount, content string) string {
 
@@ -85,7 +114,7 @@ func (ac *ArticleContentHandler) addRecommendedReading(account *ai.OfficialAccou
 	}
 
 	mdContent += "---\n"
-	mdContent += "#### 推荐阅读"
+	mdContent += "#### 推荐阅读\n"
 	for _, item := range articleList {
 		mdContent += "-[" + item.Title + "](" + item.Link + ")\n"
 	}

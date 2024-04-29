@@ -4,14 +4,10 @@ import (
 	"fmt"
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/ai"
-	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils/timeutil"
-	"github.com/flipped-aurora/gin-vue-admin/server/utils/upload"
 	"go.uber.org/zap"
-	"log"
-	"os"
-	"regexp"
 	"strings"
+	"time"
 )
 
 type CreatePipeline interface {
@@ -69,7 +65,7 @@ func (da *HotSpotArticlePipeline) Write(context *ArticleContext) error {
 		}
 		// 完成写作
 		if context.Content != "" && len(context.Content) > 500 {
-			global.GVA_LOG.Info("完成AI创作", zap.String("appID", context.AppId), zap.String("title", context.Title))
+			global.GVA_LOG.Info("完成AI创作", zap.String("AccountName", context.Account.AccountName), zap.String("title", context.Title))
 			break
 		}
 	}
@@ -89,122 +85,9 @@ var DefaultArticlePipelineApp = new(DefaultArticlePipeline)
 
 type DefaultArticlePipeline struct {
 	ArticleWriteHandleList []ArticleWriteHandle
-	AddImageHandleList     []AddImagesHandle
-}
-
-func (da *DefaultArticlePipeline) init() {
-	da.ArticleWriteHandleList = []ArticleWriteHandle{
-		&HotSpotWriteArticle{},
-		&RecreationArticle{},
-	}
-	da.AddImageHandleList = []AddImagesHandle{
-		&BaiduAddImage{},
-	}
-}
-
-type BaiduAddImage struct {
-}
-
-func (ba *BaiduAddImage) Handle(context *ArticleContext) error {
-
-	// 正则表达式匹配Markdown中的图片占位符描述
-	re := regexp.MustCompile(`\[img\](.*?)\[/img\]`)
-	matches := re.FindAllStringSubmatch(context.Content, -1)
-
-	if len(matches) == 0 {
-		return nil
-	}
-	context.Content = strings.ReplaceAll(context.Content, "[img]", "")
-	context.Content = strings.ReplaceAll(context.Content, "[/img]", "")
-
-	for _, match := range matches {
-		// 搜索图片
-		filePath := ba.SearchAndSave(match[1])
-
-		if filePath == "" {
-			continue
-		}
-
-		if !strings.Contains(filePath, "http") {
-			filePath = "https://" + filePath
-		}
-
-		wxImgFmt := "<img src=\"%s\">"
-		wxImgUrl := fmt.Sprintf(wxImgFmt, filePath)
-
-		context.Content = strings.ReplaceAll(context.Content, match[1], "\n"+wxImgUrl+"\n")
-	}
-
-	return nil
-}
-
-func (ba *BaiduAddImage) SearchAndSave(keyword string) string {
-	imgUrlList := make([]string, 0)
-
-	baiduImgUrlList := utils.CollectBaiduImgUrl(keyword)
-	if len(baiduImgUrlList) > 0 {
-		imgUrlList = append(imgUrlList, baiduImgUrlList...)
-	}
-
-	unsplashImgUrlList := utils.CollectUnsplashImgUrl(keyword)
-	if len(unsplashImgUrlList) > 0 {
-		imgUrlList = append(imgUrlList, unsplashImgUrlList...)
-	}
-
-	// 通过第一张图片链接下载图片
-	return ba.saveImage(imgUrlList)
-}
-
-func (ba *BaiduAddImage) saveImage(imgUrlList []string) string {
-	// 通过第一张图片链接下载图片
-	filePath := ""
-
-	for _, imgUrl := range imgUrlList {
-		ossFilePath, err := ba.downloadImage(imgUrl)
-		if err != nil {
-			global.GVA_LOG.Info("downloadImage failed", zap.Any("err", err.Error()))
-		} else {
-			filePath = ossFilePath
-			break
-		}
-	}
-	return filePath
-}
-
-// DownloadImage 从 URL 下载图片并上传到 OSS
-func (ba *BaiduAddImage) downloadImage(imageUrl string) (string, error) {
-	// 发起 HTTP GET 请求
-	tempFilePath, err := utils.CreateTempImgFile(imageUrl)
-	if err != nil {
-		return "", err
-	}
-
-	defer os.Remove(tempFilePath)
-
-	// 使用 multipart.FileHeader 封装文件信息
-	fileHeader, err := os.Open(tempFilePath)
-	if err != nil {
-		log.Println("Error opening file header:", err)
-		return "", err
-	}
-
-	defer fileHeader.Close() // 创建文件 defer 关闭
-
-	// 调用 OSS 上传方法
-	oss := upload.NewOss()
-	uploadUrl, _, err := oss.UploadFile(fileHeader)
-	if err != nil {
-		log.Println("Error uploading to OSS:", err)
-		return "", err
-	}
-
-	// 返回上传的 URL 和 OSS 路径
-	return uploadUrl, nil
 }
 
 func (da *DefaultArticlePipeline) Write(context *ArticleContext) error {
-	// 初始化
-	da.init()
 
 	articleWriteHandleList := make([]ArticleWriteHandle, 0)
 
@@ -216,7 +99,7 @@ func (da *DefaultArticlePipeline) Write(context *ArticleContext) error {
 		articleWriteHandleList = append(articleWriteHandleList, &HotSpotWriteArticle{})
 	}
 
-	for _, handle := range da.ArticleWriteHandleList {
+	for _, handle := range articleWriteHandleList {
 		err := handle.Handle(context)
 		if err != nil {
 			global.GVA_LOG.Error("文章写作失败", zap.Error(err))
@@ -224,16 +107,8 @@ func (da *DefaultArticlePipeline) Write(context *ArticleContext) error {
 		}
 		// 完成写作
 		if context.Content != "" && len(context.Content) > 1000 && len(context.Params) > 0 {
-			global.GVA_LOG.Info("完成AI创作", zap.String("appID", context.AppId), zap.String("title", context.Title))
+			global.GVA_LOG.Info("完成AI创作", zap.String("accountName", context.Account.AccountName), zap.String("title", context.Title))
 			break
-		}
-	}
-
-	for _, handle := range da.AddImageHandleList {
-		err := handle.Handle(context)
-		if err != nil {
-			global.GVA_LOG.Error("文章配图失败", zap.Error(err))
-			continue
 		}
 	}
 
@@ -249,7 +124,8 @@ type AddImagesHandle interface {
 }
 
 type ArticleContext struct {
-	AppId       string
+	Account     *ai.OfficialAccount
+	Article     *ai.AIArticle
 	Title       string
 	Content     string
 	Topic       string
@@ -265,7 +141,7 @@ type RecreationArticle struct {
 }
 
 func (r *RecreationArticle) Handle(context *ArticleContext) error {
-	batchId := timeutil.GetCurDate() + context.AppId
+	batchId := timeutil.GetCurDate() + context.Account.AppId
 
 	article := ai.DailyArticle{}
 	err := global.GVA_DB.Where("batch_id = ?", batchId).Where("use_times=0").Order("publish_time desc").Last(&article).Error
@@ -276,18 +152,60 @@ func (r *RecreationArticle) Handle(context *ArticleContext) error {
 	// 更新使用次数
 	article.UseTimes = article.UseTimes + 1
 	err = global.GVA_DB.Save(&article).Error
-
-	context.Title = article.Title
-	context.Content = article.Content
-	context.Link = article.Link
-
-	result, err := ChatModelServiceApp.Recreation(context)
 	if err != nil {
 		return err
 	}
 
-	context.Content = result.Content
-	context.Title = result.Title
+	// 生成文章初稿
+	aiArticle := &ai.AIArticle{
+		BatchId:           batchId,
+		Title:             article.Title,
+		TargetAccountName: context.Account.AccountName,
+		TargetAccountId:   context.Account.AppId,
+		Topic:             context.Account.Topic,
+		AuthorName:        context.Account.DefaultAuthorName,
+		Link:              article.Link,
+		Content:           article.Content,
+		PublishTime:       time.Now(),
+		ProcessParams:     "任务新创建，正在等待执行..",
+	}
+	aiArticle.BASEMODEL = BaseModel()
+	err = global.GVA_DB.Model(&ai.AIArticle{}).Create(aiArticle).Error
+	if err != nil {
+		return err
+	}
+
+	context.Title = article.Title
+	context.Content = article.Content
+	context.Link = article.Link
+	context.Article = aiArticle
+
+	PoolServiceApp.SubmitBizTask(func() {
+
+		aiArticle.ProcessStatus = ai.ProcessCreateIng
+		// 更新进度
+		global.GVA_DB.Save(&aiArticle)
+
+		result, err2 := ChatModelServiceApp.Recreation(context)
+		if err2 != nil {
+			global.GVA_LOG.Error("Recreation", zap.Error(err2))
+			return
+		}
+
+		context.Content = result.Content
+		context.Title = result.Title
+
+		//
+		aiArticle.Title = ArticleContentHandlerApp.HandleTitle(result.Title)
+		//  处理排版
+		aiArticle.Content = ArticleContentHandlerApp.Handle(context.Account, result.Content)
+
+		// 更新文章内容
+		err2 = global.GVA_DB.Save(&aiArticle).Error
+		if err2 != nil {
+			global.GVA_LOG.Error("Recreation", zap.Error(err2))
+		}
+	})
 
 	return err
 }

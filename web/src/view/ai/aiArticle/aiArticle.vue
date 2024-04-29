@@ -129,7 +129,7 @@
             align="left"
             label="主题"
             prop="topic"
-            width="80"
+            width="60"
         />
         <el-table-column
             align="left"
@@ -140,7 +140,7 @@
         <el-table-column
             align="left"
             label="发布时间"
-            width="160"
+            width="120"
         >
           <template #default="scope">
             <span>{{ formatDate(scope.row.publishTime) }}</span>
@@ -167,12 +167,18 @@
         <el-table-column
             align="left"
             label="创建时间"
-            width="160"
+            width="120"
         >
           <template #default="scope">
             <span>{{ formatDate(scope.row.CreatedAt) }}</span>
           </template>
         </el-table-column>
+        <el-table-column
+            align="left"
+            label="创作进度"
+            prop="processParams"
+            width="320"
+        />
         <el-table-column
             align="left"
             label="发布状态"
@@ -364,7 +370,6 @@ import {
   deleteAIArticle,
   deleteAIArticlesByIds,
   generateAIArticle,
-  getAIArticle,
   getAIArticleList,
   publishAIArticles,
   recreationAIArticle
@@ -372,7 +377,7 @@ import {
 // 导入 OSS 客户端和 md5 时间戳方法
 import {client} from '@/api/oss';
 
-import {ref, watch} from 'vue'
+import {onMounted, onUnmounted, ref, watch} from 'vue'
 import {ElMessage} from 'element-plus'
 import {formatDate} from '@/utils/format'
 import {getTopicList} from "@/api/topic";
@@ -436,6 +441,7 @@ const tableData = ref([])
 const searchInfo = ref({})
 const topicArr = ref([])
 const accountArr = ref([])
+
 
 const onReset = () => {
   searchInfo.value = {}
@@ -502,7 +508,6 @@ getAccountData()
 getTableData()
 
 const dialogFormVisible = ref(false)
-const type = ref('')
 
 // 批量操作
 const handleSelectionChange = (val) => {
@@ -607,14 +612,6 @@ const deleteWechatAIArticle = async (row) => {
   }
 }
 
-const updateWechatArticle = async (row) => {
-  const res = await getAIArticle({ID: row.ID})
-  type.value = 'update'
-  if (res.code === 0) {
-    form.value = res.data.article
-    dialogFormVisible.value = true
-  }
-}
 
 const recreationWechatAIArticle = async (row) => {
   row.visible = false
@@ -631,6 +628,21 @@ const recreationWechatAIArticle = async (row) => {
   }
 }
 
+const stop = ref(null); // 用于存储定时器的引用
+onMounted(() => {
+  // 定义调用getTableData的函数
+  const fetchData = () => {
+    getTableData();
+  };
+
+  // 设置定时器，每1000毫秒（1秒）调用一次fetchData
+  stop.value = setInterval(fetchData, 1000);
+
+  // 当组件卸载时清除定时器
+  onUnmounted(() => {
+    clearInterval(stop.value);
+  });
+});
 
 const translatedStatus = ref({
   0: '新生成',

@@ -13,9 +13,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/utils/timeutil"
 	"go.uber.org/zap"
 	"sort"
-	"strings"
 	"time"
-	"unicode"
 )
 
 type AIArticleService struct {
@@ -136,31 +134,13 @@ func (exa *AIArticleService) GetAIArticle(id uint64) (aiArticle ai.AIArticle, er
 func (exa *AIArticleService) GenerateArticleById(hotspotId uint64, account *ai.OfficialAccount) error {
 	context := &ArticleContext{
 		Topic:     account.Topic,
-		AppId:     account.AppId,
+		Account:   account,
 		HotspotId: hotspotId,
 	}
 
-	articleContext := ArticlePipelineApp.Run("hotspot", context)
-	if articleContext.Content == "" {
-		return errors.New("AI创作失败")
-	}
+	ArticlePipelineApp.Run("hotspot", context)
 
-	aiArticle := ai.AIArticle{
-		Title:             exa.parseTitle(articleContext.Title),
-		TargetAccountName: account.AccountName,
-		TargetAccountId:   account.AppId,
-		Topic:             articleContext.Topic,
-		AuthorName:        account.DefaultAuthorName,
-		Tags:              strings.Join(articleContext.Tags, ","),
-		Content:           ArticleContentHandlerApp.Handle(account, articleContext.Content),
-	}
-	aiArticle.BASEMODEL = BaseModel()
-
-	err := AIArticleServiceApp.CreateAIArticle(aiArticle)
-
-	global.GVA_LOG.Info("AI创作完成", zap.String("appId", account.AppId), zap.String("topic", account.Topic))
-
-	return err
+	return nil
 }
 
 func (exa *AIArticleService) GenerateArticle(account *ai.OfficialAccount) error {
@@ -184,7 +164,7 @@ func (exa *AIArticleService) GenerateArticle(account *ai.OfficialAccount) error 
 	for i < targetNum {
 		context := &ArticleContext{
 			Topic:       account.Topic,
-			AppId:       account.AppId,
+			Account:     account,
 			Params:      []string{},
 			CreateTypes: account.CreateTypes,
 		}
@@ -196,30 +176,7 @@ func (exa *AIArticleService) GenerateArticle(account *ai.OfficialAccount) error 
 			return errors.New("AI创作失败")
 		}
 
-		aiArticle := ai.AIArticle{
-			BatchId:           batchId,
-			Title:             exa.parseTitle(articleContext.Title),
-			TargetAccountName: account.AccountName,
-			TargetAccountId:   account.AppId,
-			Topic:             account.Topic,
-			AuthorName:        account.DefaultAuthorName,
-			Link:              articleContext.Link,
-			Tags:              strings.Join(articleContext.Tags, ","),
-			Content:           articleContext.Content,
-			Params:            strings.Join(articleContext.Params, ","),
-		}
-		aiArticle.BASEMODEL = BaseModel()
-
-		//  处理排版
-		aiArticle.Content = ArticleContentHandlerApp.Handle(account, articleContext.Content)
-
-		err = AIArticleServiceApp.CreateAIArticle(aiArticle)
-		if err != nil {
-			global.GVA_LOG.Error("CreateAIArticle", zap.Error(err))
-			continue
-		}
-
-		global.GVA_LOG.Info("AI创作完成", zap.String("appId", account.AppId), zap.String("topic", account.Topic))
+		global.GVA_LOG.Info("AI创作完成", zap.String("accountName", account.AccountName))
 
 		i++
 	}
@@ -236,9 +193,6 @@ func (exa *AIArticleService) GenerateDailyArticle() error {
 		return err
 	}
 
-	concurrency := 3
-	semaphore := make(chan struct{}, concurrency)
-
 	for _, account := range list {
 
 		if account.AppId == "" {
@@ -246,54 +200,16 @@ func (exa *AIArticleService) GenerateDailyArticle() error {
 		}
 
 		item := account
-
 		time.Sleep(5 * time.Second)
 
-		semaphore <- struct{}{} // 占用一个并发信号量
-
-		go func() {
-			defer func() {
-				<-semaphore // 释放一个并发信号量
-			}()
-
-			err2 := exa.GenerateArticle(item)
-			if err2 != nil {
-				global.GVA_LOG.Error("GenerateArticle With err", zap.Error(err2))
-			}
-
-		}()
+		err2 := exa.GenerateArticle(item)
+		if err2 != nil {
+			global.GVA_LOG.Error("GenerateArticle With err", zap.Error(err2))
+		}
 
 	}
 
 	return nil
-}
-
-func (exa *AIArticleService) parseTitle(title string) string {
-	title = strings.ReplaceAll(title, "#", "")
-	title = strings.ReplaceAll(title, "*", "")
-	title = strings.ReplaceAll(title, "标题：", "")
-	title = strings.ReplaceAll(title, "#", "")
-	title = utils.RemoveBookTitleBrackets(title)
-	title = strings.ReplaceAll(title, "标题建议：", "")
-	return removeQuotes(title)
-}
-
-func removeQuotes(str string) string {
-	// 判断字符串是否为空或长度小于2，无法包含前后双引号
-	if len(str) < 2 {
-		return str
-	}
-
-	// 判断首尾字符是否为双引号，并进行去除
-	firstChar := rune(str[0])
-	lastChar := rune(str[len(str)-1])
-	if (firstChar == '"' || firstChar == '“' || firstChar == '”') && (lastChar == '"' || lastChar == '“' || lastChar == '”') {
-		return strings.TrimFunc(str, func(r rune) bool {
-			return unicode.Is(unicode.Quotation_Mark, r)
-		})
-	}
-
-	return str
 }
 
 func (exa *AIArticleService) Recreation(id uint64) (err error) {

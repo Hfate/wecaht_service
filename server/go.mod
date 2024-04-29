@@ -28,6 +28,7 @@ require (
 	github.com/jordan-wright/email v0.0.0-20200824153738-3f5bafa1cd84
 	github.com/mojocn/base64Captcha v1.3.5
 	github.com/otiai10/copy v1.7.0
+	github.com/panjf2000/ants v1.3.0
 	github.com/pkg/errors v0.9.1
 	github.com/qiniu/api.v7/v7 v7.4.1
 	github.com/qiniu/qmgo v1.1.8

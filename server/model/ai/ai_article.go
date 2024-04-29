@@ -29,8 +29,18 @@ type AIArticle struct {
 	MsgDataID         int64     `json:"msgDataId"`
 	MsgId             int64     `json:"msgId"`
 	Params            string    `json:"params"`
+	ProcessStatus     int       `json:"processStatus"`
+	ProcessParams     string    `json:"processParams"`
 }
 
 func (AIArticle) TableName() string {
 	return "ai_article"
 }
+
+// 定义一个名为Color的“枚举”
+const (
+	ProcessInit      = 0 // iota从0开始，每定义一个常量自动加1
+	ProcessCreateIng = 10
+	ProcessAddImgIng = 20
+	ProcessCreated   = 30
+)
