@@ -16,6 +16,7 @@ import (
 	"regexp"
 	"strings"
 	"text/template"
+	"time"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/model/ai"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
@@ -96,6 +97,8 @@ func (*ChatService) Recreation(articleContext *ArticleContext, chatModel config.
 	starTime := timeutil.GetCurTime()
 
 	aiArticle := articleContext.Article
+	aiArticle.CreatedAt = time.Now()
+	global.GVA_DB.Save(&aiArticle)
 
 	// 文章改写
 	chatGptPromptList, err := parsePrompt(articleContext, ai.ContentRecreation)

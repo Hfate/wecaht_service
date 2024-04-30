@@ -43,12 +43,19 @@
           />
         </el-form-item>
         <el-form-item label="排版文本">
-          <editor v-model="form.content"
-                  api-key="nujoppecgjjvzjg005s5fie8aqqwbsu8f28aya3no68zzi4v"
-                  :init="init"
-                  :disabled="false"
-                  @onClick="onClick">
-          </editor>
+          <Toolbar
+              style="border-bottom: 1px solid #ccc"
+              :editor="editorRef"
+              :defaultConfig="toolbarConfig"
+              :mode="simple"
+          />
+          <Editor
+              style="height: 500px; overflow-y: hidden;"
+              v-model="form.content"
+              :defaultConfig="editorConfig"
+              :mode="simple"
+              @onCreated="onCreated"
+          />
         </el-form-item>
       </el-form>
 
@@ -77,16 +84,18 @@
 }
 </style>
 
+<style src="@wangeditor/editor/dist/css/style.css"></style>
+
+
 <script setup>
-import Editor from "@tinymce/tinymce-vue";
-import {client} from '@/api/oss';
 import {getAIArticle, updateArticle} from "@/api/aiArticle";
-import md5 from 'blueimp-md5';
 import {useRoute} from 'vue-router';
-import {onMounted, ref, watch} from 'vue';
+import {onBeforeUnmount, onMounted, ref, watch} from 'vue';
 import {getOfficialAccountList} from "@/api/officialAccount";
 import {getTopicList} from "@/api/topic";
 import {ElMessage} from "element-plus";
+import {Editor, Toolbar} from '@wangeditor/editor-for-vue'
+
 
 defineOptions({
   name: 'AIArticleDetail'
@@ -108,38 +117,66 @@ const topicArr = ref([])
 const accountArr = ref([])
 const articleId = ref('');
 
+const editorRef = ref(null)
+const toolbarConfig = ref({})
+const editorConfig = ref({placeholder: '请输入内容...'})
+
+
 onMounted(() => {
   getWechatArticle();
   getTopicData();
   getAccountData();
 });
 
+onBeforeUnmount(() => {
+  const editor = editorRef.value
+  if (editor) {
+    editor.destroy() // 组件销毁时，及时销毁编辑器
+  }
+})
 
-// 初始化配置
-const init = {
-  //language_url: '/static/tinymce/langs/zh_CN.js',
-  //language: 'zh_CN',
-  //skin_url: '/static/tinymce/skins/ui/oxide',
-  height: 500,
-  width: 1200,
-  plugins: 'lists image media table wordcount preview code',
-  toolbar: 'code | undo redo | formatselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | lists image media table | removeformat preview',
-  branding: false,
-  menubar: true,
-  images_upload_handler: (blobInfo, success, failure) => {
-    const filename = blobInfo.filename();
-    const suffix = filename.substring(filename.lastIndexOf('.') + 1);
-    const nameWithMd5AndTime = `${md5(blobInfo.base64())}${getTime()}.${suffix}`;
-    client.multipartUpload(nameWithMd5AndTime, blobInfo.blob()).then((result) => {
-      if (result.res.requestUrls) {
-        console.log('返回结果', result);
-        success(result.res.requestUrls[0].split('?')[0]);
-      }
-    }).catch((err) => {
-      console.log(err);
-    });
-  },
-};
+// 方法
+const onCreated = (editor) => {
+  editorRef.value = Object.seal(editor) // 使用 Object.seal() 封装
+}
+
+
+// //
+// editorConfig.value.MENU_CONF['uploadImage'] = {
+//   server: '/api/upload',
+//   // form-data fieldName ，默认值 'wangeditor-uploaded-image'
+//   fieldName: 'your-custom-name',
+//
+//   // 单个文件的最大体积限制，默认为 2M
+//   maxFileSize: 1 * 1024 * 1024, // 1M
+//
+//   // 最多可上传几个文件，默认为 100
+//   maxNumberOfFiles: 10,
+//
+//   // 选择文件时的类型限制，默认为 ['image/*'] 。如不想限制，则设置为 []
+//   allowedFileTypes: ['image/*'],
+//
+//   // 自定义上传参数，例如传递验证的 token 等。参数会被添加到 formData 中，一起上传到服务端。
+//   meta: {
+//     token: 'xxx',
+//     otherKey: 'yyy'
+//   },
+//
+//   // 将 meta 拼接到 url 参数中，默认 false
+//   metaWithUrl: false,
+//
+//   // 自定义增加 http  header
+//   headers: {
+//     Accept: 'text/x-json',
+//     otherKey: 'xxx'
+//   },
+//
+//   // 跨域是否传递 cookie ，默认为 false
+//   withCredentials: true,
+//
+//   // 超时时间，默认为 10 秒
+//   timeout: 5 * 1000, // 5 秒
+// }
 
 
 const enterDialog = async () => {
@@ -154,18 +191,6 @@ const enterDialog = async () => {
   }
 }
 
-// 时间戳方法
-const getTime = () => {
-  const time = new Date();
-  // ... 生成时间字符串的逻辑 ...
-  return time;
-};
-
-// onClick 事件处理
-const onClick = (e) => {
-  // 触发 onClick 事件，传递当前事件和 tinymce 实例
-  // 这里可以根据需要进行事件处理
-};
 
 // 监视器，保持双向数据绑定的一致性
 watch(() => form.value.content, (newValue) => {
