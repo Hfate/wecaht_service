@@ -96,8 +96,12 @@ func (*ChatService) HotSpotWrite(context *ArticleContext, chatModel config.ChatM
 func (*ChatService) Recreation(articleContext *ArticleContext, chatModel config.ChatModel) (*ArticleContext, error) {
 	starTime := timeutil.GetCurTime()
 
+	// 重置进度
 	aiArticle := articleContext.Article
 	aiArticle.CreatedAt = time.Now()
+	aiArticle.Percent = 0
+	aiArticle.ProcessStatus = ai.ProcessCreateIng
+	aiArticle.ProcessParams = "开始执行文章改写"
 	global.GVA_DB.Save(&aiArticle)
 
 	// 文章改写
