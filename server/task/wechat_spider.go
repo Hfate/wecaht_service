@@ -39,6 +39,11 @@ func WechatSpider(db *gorm.DB) error {
 					continue
 				}
 
+				db.Model(&ai.Url{}).Where("title = ?", a.Title).Count(&count)
+				if count > 0 {
+					continue
+				}
+
 				resp, _ := utils.GetStr(a.Link)
 				var content *WechatContent
 				response := graphquery.ParseFromString(resp, GRAPH_QUERY)
