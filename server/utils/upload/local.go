@@ -3,6 +3,7 @@ package upload
 import (
 	"errors"
 	"io"
+	"mime/multipart"
 	"os"
 	"path"
 	"strings"
@@ -22,6 +23,10 @@ type Local struct{}
 //@description: 上传文件
 //@param: file *multipart.FileHeader
 //@return: string, string, error
+
+func (*Local) UploadMultipartFile(file *multipart.FileHeader) (string, string, error) {
+	return "", "", nil
+}
 
 func (*Local) UploadFile(file *os.File) (string, string, error) {
 	// 读取文件后缀

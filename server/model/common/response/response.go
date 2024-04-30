@@ -12,6 +12,18 @@ type Response struct {
 	Msg  string      `json:"msg"`
 }
 
+type FileResponse struct {
+	Errno   int      `json:"errno"`
+	Data    FileData `json:"data"`
+	Message string   `json:"message"`
+}
+
+type FileData struct {
+	Url  string `json:"url"`
+	Alt  string `json:"alt"`
+	Href string `json:"href"`
+}
+
 const (
 	ERROR   = 7
 	SUCCESS = 0
@@ -23,6 +35,23 @@ func Result(code int, data interface{}, msg string, c *gin.Context) {
 		code,
 		data,
 		msg,
+	})
+}
+
+func File(fileUrl, msg string, c *gin.Context) {
+	// 开始时间
+	c.JSON(http.StatusOK, FileResponse{
+		Errno:   SUCCESS,
+		Data:    FileData{Url: fileUrl},
+		Message: msg,
+	})
+}
+
+func FileErr(msg string, c *gin.Context) {
+	// 开始时间
+	c.JSON(http.StatusOK, FileResponse{
+		Errno:   ERROR,
+		Message: msg,
 	})
 }
 

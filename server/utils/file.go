@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"errors"
 	"github.com/spf13/cast"
+	"io"
 	"log"
+	"mime/multipart"
 	"net/http"
 	"os"
 )
@@ -46,4 +48,29 @@ func CreateTempImgFile(fileUrl string) (string, error) {
 	}
 
 	return file.Name(), nil
+}
+
+func MultiFile2File(formFile *multipart.FileHeader) (*os.File, error) {
+	// 使用 fileHeader.Open() 获取 multipart.File
+	file, err := formFile.Open()
+	if err != nil {
+		// 处理错误
+		return nil, err
+	}
+	defer file.Close() // 记得关闭文件
+
+	tempFileName := cast.ToString(GenID()) + ".jpg"
+	// 将内存中的图片数据写入临时文件
+	osFile, err := os.CreateTemp("", tempFileName) // 假设图片格式为 jpg
+	if err != nil {
+		// 处理错误
+		return nil, err
+	}
+	// 将 multipart.File 的内容复制到 os.File 中
+	_, err = io.Copy(osFile, file)
+	if err != nil {
+		// 处理错误
+		return nil, err
+	}
+	return osFile, nil
 }

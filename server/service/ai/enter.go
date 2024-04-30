@@ -13,4 +13,5 @@ type ServiceGroup struct {
 	TopicService
 	WechatService
 	DajialaService
+	FileService
 }

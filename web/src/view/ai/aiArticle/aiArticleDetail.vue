@@ -95,7 +95,8 @@ import {getOfficialAccountList} from "@/api/officialAccount";
 import {getTopicList} from "@/api/topic";
 import {ElMessage} from "element-plus";
 import {Editor, Toolbar} from '@wangeditor/editor-for-vue'
-
+const basePath = ref(import.meta.env.VITE_BASE_PATH)
+const basePort = ref(import.meta.env.VITE_SERVER_PORT)
 
 defineOptions({
   name: 'AIArticleDetail'
@@ -119,7 +120,7 @@ const articleId = ref('');
 
 const editorRef = ref(null)
 const toolbarConfig = ref({})
-const editorConfig = ref({placeholder: '请输入内容...'})
+const editorConfig = ref({placeholder: '请输入内容...', MENU_CONF: {}})
 
 
 onMounted(() => {
@@ -138,45 +139,38 @@ onBeforeUnmount(() => {
 // 方法
 const onCreated = (editor) => {
   editorRef.value = Object.seal(editor) // 使用 Object.seal() 封装
+
+  console.log(basePath)
+
 }
 
 
-// //
-// editorConfig.value.MENU_CONF['uploadImage'] = {
-//   server: '/api/upload',
-//   // form-data fieldName ，默认值 'wangeditor-uploaded-image'
-//   fieldName: 'your-custom-name',
 //
-//   // 单个文件的最大体积限制，默认为 2M
-//   maxFileSize: 1 * 1024 * 1024, // 1M
-//
-//   // 最多可上传几个文件，默认为 100
-//   maxNumberOfFiles: 10,
-//
-//   // 选择文件时的类型限制，默认为 ['image/*'] 。如不想限制，则设置为 []
-//   allowedFileTypes: ['image/*'],
-//
-//   // 自定义上传参数，例如传递验证的 token 等。参数会被添加到 formData 中，一起上传到服务端。
-//   meta: {
-//     token: 'xxx',
-//     otherKey: 'yyy'
-//   },
-//
-//   // 将 meta 拼接到 url 参数中，默认 false
-//   metaWithUrl: false,
-//
-//   // 自定义增加 http  header
-//   headers: {
-//     Accept: 'text/x-json',
-//     otherKey: 'xxx'
-//   },
-//
-//   // 跨域是否传递 cookie ，默认为 false
-//   withCredentials: true,
-//
-//   // 超时时间，默认为 10 秒
-//   timeout: 5 * 1000, // 5 秒
-// }
+editorConfig.value.MENU_CONF['uploadImage'] = {
+  server: '/api/file/upload',
+  // form-data fieldName ，默认值 'wangeditor-uploaded-image'
+  fieldName: 'file',
+
+  // 单个文件的最大体积限制，默认为 2M
+  maxFileSize: 1 * 1024 * 1024, // 1M
+
+  // 最多可上传几个文件，默认为 100
+  maxNumberOfFiles: 1,
+
+  // 选择文件时的类型限制，默认为 ['image/*'] 。如不想限制，则设置为 []
+  allowedFileTypes: ['image/*'],
+
+
+  // 将 meta 拼接到 url 参数中，默认 false
+  metaWithUrl: false,
+
+
+  // 跨域是否传递 cookie ，默认为 false
+  withCredentials: true,
+
+  // 超时时间，默认为 10 秒
+  timeout: 5 * 1000, // 5 秒
+}
 
 
 const enterDialog = async () => {

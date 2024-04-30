@@ -104,8 +104,8 @@ func Routers() *gin.Engine {
 		aiRouter.InitOfficialAccountRouter(PrivateGroup)         // 公众号管理
 		aiRouter.InitHotspotRouter(PrivateGroup)                 // 热点追踪
 		aiRouter.InitTopicRouter(PrivateGroup)                   // 主题管理
-		//aiRouter.InitFileRouter(PrivateGroup)                    //文件管理
-		wechatRouter.InitWeChatRouter(PublicGroup) // 微信公众号
+		aiRouter.InitFileRouter(PrivateGroup)                    //文件管理
+		wechatRouter.InitWeChatRouter(PublicGroup)               // 微信公众号
 	}
 
 	global.GVA_LOG.Info("router register success")

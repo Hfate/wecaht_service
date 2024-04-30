@@ -1,6 +1,7 @@
 package upload
 
 import (
+	"mime/multipart"
 	"os"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
@@ -11,6 +12,7 @@ import (
 // Author [ccfish86](https://github.com/ccfish86)
 type OSS interface {
 	UploadFile(file *os.File) (string, string, error)
+	UploadMultipartFile(file *multipart.FileHeader) (string, string, error)
 	DeleteFile(key string) error
 }
 
