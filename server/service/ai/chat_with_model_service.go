@@ -15,7 +15,7 @@ func (*ChatModelService) Recreation(context *ArticleContext) (*ArticleContext, e
 	for _, chatModel := range chatModels {
 		// 可以通过 WithModel 指定模型
 		result, err := ChatServiceApp.Recreation(context, chatModel)
-		if err == nil && len(context.Params) > 0 {
+		if err == nil && len(context.Params) > 0 && len(context.Content) > 1000 {
 			return result, nil
 		}
 	}
