@@ -559,6 +559,9 @@ github.com/shirou/gopsutil/v3/mem
 # github.com/shoenig/go-m1cpu v0.1.6
 ## explicit; go 1.20
 github.com/shoenig/go-m1cpu
+# github.com/shopspring/decimal v1.4.0
+## explicit; go 1.10
+github.com/shopspring/decimal
 # github.com/silenceper/wechat/v2 v2.1.6
 ## explicit; go 1.16
 github.com/silenceper/wechat/v2

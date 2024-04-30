@@ -10,6 +10,7 @@ import (
 	systemService "github.com/flipped-aurora/gin-vue-admin/server/service/system"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils/timeutil"
+	"github.com/spf13/cast"
 	"go.uber.org/zap"
 	"sort"
 	"time"
@@ -197,8 +198,6 @@ func (exa *AIArticleService) GenerateDailyArticle() error {
 		}
 
 		item := account
-		time.Sleep(5 * time.Second)
-
 		err2 := exa.GenerateArticle(item)
 		if err2 != nil {
 			global.GVA_LOG.Error("GenerateArticle With err", zap.Error(err2))
@@ -275,9 +274,27 @@ func (exa *AIArticleService) GetAIArticleList(sysUserAuthorityID uint, info aiRe
 	}
 
 	articleMap := make(map[string][]ai.AIArticle)
-
 	batchIdList := make([]string, 0)
+	curTime := time.Now()
+	avgTime := AvgTimeServiceApp.FindAvgTime()
 	for _, item := range articleList {
+
+		if item.ProcessStatus != ai.ProcessCreated && item.ProcessStatus != ai.ProcessInit {
+			diffTime := curTime.Sub(item.CreatedAt).Milliseconds()
+
+			percent := utils.FloatDiv(cast.ToString(diffTime), cast.ToString(avgTime))
+			percent = utils.FloatMul(percent, "100")
+			percent = utils.StringFixed2(percent)
+			percentNum := cast.ToFloat64(percent)
+			if percentNum < 0 {
+				percentNum = 0
+			}
+			if percentNum >= 100 {
+				percentNum = 99
+			}
+			item.Percent = int(percentNum)
+		}
+
 		articleMap[item.BatchId] = append(articleMap[item.BatchId], item)
 		batchIdList = append(batchIdList, item.BatchId)
 	}
@@ -288,8 +305,8 @@ func (exa *AIArticleService) GetAIArticleList(sysUserAuthorityID uint, info aiRe
 	sort.Strings(batchIdList)
 
 	result := make([]aiRes.AIArticleParentResponse, 0)
-	for _, batchId := range batchIdList {
-		subList := articleMap[batchId]
+	for _, bid := range batchIdList {
+		subList := articleMap[bid]
 
 		children := make([]ai.AIArticle, 0)
 		if len(subList) > 1 {

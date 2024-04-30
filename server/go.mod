@@ -36,6 +36,7 @@ require (
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/russross/blackfriday v1.6.0
 	github.com/shirou/gopsutil/v3 v3.23.6
+	github.com/shopspring/decimal v1.4.0
 	github.com/silenceper/wechat/v2 v2.1.6
 	github.com/songzhibin97/gkit v1.2.11
 	github.com/spf13/cast v1.6.0

@@ -178,7 +178,20 @@
             label="创作进度"
             prop="processParams"
             width="320"
-        />
+        >
+          <template #default="scope">
+            <span>{{ scope.row.processParams }}</span>
+            <Progress
+                :width="250"
+                :stroke-width="10"
+                :stroke-color="{
+                  '0%': '#108ee9',
+                  '100%': '#87d068',
+                  direction: 'right'
+              }"
+                :percent="scope.row.percent"/>
+          </template>
+        </el-table-column>
         <el-table-column
             align="left"
             label="发布状态"
@@ -366,6 +379,8 @@
 </style>
 
 <script setup>
+import Progress from './Progress.vue'
+
 import {
   deleteAIArticle,
   deleteAIArticlesByIds,
@@ -418,6 +433,7 @@ const closeDialog = () => {
     tags: '',
   }
 }
+
 
 const enterDialog = async () => {
   let res = await updateArticle(form.value)
@@ -636,7 +652,7 @@ onMounted(() => {
   };
 
   // 设置定时器，每1000毫秒（1秒）调用一次fetchData
-  stop.value = setInterval(fetchData, 1000);
+  stop.value = setInterval(fetchData, 3000);
 
   // 当组件卸载时清除定时器
   onUnmounted(() => {

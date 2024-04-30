@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/flipped-aurora/gin-vue-admin/server/config"
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
+	"github.com/flipped-aurora/gin-vue-admin/server/utils/timeutil"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils/upload"
 	"github.com/spf13/cast"
 	"go.uber.org/zap"
@@ -92,6 +93,8 @@ func (*ChatService) HotSpotWrite(context *ArticleContext, chatModel config.ChatM
 }
 
 func (*ChatService) Recreation(articleContext *ArticleContext, chatModel config.ChatModel) (*ArticleContext, error) {
+	starTime := timeutil.GetCurTime()
+
 	aiArticle := articleContext.Article
 
 	// 文章改写
@@ -174,10 +177,17 @@ func (*ChatService) Recreation(articleContext *ArticleContext, chatModel config.
 
 	aiArticle.ProcessStatus = ai.ProcessCreated
 	aiArticle.ProcessParams = "创作完成"
+	aiArticle.Percent = 100
 	// 更新进度
 	global.GVA_DB.Save(&aiArticle)
 
 	articleContext.Params = []string{chatModel.ModelType, "Recreation"}
+
+	endTime := timeutil.GetCurTime()
+
+	// 更新时长
+	AvgTimeServiceApp.UpdateAvgTime(endTime - starTime)
+
 	return articleContext, nil
 }
 

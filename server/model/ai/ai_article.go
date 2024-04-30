@@ -31,6 +31,7 @@ type AIArticle struct {
 	Params            string    `json:"params"`
 	ProcessStatus     int       `json:"processStatus"`
 	ProcessParams     string    `json:"processParams"`
+	Percent           int       `json:"percent"`
 }
 
 func (AIArticle) TableName() string {

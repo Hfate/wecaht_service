@@ -57,6 +57,7 @@
         "dotenv": "^16.3.1",
         "eslint": "^8.49.0",
         "eslint-plugin-vue": "^9.15.1",
+        "less": "^4.2.0",
         "sass": "^1.54.0",
         "terser": "^5.19.1",
         "unplugin-auto-import": "^0.16.6",

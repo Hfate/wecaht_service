@@ -1,9 +1,16 @@
 package utils
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+	"time"
+)
 
 func TestCollectArticle(t *testing.T) {
-	CollectArticle("以色列：伊朗将承受冲突升级的后果")
+	curTime := time.Now()
+	time.Sleep(2 * time.Second)
+
+	fmt.Println(curTime.Sub(time.Now()).Milliseconds())
 }
 
 func TestCollectWechatArticle(t *testing.T) {

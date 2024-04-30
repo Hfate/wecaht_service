@@ -288,7 +288,7 @@ func (exa *BenchmarkAccountService) GetBenchmarkAccountList(sysUserAuthorityID u
 	if err != nil {
 		return benchmarkAccountList, total, err
 	} else {
-		err = db.Limit(limit).Offset(offset).Order("updated_at desc").Find(&benchmarkAccountList).Error
+		err = db.Limit(limit).Offset(offset).Order("created_at desc").Find(&benchmarkAccountList).Error
 	}
 	return benchmarkAccountList, total, err
 }
