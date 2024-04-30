@@ -122,7 +122,7 @@
             align="left"
             label="阅读量"
             prop="readNum"
-            width="70"
+            width="100"
         />
         <el-table-column
             align="left"

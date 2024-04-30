@@ -95,8 +95,7 @@ import {getOfficialAccountList} from "@/api/officialAccount";
 import {getTopicList} from "@/api/topic";
 import {ElMessage} from "element-plus";
 import {Editor, Toolbar} from '@wangeditor/editor-for-vue'
-const basePath = ref(import.meta.env.VITE_BASE_PATH)
-const basePort = ref(import.meta.env.VITE_SERVER_PORT)
+
 
 defineOptions({
   name: 'AIArticleDetail'

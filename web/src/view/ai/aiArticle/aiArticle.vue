@@ -389,8 +389,6 @@ import {
   publishAIArticles,
   recreationAIArticle
 } from '@/api/aiArticle'
-// 导入 OSS 客户端和 md5 时间戳方法
-import {client} from '@/api/oss';
 
 import {onMounted, onUnmounted, ref, watch} from 'vue'
 import {ElMessage} from 'element-plus'
@@ -399,7 +397,6 @@ import {getTopicList} from "@/api/topic";
 
 
 import Editor from '@tinymce/tinymce-vue'
-import md5 from 'blueimp-md5';
 
 
 import {getOfficialAccountList,} from '@/api/officialAccount'
@@ -534,40 +531,6 @@ const deleteVisible = ref(false)
 const publishVisible = ref(false)
 
 
-// 初始化配置
-const init = {
-  //language_url: '/static/tinymce/langs/zh_CN.js',
-  //language: 'zh_CN',
-  //skin_url: '/static/tinymce/skins/ui/oxide',
-  height: 500,
-  width: 900,
-  plugins: 'lists image media table textcolor wordcount contextmenu preview code',
-  toolbar: 'code | undo redo | formatselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | lists image media table | removeformat preview',
-  branding: false,
-  menubar: true,
-  images_upload_handler: (blobInfo, success, failure) => {
-    const filename = blobInfo.filename();
-    const suffix = filename.substring(filename.lastIndexOf('.') + 1);
-    const nameWithMd5AndTime = `${md5(blobInfo.base64())}${getTime()}.${suffix}`;
-    client.multipartUpload(nameWithMd5AndTime, blobInfo.blob()).then((result) => {
-      if (result.res.requestUrls) {
-        console.log('返回结果', result);
-        success(result.res.requestUrls[0].split('?')[0]);
-      }
-    }).catch((err) => {
-      console.log(err);
-    });
-  },
-};
-
-
-// 时间戳方法
-const getTime = () => {
-  const time = new Date();
-  // ... 生成时间字符串的逻辑 ...
-  return time;
-};
-
 // onClick 事件处理
 const onClick = (e) => {
   // 触发 onClick 事件，传递当前事件和 tinymce 实例
@@ -651,7 +614,7 @@ onMounted(() => {
     getTableData();
   };
 
-  // 设置定时器，每1000毫秒（1秒）调用一次fetchData
+  // 设置定时器，每3秒调用一次fetchData
   stop.value = setInterval(fetchData, 3000);
 
   // 当组件卸载时清除定时器
