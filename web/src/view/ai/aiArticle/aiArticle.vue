@@ -182,6 +182,7 @@
           <template #default="scope">
             <span>{{ scope.row.processParams }}</span>
             <Progress
+                v-if="scope.row.percent !== 100"
                 :width="250"
                 :stroke-width="10"
                 :stroke-color="{

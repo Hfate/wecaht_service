@@ -113,13 +113,6 @@
         />
         <el-table-column
             align="left"
-            label="作者"
-            prop="authorName"
-            width="200"
-        />
-
-        <el-table-column
-            align="left"
             label="阅读量"
             prop="readNum"
             width="100"

@@ -44,4 +44,5 @@ const (
 	ProcessCreateIng = 10
 	ProcessAddImgIng = 20
 	ProcessCreated   = 30
+	ProcessFail      = 40
 )
