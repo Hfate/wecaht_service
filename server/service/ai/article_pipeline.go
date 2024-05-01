@@ -172,7 +172,7 @@ func (r *RecreationArticle) Handle(context *ArticleContext) error {
 			return
 		}
 
-		if result.Title == context.Title {
+		if result.Title == article.Title {
 			aiArticle.ProcessParams = "创作失败"
 			aiArticle.ProcessStatus = ai.ProcessFail
 			aiArticle.Percent = 100

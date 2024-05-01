@@ -279,7 +279,7 @@ func (exa *AIArticleService) GetAIArticleList(sysUserAuthorityID uint, info aiRe
 	avgTime := AvgTimeServiceApp.FindAvgTime()
 	for _, item := range articleList {
 
-		if item.ProcessStatus != ai.ProcessCreated && item.ProcessStatus != ai.ProcessInit {
+		if item.ProcessStatus != ai.ProcessCreated && item.ProcessStatus != ai.ProcessInit && item.ProcessStatus != ai.ProcessFail {
 			diffTime := curTime.Sub(item.CreatedAt).Milliseconds()
 
 			percent := utils.FloatDiv(cast.ToString(diffTime), cast.ToString(avgTime))
