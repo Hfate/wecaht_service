@@ -615,7 +615,7 @@ onMounted(() => {
   };
 
   // 设置定时器，每3秒调用一次fetchData
-  stop.value = setInterval(fetchData, 3000);
+  stop.value = setInterval(fetchData, 5000);
 
   // 当组件卸载时清除定时器
   onUnmounted(() => {
