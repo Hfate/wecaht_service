@@ -38,6 +38,12 @@
               @click="onDownload"
           >下载
           </el-button>
+          <el-button
+              type="primary"
+              icon="refresh"
+              @click="openDialog"
+          >素材余量统计
+          </el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -248,12 +254,45 @@
     </div>
 
 
+    <el-dialog
+        v-model="dialogFormVisible"
+        :before-close="closeDialog"
+        title="剩余可用素材"
+        width="300"
+    >
+      <el-table
+          ref="multipleTable"
+          :data="articleStat"
+          style="width:100%"
+      >
+        <el-table-column
+            type="selection"
+            width="55"
+            v-if="false"
+        />
+        <el-table-column
+            align="left"
+            label="主题"
+            prop="topic"
+            width="100"
+        />
+        <el-table-column
+            align="left"
+            label="剩余素材"
+            prop="count"
+            width="160"
+        />
+      </el-table>
+    </el-dialog>
+
+
   </div>
 
 </template>
 
+
 <script setup>
-import {deleteArticle, deleteArticlesByIds, getArticleList, recreationArticle} from '@/api/article'
+import {deleteArticle, deleteArticlesByIds, getArticleList, getArticleStats, recreationArticle} from '@/api/article'
 import {ref} from 'vue'
 import {ElMessage} from 'element-plus'
 import {formatDate} from '@/utils/format'
@@ -272,6 +311,7 @@ const pageSize = ref(10)
 const tableData = ref([])
 const searchInfo = ref({})
 const files = ref([])
+const articleStat = ref([])
 
 
 const onReset = () => {
@@ -314,17 +354,17 @@ const getTableData = async () => {
     page.value = table.data.page
     pageSize.value = table.data.pageSize
   }
+
+  const stats = await getArticleStats()
+  if (stats.code == 0) {
+    articleStat.value = stats.data.list
+  }
 }
 
 getTableData()
 
 const dialogFormVisible = ref(false)
-const type = ref('')
 
-// 批量操作
-const handleSelectionChange = (val) => {
-  articles.value = val
-}
 
 const deleteVisible = ref(false)
 const onDelete = async () => {
@@ -342,15 +382,10 @@ const onDelete = async () => {
     getTableData()
   }
 }
-const downloadVisible = ref(false)
 
-const downloadTemplate = async () => {
-  downloadVisible.value = false
-  const url = import.meta.env.VITE_BASE_API + '/article/template'
-  const link = document.createElement('a')
-  link.href = url;
-  link.target = '_blank'; // 在新标签页中打开
-  link.click();
+
+const closeDialog = () => {
+  dialogFormVisible.value = false
 }
 
 
@@ -403,7 +438,6 @@ const recreationWechatArticle = async (row) => {
 
 
 const uploadSuccess = (res) => {
-  dialogFormVisible.value = false
   files.value = []
   getTableData()
   const {data} = res
@@ -420,6 +454,10 @@ const uploadError = () => {
   })
 }
 
+
+const openDialog = () => {
+  dialogFormVisible.value = true
+}
 
 </script>
 

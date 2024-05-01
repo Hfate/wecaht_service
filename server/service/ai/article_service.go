@@ -183,6 +183,25 @@ func (exa *ArticleService) Recreation(id uint64) error {
 	return err
 }
 
+func (exa *ArticleService) GetArticleStats(sysUserAuthorityID uint) (list interface{}, err error) {
+	var a system.SysAuthority
+	a.AuthorityId = sysUserAuthorityID
+	_, err = systemService.AuthorityServiceApp.GetAuthorityInfo(a)
+	if err != nil {
+		return
+	}
+
+	result := make([]*ai.ArticleStats, 0)
+	err = global.GVA_DB.Raw(" select `topic`, count(*) as count " +
+		" from wechat_article " +
+		" where use_times = 0" +
+		" and deleted_at is null" +
+		" and topic != ''" +
+		" group by topic").Scan(&result).Error
+
+	return result, err
+}
+
 // @author: [piexlmax](https://github.com/piexlmax)
 // @function: GetArticleList
 // @description: 分页获取文章列表

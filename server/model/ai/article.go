@@ -50,3 +50,8 @@ type ArticleExclUpload struct {
 	PortalName  string `json:"portalName" xlsx:"PortalName"`
 	PublishTime string `json:"publishTime" xlsx:"PublishTime"`
 }
+
+type ArticleStats struct {
+	Topic string `json:"topic"`
+	Count int64  `json:"count"`
+}

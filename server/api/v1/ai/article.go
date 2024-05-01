@@ -234,3 +234,24 @@ func (e *ArticleApi) Download(c *gin.Context) {
 	pageInfo.PageSize = 200
 	articleService.Download(c, utils.GetUserAuthorityId(c), pageInfo)
 }
+
+// GetArticleStats
+// @Tags      Article
+// @Summary   分页素材余量统计
+// @Security  ApiKeyAuth
+// @accept    application/json
+// @Produce   application/json
+// @Param     data  query     request.PageInfo                                        true  "页码, 每页大小"
+// @Success   200   {object}  response.Response{data=response.PageResult,msg=string}  "分页获取权限文章列表,返回包括列表,总数,页码,每页数量"
+// @Router    /article/stats [get]
+func (e *ArticleApi) GetArticleStats(c *gin.Context) {
+	articleList, err := articleService.GetArticleStats(utils.GetUserAuthorityId(c))
+	if err != nil {
+		global.GVA_LOG.Error("获取失败!", zap.Error(err))
+		response.FailWithMessage("获取失败"+err.Error(), c)
+		return
+	}
+	response.OkWithDetailed(response.PageResult{
+		List: articleList,
+	}, "获取成功", c)
+}
