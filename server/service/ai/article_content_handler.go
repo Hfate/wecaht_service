@@ -8,7 +8,6 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"go.uber.org/zap"
 	"strings"
-	"unicode"
 )
 
 var OfficialAccountCard = "<section class='mp_profile_iframe_wrp'>" +
@@ -19,15 +18,9 @@ var OfficialAccountCard = "<section class='mp_profile_iframe_wrp'>" +
 	"data-signature='%s' " +
 	"data-from='0' data-is_biz_ban='0'></mp-common-profile></section>"
 
-var followA = "<section style='margin-bottom: 0px;outline: 0px;font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei UI', 'Microsoft YaHei', Arial, sans-serif;background-color: rgb(255, 255, 255);letter-spacing: 0.578px;text-align: center;'><span style='outline: 0px;font-size: 14px;font-family: 'Helvetica Neue', Helvetica, 'Hiragino Sans GB', 'Microsoft YaHei', Arial, sans-serif;'>" +
-	"关注不迷路 随时找得到</span>" +
-	"</section>"
-var followB = "<section style='margin-bottom: 0px;outline: 0px;font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei UI', 'Microsoft YaHei', Arial, sans-serif;background-color: rgb(255, 255, 255);letter-spacing: 0.578px;text-align: center;'><span style='outline: 0px;font-size: 14px;font-family: 'Helvetica Neue', Helvetica, 'Hiragino Sans GB', 'Microsoft YaHei', Arial, sans-serif;'>" +
-	"点赞、关注、转发</span>" +
-	"</section>"
-var followC = "<section style='margin-bottom: 0px;outline: 0px;font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei UI', 'Microsoft YaHei', Arial, sans-serif;background-color: rgb(255, 255, 255);letter-spacing: 0.578px;text-align: center;'><span style='outline: 0px;font-size: 14px;font-family: 'Helvetica Neue', Helvetica, 'Hiragino Sans GB', 'Microsoft YaHei', Arial, sans-serif;'>" +
-	"↓↓↓↓↓↓</span>" +
-	"</section>"
+var followA = "<p style='outline: 0px;text-align: center;margin-bottom: 0px;'><span style='outline: 0px;font-size: 14px;'>关注不迷路 随时找得到</span></p>"
+var followB = "<p style='outline: 0px;text-align: center;margin-bottom: 0px;'><span style='outline: 0px;font-size: 14px;'>点赞、关注、转发</span></p>"
+var followC = "<p style='outline: 0px;text-align: center;margin-bottom: 0px;'><span style='outline: 0px;font-size: 14px;'>↓↓↓↓↓↓</span></p>"
 
 type ArticleContentHandler struct {
 }
@@ -41,25 +34,7 @@ func (ac *ArticleContentHandler) HandleTitle(title string) string {
 	title = strings.ReplaceAll(title, "#", "")
 	title = utils.RemoveBookTitleBrackets(title)
 	title = strings.ReplaceAll(title, "标题建议：", "")
-	return removeQuotes(title)
-}
-
-func removeQuotes(str string) string {
-	// 判断字符串是否为空或长度小于2，无法包含前后双引号
-	if len(str) < 2 {
-		return str
-	}
-
-	// 判断首尾字符是否为双引号，并进行去除
-	firstChar := rune(str[0])
-	lastChar := rune(str[len(str)-1])
-	if (firstChar == '"' || firstChar == '“' || firstChar == '”') && (lastChar == '"' || lastChar == '“' || lastChar == '”') {
-		return strings.TrimFunc(str, func(r rune) bool {
-			return unicode.Is(unicode.Quotation_Mark, r)
-		})
-	}
-
-	return str
+	return utils.RemoveQuotes(title)
 }
 
 func (ac *ArticleContentHandler) Handle(account *ai.OfficialAccount, content string) string {
@@ -116,7 +91,7 @@ func (ac *ArticleContentHandler) addRecommendedReading(account *ai.OfficialAccou
 	mdContent += "---\n"
 	mdContent += "#### 推荐阅读\n"
 	for _, item := range articleList {
-		mdContent += "-[" + item.Title + "](" + item.Link + ")\n"
+		mdContent += "[" + item.Title + "](" + item.Link + ")\n"
 	}
 
 	return mdContent

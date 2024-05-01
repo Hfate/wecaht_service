@@ -4,6 +4,7 @@ import (
 	"github.com/russross/blackfriday"
 	"strings"
 	"unicode"
+	"unicode/utf8"
 )
 
 var CSSStyleMap = map[string]string{}
@@ -31,6 +32,27 @@ func RemoveChinese(s string) string {
 		}
 	}
 	return result
+}
+
+func RemoveQuotes(str string) string {
+	// 检查字符串长度是否足够
+	if len(str) < 2 {
+		return str
+	}
+
+	// 读取第一个和最后一个字符
+	firstRune, firstSize := utf8.DecodeRuneInString(str)
+	lastRune, _ := utf8.DecodeLastRuneInString(str)
+
+	// 检查首尾字符是否为双引号
+	if (firstRune == '"' || firstRune == '“' || firstRune == '”') && (lastRune == '"' || lastRune == '“' || lastRune == '”') {
+		// 去除首尾的双引号
+		return strings.TrimFunc(str[firstSize:len(str)-utf8.RuneLen(lastRune)], func(r rune) bool {
+			return r == '"' || r == '“' || r == '”'
+		})
+	}
+
+	return str
 }
 
 func RenderMarkdownContent(markdown string) (string, error) {

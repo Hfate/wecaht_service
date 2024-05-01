@@ -185,6 +185,7 @@ func (*ChatService) Recreation(articleContext *ArticleContext, chatModel config.
 	aiArticle.ProcessStatus = ai.ProcessCreated
 	aiArticle.ProcessParams = "创作完成"
 	aiArticle.Percent = 100
+	aiArticle.Params = chatModel.ModelType + "," + "Recreation"
 	// 更新进度
 	global.GVA_DB.Save(&aiArticle)
 

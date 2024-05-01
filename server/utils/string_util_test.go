@@ -24,3 +24,7 @@ func TestHtmlAddStyle(t *testing.T) {
 	fmt.Println(HtmlAddStyle(html))
 
 }
+
+func TestRemoveQuotes(t *testing.T) {
+	fmt.Println(RemoveQuotes("“当爱已成往事：揭秘出轨男人的真心话”"))
+}
