@@ -39,7 +39,7 @@ func WechatSpider(db *gorm.DB) error {
 					continue
 				}
 
-				db.Model(&ai.Url{}).Where("title = ?", a.Title).Count(&count)
+				db.Model(&ai.Article{}).Where("title = ?", a.Title).Count(&count)
 				if count > 0 {
 					continue
 				}
