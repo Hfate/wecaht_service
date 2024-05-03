@@ -90,7 +90,12 @@ func (ac *ArticleContentHandler) addRecommendedReading(account *ai.OfficialAccou
 
 	mdContent += "---\n"
 	mdContent += "#### 推荐阅读\n"
+	titleSet := make(map[string]bool)
 	for _, item := range articleList {
+		if titleSet[item.Title] {
+			continue
+		}
+		titleSet[item.Title] = true
 		mdContent += "-[" + item.Title + "](" + item.Link + ")\n"
 	}
 
