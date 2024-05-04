@@ -42,6 +42,9 @@ func (ac *ArticleContentHandler) Handle(account *ai.OfficialAccount, content str
 	// 移除特殊字符
 	content = ac.removeSpecialWord(content)
 
+	// 移除文首文末废话
+	content = ac.removeNonsense(content)
+
 	// 添加推荐阅读
 	content = ac.addRecommendedReading(account, content)
 
@@ -55,6 +58,19 @@ func (ac *ArticleContentHandler) Handle(account *ai.OfficialAccount, content str
 
 }
 
+func (ac *ArticleContentHandler) removeNonsense(content string) string {
+	contentArr := strings.Split(content, "---")
+	maxLength := 0
+	result := ""
+	for _, item := range contentArr {
+		if len(item) > maxLength {
+			result = item
+			maxLength = len(item)
+		}
+	}
+	return result
+}
+
 func (ac *ArticleContentHandler) removeSpecialWord(content string) string {
 	// 以换行符为分隔符，将文章内容拆分成多行
 	lines := strings.Split(content, "\n")
@@ -63,6 +79,8 @@ func (ac *ArticleContentHandler) removeSpecialWord(content string) string {
 	var contentLines []string
 	for _, line := range lines {
 		if !strings.Contains(line, "标题：") &&
+			!strings.Contains(line, "Prompt") &&
+			!strings.Contains(line, "原文素材") &&
 			!strings.Contains(line, "占位符") &&
 			!strings.Contains(line, "配图") &&
 			!strings.Contains(line, "小标题") {
