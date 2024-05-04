@@ -210,6 +210,12 @@
         />
         <el-table-column
             align="left"
+            label="相似度"
+            prop="similarity"
+            width="80"
+        />
+        <el-table-column
+            align="left"
             label="操作"
             min-width="160"
         >

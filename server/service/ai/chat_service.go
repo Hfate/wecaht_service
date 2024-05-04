@@ -27,7 +27,7 @@ type ChatService struct {
 
 var ChatServiceApp = new(ChatService)
 
-func (*ChatService) GetKeyWord(title string, chatModel config.ChatModel) string {
+func (cs *ChatService) GetKeyWord(title string, chatModel config.ChatModel) string {
 	chatGptPrompt := "你现在是一名爆文写手，特别擅长从文章标题中找到关键词。我将给一个文章标题，需要你帮忙提取标题中的一个关键词用以做图片搜索。如果找不到关键词，可以返回该标题的主题，例如：历史，职场，明星等等" +
 		"\n举例   " +
 		"\n文章标题：中瑙友谊再升华，开启双边合作新篇章。  关键词：友谊再升华" +
@@ -44,7 +44,7 @@ func (*ChatService) GetKeyWord(title string, chatModel config.ChatModel) string 
 	return resp
 }
 
-func (*ChatService) HotSpotWrite(context *ArticleContext, chatModel config.ChatModel) (*ArticleContext, error) {
+func (cs *ChatService) HotSpotWrite(context *ArticleContext, chatModel config.ChatModel) (*ArticleContext, error) {
 
 	chatGptPromptList, err := parsePrompt(context, ai.ContentRecreation)
 	if err != nil {
@@ -93,7 +93,7 @@ func (*ChatService) HotSpotWrite(context *ArticleContext, chatModel config.ChatM
 	return context, nil
 }
 
-func (*ChatService) Recreation(articleContext *ArticleContext, chatModel config.ChatModel) (*ArticleContext, error) {
+func (cs *ChatService) Recreation(articleContext *ArticleContext, chatModel config.ChatModel) (*ArticleContext, error) {
 	starTime := timeutil.GetCurTime()
 
 	// 重置进度
@@ -186,8 +186,11 @@ func (*ChatService) Recreation(articleContext *ArticleContext, chatModel config.
 	aiArticle.ProcessParams = "创作完成"
 	aiArticle.Percent = 100
 	aiArticle.Params = chatModel.ModelType + "," + "Recreation"
+	aiArticle.Content = articleContext.Content
 	// 更新进度
 	global.GVA_DB.Save(&aiArticle)
+
+	go cs.GetSimilarity(aiArticle)
 
 	articleContext.Params = []string{chatModel.ModelType, "Recreation"}
 
@@ -197,6 +200,27 @@ func (*ChatService) Recreation(articleContext *ArticleContext, chatModel config.
 	AvgTimeServiceApp.UpdateAvgTime(endTime - starTime)
 
 	return articleContext, nil
+}
+
+func (cs *ChatService) GetSimilarity(aiArticle *ai.AIArticle) {
+	req := &SimilarityReq{
+		Text:    aiArticle.OriginContent,
+		Compare: []string{aiArticle.Content},
+	}
+
+	resp, err := SiTongServiceApp.Similarity(req)
+	if err != nil {
+		global.GVA_LOG.Error("GetSimilarity", zap.Error(err))
+		return
+	}
+
+	if resp != nil && len(resp.Results) > 0 {
+		// 更新相似度
+		similarity := resp.Results[0].Similarity
+		aiArticle.Similarity = similarity
+		global.GVA_DB.Save(&aiArticle)
+	}
+
 }
 
 var BaiduAddImageApp = new(BaiduAddImage)
@@ -314,7 +338,7 @@ var ChatSystemMessage = &ChatMessage{
 	Content: "你是一个人工智能助手，你更擅长中文的对话。你会为用户提供安全，有帮助，准确的回答.",
 }
 
-func (*ChatService) ChatWithModel(message string, history []*ChatMessage, chatModel config.ChatModel) (string, []*ChatMessage, error) {
+func (cs *ChatService) ChatWithModel(message string, history []*ChatMessage, chatModel config.ChatModel) (string, []*ChatMessage, error) {
 	apiUrl := chatModel.ApiUrl
 	model := chatModel.Model
 	refreshToken := chatModel.RefreshToken

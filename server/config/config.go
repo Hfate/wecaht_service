@@ -4,11 +4,11 @@ type Server struct {
 	JWT        JWT         `mapstructure:"jwt" json:"jwt" yaml:"jwt"`
 	Zap        Zap         `mapstructure:"zap" json:"zap" yaml:"zap"`
 	Redis      Redis       `mapstructure:"redis" json:"redis" yaml:"redis"`
-	QianFan    QianFan     `mapstructure:"qianfan" json:"qianfan" yaml:"qianfan"`
+	Sitong     Sitong      `mapstructure:"sitong" json:"sitong" yaml:"sitong"`
 	Kimi       Kimi        `mapstructure:"kimi" json:"kimi" yaml:"kimi"`
 	Dajiala    Dajiala     `mapstructure:"dajiala" json:"dajiala" yaml:"dajiala"`
-	Qianwen    Qianwen     `mapstructure:"qianwen" json:"qianwen" yaml:"qianwen"`
 	ChatModels []ChatModel `mapstructure:"chat-models" json:"chat-models" yaml:"chat-models"`
+	QianFan    QianFan     `mapstructure:"qianfan" json:"qianfan" yaml:"qianfan"`
 	Mongo      Mongo       `mapstructure:"mongo" json:"mongo" yaml:"mongo"`
 	Email      Email       `mapstructure:"email" json:"email" yaml:"email"`
 	System     System      `mapstructure:"system" json:"system" yaml:"system"`
