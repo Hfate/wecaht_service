@@ -161,26 +161,26 @@ func (*ChatService) Recreation(articleContext *ArticleContext, chatModel config.
 	global.GVA_DB.Save(&aiArticle)
 
 	// 文章配图
-	chatGptPromptList, err = parsePrompt(articleContext, ai.AddImage)
-	if err != nil {
-		return nil, err
-	}
-
-	for index, chatGptPrompt := range chatGptPromptList {
-		aiArticle.ProcessParams = "【" + chatModel.ModelType + "】文章配图:正在执行第" + cast.ToString(index+1) + "条prompt"
-		global.GVA_DB.Save(&aiArticle)
-		resp, chatMessageHistory, err = ChatServiceApp.ChatWithModel(chatGptPrompt, chatMessageHistory, chatModel)
-		if err != nil {
-			return nil, err
-		}
-
-		articleContext.Content = resp
-	}
-
-	err = BaiduAddImageApp.Handle(articleContext)
-	if err != nil {
-		return nil, err
-	}
+	//chatGptPromptList, err = parsePrompt(articleContext, ai.AddImage)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//
+	//for index, chatGptPrompt := range chatGptPromptList {
+	//	aiArticle.ProcessParams = "【" + chatModel.ModelType + "】文章配图:正在执行第" + cast.ToString(index+1) + "条prompt"
+	//	global.GVA_DB.Save(&aiArticle)
+	//	resp, chatMessageHistory, err = ChatServiceApp.ChatWithModel(chatGptPrompt, chatMessageHistory, chatModel)
+	//	if err != nil {
+	//		return nil, err
+	//	}
+	//
+	//	articleContext.Content = resp
+	//}
+	//
+	//err = BaiduAddImageApp.Handle(articleContext)
+	//if err != nil {
+	//	return nil, err
+	//}
 
 	aiArticle.ProcessStatus = ai.ProcessCreated
 	aiArticle.ProcessParams = "创作完成"

@@ -21,6 +21,7 @@ type AIArticle struct {
 	ReadNum           int       `json:"readNum"`
 	CommentNum        int       `json:"commentNum"`
 	Content           string    `json:"content"`
+	OriginContent     string    `json:"originContent"`
 	Tags              string    `json:"tags"`
 	ArticleStatus     int       `json:"articleStatus"` // 0  刚生成  1 发送至草稿箱  2 发布成功 3 群发成功  4 发布失败
 	ErrMessage        string    `json:"errMessage"`

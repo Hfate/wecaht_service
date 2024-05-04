@@ -146,6 +146,7 @@ func (r *RecreationArticle) Handle(context *ArticleContext) error {
 		AuthorName:        context.Account.DefaultAuthorName,
 		Link:              article.Link,
 		Content:           article.Content,
+		OriginContent:     article.Content,
 		PublishTime:       time.Now(),
 		ProcessParams:     "任务新创建，正在等待执行..",
 	}
