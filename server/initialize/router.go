@@ -105,6 +105,7 @@ func Routers() *gin.Engine {
 		aiRouter.InitHotspotRouter(PrivateGroup)                 // 热点追踪
 		aiRouter.InitTopicRouter(PrivateGroup)                   // 主题管理
 		aiRouter.InitFileRouter(PrivateGroup)                    //文件管理
+		aiRouter.InitTemplateRouter(PrivateGroup)                //模板管理
 		wechatRouter.InitWeChatRouter(PublicGroup)               // 微信公众号
 	}
 

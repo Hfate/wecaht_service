@@ -88,7 +88,7 @@ func (exa *AIArticleService) Publish1Article(aiArticleList []ai.AIArticle) (err 
 	if len(aiArticleList) == 0 {
 		return err
 	}
-	officialAccount, err := OfficialAccountServiceApp.GetOfficialAccountByAppId(aiArticleList[0].TargetAccountId)
+	officialAccount, err := OfficialAccountServiceApp.FindByAppId(aiArticleList[0].TargetAccountId)
 	if err != nil {
 		return err
 	}
@@ -215,7 +215,7 @@ func (exa *AIArticleService) Recreation(id uint64) (err error) {
 		return err
 	}
 
-	officeAccount, err := OfficialAccountServiceApp.GetOfficialAccountByAppId(aiArticle.TargetAccountId)
+	officeAccount, err := OfficialAccountServiceApp.FindByAppId(aiArticle.TargetAccountId)
 	if err != nil {
 		return err
 	}

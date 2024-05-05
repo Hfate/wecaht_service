@@ -113,8 +113,9 @@ func (cs *ChatService) Recreation(articleContext *ArticleContext, chatModel conf
 	chatMessageHistory := []*ChatMessage{ChatSystemMessage}
 	resp := ""
 
+	size := cast.ToString(len(chatGptPromptList))
 	for index, chatGptPrompt := range chatGptPromptList {
-		aiArticle.ProcessParams = "【" + chatModel.ModelType + "】文章改写:正在执行第" + cast.ToString(index+1) + "条prompt"
+		aiArticle.ProcessParams = "【" + chatModel.ModelType + "】文章改写:prompt执行进度[" + cast.ToString(index+1) + "/" + size + "]"
 		global.GVA_DB.Save(&aiArticle)
 		resp, chatMessageHistory, err = ChatServiceApp.ChatWithModel(chatGptPrompt, chatMessageHistory, chatModel)
 		if err != nil {
@@ -146,8 +147,8 @@ func (cs *ChatService) Recreation(articleContext *ArticleContext, chatModel conf
 		return nil, err
 	}
 
-	for index, chatGptPrompt := range chatGptPromptList {
-		aiArticle.ProcessParams = "【" + chatModel.ModelType + "】标题创建:正在执行第" + cast.ToString(index+1) + "条prompt"
+	for _, chatGptPrompt := range chatGptPromptList {
+		aiArticle.ProcessParams = "【" + chatModel.ModelType + "】标题创建prompt执行ing"
 		global.GVA_DB.Save(&aiArticle)
 		resp, chatMessageHistory, err = ChatServiceApp.ChatWithModel(chatGptPrompt, chatMessageHistory, chatModel)
 		if err != nil {

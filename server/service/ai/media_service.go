@@ -23,7 +23,7 @@ var MediaServiceApp = new(MediaService)
 //@return: err error
 //
 //func (exa *MediaService) CreateMedia(targetAccountId string, header *multipart.FileHeader) (err error) {
-//	officialAccount, err := OfficialAccountServiceApp.GetOfficialAccountByAppId(targetAccountId)
+//	officialAccount, err := OfficialAccountServiceApp.FindByAppId(targetAccountId)
 //	if err != nil {
 //		return err
 //	}
@@ -60,7 +60,7 @@ var MediaServiceApp = new(MediaService)
 //}
 
 func (exa *MediaService) ImageUpload(targetAccountId string, fileUrl string) (url string, err error) {
-	officialAccount, err := OfficialAccountServiceApp.GetOfficialAccountByAppId(targetAccountId)
+	officialAccount, err := OfficialAccountServiceApp.FindByAppId(targetAccountId)
 	if err != nil {
 		return "", err
 	}
@@ -84,7 +84,7 @@ func (exa *MediaService) CreateMediaByPath(targetAccountId string, filePath stri
 		return "", "", errors.New("搜索不到图片，使用默认图片")
 	}
 
-	officialAccount, err := OfficialAccountServiceApp.GetOfficialAccountByAppId(targetAccountId)
+	officialAccount, err := OfficialAccountServiceApp.FindByAppId(targetAccountId)
 	if err != nil {
 		return "", "", err
 	}

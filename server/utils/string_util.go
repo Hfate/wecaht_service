@@ -2,6 +2,7 @@ package utils
 
 import (
 	"github.com/russross/blackfriday"
+	"regexp"
 	"strings"
 	"unicode"
 	"unicode/utf8"
@@ -16,7 +17,7 @@ func init() {
 	CSSStyleMap["<h2>"] = "<h2 style=\"letter-spacing: normal;text-wrap: wrap;text-align: center;line-height: 1.75;font-family: -apple-system-font, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei UI', 'Microsoft YaHei', Arial, sans-serif;font-size: 1.2em;font-weight: bold;display: table;margin: 4em auto 2em;padding-right: 0.2em;padding-left: 0.2em;background: rgb(15, 76, 129);color: rgb(255, 255, 255);\">"
 	CSSStyleMap["<h2>"] = "<h2 style=\"letter-spacing: normal;text-wrap: wrap;text-align: center;line-height: 1.75;font-family: -apple-system-font, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei UI', 'Microsoft YaHei', Arial, sans-serif;font-size: 1.2em;font-weight: bold;display: table;margin: 4em auto 2em;padding-right: 0.2em;padding-left: 0.2em;background: rgb(15, 76, 129);color: rgb(255, 255, 255);\">"
 	CSSStyleMap["<h3>"] = "<h3 style=\"letter-spacing: normal;text-wrap: wrap;text-align: left;line-height: 1.2;font-family: -apple-system-font, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei UI', 'Microsoft YaHei', Arial, sans-serif;font-size: 1.1em;font-weight: bold;margin-top: 2em;margin-right: 8px;margin-bottom: 0.75em;padding-left: 8px;border-left: 3px solid rgb(15, 76, 129);color: rgb(63, 63, 63);\">"
-	CSSStyleMap["<h4"] = "<h4 style=\"font-size: 1em;letter-spacing: normal;text-wrap: wrap;text-align: left;line-height: 1.75;font-family: -apple-system-font, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei UI', 'Microsoft YaHei', Arial, sans-serif;font-weight: bold;margin: 2em 8px 0.5em;color: rgb(15, 76, 129);\">"
+	CSSStyleMap["<h4>"] = "<h4 style=\"font-size: 1em;letter-spacing: normal;text-wrap: wrap;text-align: left;line-height: 1.75;font-family: -apple-system-font, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei UI', 'Microsoft YaHei', Arial, sans-serif;font-weight: bold;margin: 2em 8px 0.5em;color: rgb(15, 76, 129);\">"
 	CSSStyleMap["<p>"] = "<p style=\"line-height: 1.75;font-family: -apple-system-font, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei UI', 'Microsoft YaHei', Arial, sans-serif;font-size: 1em;letter-spacing: 0.1em;color: rgb(80, 80, 80);\">"
 	CSSStyleMap["<strong>"] = "<strong style=\"line-height: 1.75;color: rgb(15, 76, 129);\">"
 	CSSStyleMap["<ul>"] = "<ul style=\"font-size: 14px;letter-spacing: normal;text-wrap: wrap;text-align: left;line-height: 1.75;font-family: -apple-system-font, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei UI', 'Microsoft YaHei', Arial, sans-serif;padding-left: 1em;list-style: circle;color: rgb(63, 63, 63);\" class=\"list-paddingleft-1\">"
@@ -105,4 +106,24 @@ func RemoveRepByMap(slc []string) []string {
 		}
 	}
 	return result
+}
+
+// RemoveSections 函数接受一个包含文章的字符串，并移除其中的特定段落。
+func RemoveSections(text string) string {
+	// 定义要移除的段落标记
+	markers := []string{
+		"开头（\\d+字)",
+		"发展 (\\d+字)",
+		"顶峰 (\\d+字)",
+		// 可以继续添加更多的标记
+	}
+
+	// 构建用于匹配包含特定标记的行的正则表达式
+	markerPattern := regexp.QuoteMeta(strings.Join(markers, "|"))
+	regex := regexp.MustCompile("(?m)^(" + markerPattern + ")(\\s+.*)?$")
+
+	// 使用正则表达式替换掉包含特定标记的行
+	cleanedText := regex.ReplaceAllString(text, "")
+
+	return cleanedText
 }

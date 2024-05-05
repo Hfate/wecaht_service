@@ -12,6 +12,6 @@ type ServiceGroup struct {
 	PromptService
 	TopicService
 	WechatService
-	DajialaService
 	FileService
+	TemplateService
 }

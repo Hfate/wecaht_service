@@ -2,11 +2,8 @@ package ai
 
 import (
 	"fmt"
-	"github.com/PuerkitoBio/goquery"
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/ai"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
-	"go.uber.org/zap"
 	"strings"
 )
 
@@ -17,10 +14,6 @@ var OfficialAccountCard = "<section class='mp_profile_iframe_wrp'>" +
 	"data-nickname='%s' data-alias='' " +
 	"data-signature='%s' " +
 	"data-from='0' data-is_biz_ban='0'></mp-common-profile></section>"
-
-var followA = "<p style='outline: 0px;text-align: center;margin-bottom: 0px;'><span style='outline: 0px;font-size: 14px;'>关注不迷路 随时找得到</span></p>"
-var followB = "<p style='outline: 0px;text-align: center;margin-bottom: 0px;'><span style='outline: 0px;font-size: 14px;'>点赞、关注、转发</span></p>"
-var followC = "<p style='outline: 0px;text-align: center;margin-bottom: 0px;'><span style='outline: 0px;font-size: 14px;'>↓↓↓↓↓↓</span></p>"
 
 type ArticleContentHandler struct {
 }
@@ -45,17 +38,33 @@ func (ac *ArticleContentHandler) Handle(account *ai.OfficialAccount, content str
 	// 移除文首文末废话
 	content = ac.removeNonsense(content)
 
+	//使用模板
+	content = ac.useTemplate(account.AppId, content)
+
 	// 添加推荐阅读
 	content = ac.addRecommendedReading(account, content)
 
-	// 富文本
-	content = ac.handleRichContent(content, account.CssFormat)
-
 	// 添加公众号排版内容
-	content = ac.handleWechatSetType(account, content)
+	content = ac.addCard(account, content)
+
+	// 富文本
+	content = ac.addCss(content, account.CssFormat)
 
 	return content
 
+}
+
+func (ac *ArticleContentHandler) useTemplate(appId, mdContent string) string {
+	template := TemplateServiceApp.FindByAccountId(appId)
+
+	htmlContent := template.TemplateValue
+	htmlContent = strings.ReplaceAll(htmlContent, "<p style=\"text-align: left;\">{{.Content}}</p>", "{{.Content}}")
+
+	md2Html, _ := utils.RenderMarkdownContent(mdContent)
+
+	htmlContent = strings.ReplaceAll(htmlContent, "{{.Content}}", md2Html)
+
+	return htmlContent
 }
 
 func (ac *ArticleContentHandler) removeNonsense(content string) string {
@@ -71,6 +80,8 @@ func (ac *ArticleContentHandler) removeNonsense(content string) string {
 	return result
 }
 
+var removeWords = []string{"标题：", "原创性", "二创", "Prompt", "占位符", "原文素材", "配图", "小标题", "正文"}
+
 func (ac *ArticleContentHandler) removeSpecialWord(content string) string {
 	// 以换行符为分隔符，将文章内容拆分成多行
 	lines := strings.Split(content, "\n")
@@ -78,14 +89,19 @@ func (ac *ArticleContentHandler) removeSpecialWord(content string) string {
 	// 排除标题行
 	var contentLines []string
 	for _, line := range lines {
-		if !strings.Contains(line, "标题：") &&
-			!strings.Contains(line, "Prompt") &&
-			!strings.Contains(line, "原文素材") &&
-			!strings.Contains(line, "占位符") &&
-			!strings.Contains(line, "配图") &&
-			!strings.Contains(line, "小标题") {
-			contentLines = append(contentLines, line)
+		isContinue := false
+		for _, item := range removeWords {
+			if strings.Contains(line, item) {
+				isContinue = true
+				break
+			}
 		}
+
+		if isContinue {
+			continue
+		}
+
+		contentLines = append(contentLines, line)
 	}
 
 	// 将剩余的行重新连接成一篇文章
@@ -98,65 +114,59 @@ func (ac *ArticleContentHandler) removeSpecialWord(content string) string {
 	return markdownContent
 }
 
-func (ac *ArticleContentHandler) addRecommendedReading(account *ai.OfficialAccount, mdContent string) string {
+func (ac *ArticleContentHandler) addRecommendedReading(account *ai.OfficialAccount, htmlContent string) string {
+	if !strings.Contains(htmlContent, "{{.RecommendList}}") {
+		return htmlContent
+	}
+
+	htmlContent = strings.ReplaceAll(htmlContent, "<p style=\"text-align: left;\">{{.RecommendList}}</p>", "{{.RecommendList}}")
+
 	// 获取历史已发布消息5条图文消息
 	articleList := ArticleServiceApp.FindLimit5ByPortalName(account.AccountName)
 
 	if len(articleList) == 0 {
-		return mdContent
+		htmlContent = strings.ReplaceAll(htmlContent, "{{.RecommendList}}", "")
+		return htmlContent
 	}
 
-	mdContent += "---\n"
-	mdContent += "#### 推荐阅读\n"
 	titleSet := make(map[string]bool)
+	recommendList := "<p>"
+
 	for _, item := range articleList {
 		if titleSet[item.Title] {
 			continue
 		}
 		titleSet[item.Title] = true
-		mdContent += "-[" + item.Title + "](" + item.Link + ")\n"
+		recommendList += "<a href='" + item.Link + "'>" + item.Title + "</a><br>"
 	}
+	recommendList += "</p>"
 
-	return mdContent
+	htmlContent = strings.ReplaceAll(htmlContent, "{{.RecommendList}}", recommendList)
+
+	return htmlContent
 }
 
-func (ac *ArticleContentHandler) handleWechatSetType(account *ai.OfficialAccount, htmlContent string) string {
-	dom, err := goquery.NewDocumentFromReader(strings.NewReader(htmlContent))
-	if err != nil {
-		global.GVA_LOG.Error("handleWechatSetType", zap.Error(err))
+func (ac *ArticleContentHandler) addCard(account *ai.OfficialAccount, htmlContent string) string {
+	if !strings.Contains(htmlContent, "{{.Card}}") {
 		return htmlContent
 	}
 
-	// 往body中添加一个公众号名片
+	htmlContent = strings.ReplaceAll(htmlContent, "<p style=\"text-align: left;\">{{.Card}}</p>", "{{.Card}}")
+
 	accountCard := fmt.Sprintf(OfficialAccountCard, account.AccountId,
 		account.HeadImgUrl, account.AccountName, account.Signature)
 
-	body := dom.Find("body")
-	body.AppendHtml(followA)
-	body.AppendHtml(followB)
-	body.AppendHtml(followC)
-	body.AppendHtml(accountCard)
+	htmlContent = strings.ReplaceAll(htmlContent, "{{.Card}}", accountCard)
 
-	// 输出整个修改后的HTML文档
-	modifiedHtml, err := dom.Html()
-
-	return modifiedHtml
+	return htmlContent
 }
 
-func (ac *ArticleContentHandler) handleRichContent(content string, cssFormat string) string {
-	// 转成html
-	htmlContent, err := utils.RenderMarkdownContent(content)
-	if err != nil {
-		global.GVA_LOG.Error("handleRichContent", zap.Error(err))
-		return content
-	}
-
+func (ac *ArticleContentHandler) addCss(htmlContent string, cssFormat string) string {
 	// 添加css
 	if cssFormat != "" {
 		htmlContent = utils.UssCssFormat(htmlContent, cssFormat)
 	} else {
 		htmlContent = utils.HtmlAddStyle(htmlContent)
 	}
-
 	return htmlContent
 }

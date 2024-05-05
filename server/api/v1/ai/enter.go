@@ -13,6 +13,7 @@ type ApiGroup struct {
 	PromptApi
 	TopicApi
 	FileApi
+	TemplateApi
 }
 
 var (
@@ -27,4 +28,5 @@ var (
 	wxTokenService          = service.ServiceGroupApp.AIServiceGroup.WxTokenService
 	hotspotService          = service.ServiceGroupApp.AIServiceGroup.HotspotService
 	fileService             = service.ServiceGroupApp.AIServiceGroup.FileService
+	templateService         = service.ServiceGroupApp.AIServiceGroup.TemplateService
 )

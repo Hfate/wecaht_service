@@ -11,4 +11,5 @@ type RouterGroup struct {
 	PromptRouter
 	TopicRouter
 	FileRouter
+	TemplateRouter
 }

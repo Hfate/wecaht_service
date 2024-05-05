@@ -28,3 +28,21 @@ func TestHtmlAddStyle(t *testing.T) {
 func TestRemoveQuotes(t *testing.T) {
 	fmt.Println(RemoveQuotes("“当爱已成往事：揭秘出轨男人的真心话”"))
 }
+
+func TestRemoveMarkedSections(t *testing.T) {
+	// 示例文章
+	article := `开头（200字）
+李婷站在咖啡厅的门口，手里紧握着一杯已经冷却的拿铁...
+发展（500字）
+李婷和张涛的故事，始于大学校园...
+顶峰（300字）
+然而，就在李婷以为自己已经走出了张涛的阴影时...
+结尾（200字）
+李婷走在回家的路上，她的心情异常平静。`
+
+	// 移除标记及其后面的内容
+	modifiedArticle := RemoveSections(article)
+
+	// 输出结果
+	fmt.Println(modifiedArticle)
+}
