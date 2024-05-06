@@ -39,6 +39,7 @@
         "tinymce": "^7.0.1",
         "ueditor": "^1.2.3",
         "vue": "^3.3.4",
+        "vue-json-pretty": "^2.4.0",
         "vue-router": "^4.2.4",
         "vue-ueditor-wrap": "^3.0.8"
     },

@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/flipped-aurora/gin-vue-admin/server/config"
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils/timeutil"
@@ -13,7 +12,6 @@ import (
 	"go.uber.org/zap"
 	"log"
 	"os"
-	"regexp"
 	"strings"
 	"text/template"
 	"time"
@@ -141,53 +139,70 @@ func (cs *ChatService) Recreation(articleContext *ArticleContext, chatModel conf
 	//	}
 	//}
 
-	// 标题创建
-	chatGptPromptList, err = parsePrompt(articleContext, ai.TitleCreate)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, chatGptPrompt := range chatGptPromptList {
-		aiArticle.ProcessParams = "【" + chatModel.ModelType + "】标题创建prompt执行ing"
-		global.GVA_DB.Save(&aiArticle)
-		resp, chatMessageHistory, err = ChatServiceApp.ChatWithModel(chatGptPrompt, chatMessageHistory, chatModel)
-		if err != nil {
-			return nil, err
-		}
-		articleContext.Title = resp
-	}
-
-	aiArticle.ProcessStatus = ai.ProcessAddImgIng
-	// 更新进度
-	global.GVA_DB.Save(&aiArticle)
-
-	// 文章配图
-	//chatGptPromptList, err = parsePrompt(articleContext, ai.AddImage)
+	//// 标题创建
+	//chatGptPromptList, err = parsePrompt(articleContext, ai.TitleCreate)
 	//if err != nil {
 	//	return nil, err
 	//}
 	//
-	//for index, chatGptPrompt := range chatGptPromptList {
-	//	aiArticle.ProcessParams = "【" + chatModel.ModelType + "】文章配图:正在执行第" + cast.ToString(index+1) + "条prompt"
+	//for _, chatGptPrompt := range chatGptPromptList {
+	//	aiArticle.ProcessParams = "【" + chatModel.ModelType + "】标题创建prompt执行ing"
 	//	global.GVA_DB.Save(&aiArticle)
 	//	resp, chatMessageHistory, err = ChatServiceApp.ChatWithModel(chatGptPrompt, chatMessageHistory, chatModel)
 	//	if err != nil {
 	//		return nil, err
 	//	}
-	//
-	//	articleContext.Content = resp
+	//	articleContext.Title = resp
 	//}
-	//
-	//err = BaiduAddImageApp.Handle(articleContext)
-	//if err != nil {
-	//	return nil, err
-	//}
+
+	// 文章配图
+	aiArticle.ProcessStatus = ai.ProcessAddImgIng
+	// 更新进度
+	global.GVA_DB.Save(&aiArticle)
+
+	// 文章配图
+	chatGptPromptList, err = parsePrompt(articleContext, ai.AddImage)
+	if err != nil {
+		return nil, err
+	}
+
+	size = cast.ToString(len(chatGptPromptList))
+	for index, chatGptPrompt := range chatGptPromptList {
+		aiArticle.ProcessParams = "【" + chatModel.ModelType + "】文章配图:prompt执行进度[" + cast.ToString(index+1) + "/" + size + "]"
+		global.GVA_DB.Save(&aiArticle)
+		resp, chatMessageHistory, err = ChatServiceApp.ChatWithModel(chatGptPrompt, chatMessageHistory, chatModel)
+		if err != nil {
+			return nil, err
+		}
+
+		resp = strings.ReplaceAll(resp, "```json", "")
+		resp = strings.ReplaceAll(resp, "```", "")
+
+		addImgResp := &AddImgResp{}
+
+		err = utils.JsonStrToStruct(resp, addImgResp)
+		if err == nil && addImgResp.Image1Description != "" && addImgResp.Image2Description != "" {
+			img1 := cs.SearchAndSave(addImgResp.Image1Description)
+			img2 := cs.SearchAndSave(addImgResp.Image2Description)
+
+			if strings.Contains(img1, "http") {
+				articleContext.Content = "![" + addImgResp.Image1Description + "](" + img1 + ")" + "\n" + articleContext.Content
+			}
+
+			if strings.Contains(img2, "http") {
+				articleContext.Content = articleContext.Content + "\n" + "![" + addImgResp.Image2Description + "](" + img2 + ")"
+			}
+		}
+
+	}
 
 	aiArticle.ProcessStatus = ai.ProcessCreated
 	aiArticle.ProcessParams = "创作完成"
 	aiArticle.Percent = 100
 	aiArticle.Params = chatModel.ModelType + "," + "Recreation"
 	aiArticle.Content = articleContext.Content
+	aiArticle.Context = utils.Parse2Json(chatMessageHistory)
+
 	// 更新进度
 	global.GVA_DB.Save(&aiArticle)
 
@@ -224,53 +239,7 @@ func (cs *ChatService) GetSimilarity(aiArticle *ai.AIArticle) {
 
 }
 
-var BaiduAddImageApp = new(BaiduAddImage)
-
-type BaiduAddImage struct {
-}
-
-func (ba *BaiduAddImage) Handle(context *ArticleContext) error {
-
-	// 正则表达式匹配Markdown中的图片占位符描述
-	re := regexp.MustCompile(`\[img\](.*?)\[/img\]`)
-	matches := re.FindAllStringSubmatch(context.Content, -1)
-
-	if len(matches) == 0 {
-		return nil
-	}
-	context.Content = strings.ReplaceAll(context.Content, "[img]", "")
-	context.Content = strings.ReplaceAll(context.Content, "[/img]", "")
-
-	aiArticle := context.Article
-	size := cast.ToString(len(matches))
-	for index, match := range matches {
-		aiArticle.ProcessParams = "文章配图:正在下载.[" + cast.ToString(index+1) + "/" + size + "]"
-		global.GVA_DB.Save(&aiArticle)
-
-		// 搜索图片
-		filePath := ba.SearchAndSave(match[1])
-
-		if filePath == "" {
-			continue
-		}
-
-		if !strings.Contains(filePath, "http") {
-			filePath = "https://" + filePath
-		}
-
-		wxImgFmt := "<img src=\"%s\">"
-		wxImgUrl := fmt.Sprintf(wxImgFmt, filePath)
-
-		context.Content = strings.ReplaceAll(context.Content, match[1], "\n"+wxImgUrl+"\n")
-	}
-
-	aiArticle.Content = context.Content
-	global.GVA_DB.Save(&aiArticle)
-
-	return nil
-}
-
-func (ba *BaiduAddImage) SearchAndSave(keyword string) string {
+func (cs *ChatService) SearchAndSave(keyword string) string {
 	imgUrlList := make([]string, 0)
 
 	baiduImgUrlList := utils.CollectBaiduImgUrl(keyword)
@@ -284,15 +253,15 @@ func (ba *BaiduAddImage) SearchAndSave(keyword string) string {
 	}
 
 	// 通过第一张图片链接下载图片
-	return ba.saveImage(imgUrlList)
+	return cs.saveImage(imgUrlList)
 }
 
-func (ba *BaiduAddImage) saveImage(imgUrlList []string) string {
+func (cs *ChatService) saveImage(imgUrlList []string) string {
 	// 通过第一张图片链接下载图片
 	filePath := ""
 
 	for _, imgUrl := range imgUrlList {
-		ossFilePath, err := ba.downloadImage(imgUrl)
+		ossFilePath, err := cs.downloadImage(imgUrl)
 		if err != nil {
 			global.GVA_LOG.Info("downloadImage failed", zap.Any("err", err.Error()))
 		} else {
@@ -300,11 +269,16 @@ func (ba *BaiduAddImage) saveImage(imgUrlList []string) string {
 			break
 		}
 	}
+
+	if !strings.Contains(filePath, "http") {
+		filePath = "https://" + filePath
+	}
+
 	return filePath
 }
 
 // DownloadImage 从 URL 下载图片并上传到 OSS
-func (ba *BaiduAddImage) downloadImage(imageUrl string) (string, error) {
+func (cs *ChatService) downloadImage(imageUrl string) (string, error) {
 	// 发起 HTTP GET 请求
 	tempFilePath, err := utils.CreateTempImgFile(imageUrl)
 	if err != nil {
@@ -333,6 +307,85 @@ func (ba *BaiduAddImage) downloadImage(imageUrl string) (string, error) {
 	// 返回上传的 URL 和 OSS 路径
 	return uploadUrl, nil
 }
+
+//func (ba *BaiduAddImage) SearchAndSave(keyword string) string {
+//	imgUrlList := make([]string, 0)
+//
+//	baiduImgUrlList := utils.CollectBaiduImgUrl(keyword)
+//	if len(baiduImgUrlList) > 0 {
+//		imgUrlList = append(imgUrlList, baiduImgUrlList...)
+//	}
+//
+//	unsplashImgUrlList := utils.CollectUnsplashImgUrl(keyword)
+//	if len(unsplashImgUrlList) > 0 {
+//		imgUrlList = append(imgUrlList, unsplashImgUrlList...)
+//	}
+//
+//	// 通过第一张图片链接下载图片
+//	return ba.saveImage(imgUrlList)
+//}
+//
+//var BaiduAddImageApp = new(BaiduAddImage)
+//
+//type BaiduAddImage struct {
+//}
+//
+//func (ba *BaiduAddImage) Handle(context *ArticleContext) error {
+//
+//	// 正则表达式匹配Markdown中的图片占位符描述
+//	re := regexp.MustCompile(`\[img\](.*?)\[/img\]`)
+//	matches := re.FindAllStringSubmatch(context.Content, -1)
+//
+//	if len(matches) == 0 {
+//		return nil
+//	}
+//	context.Content = strings.ReplaceAll(context.Content, "[img]", "")
+//	context.Content = strings.ReplaceAll(context.Content, "[/img]", "")
+//
+//	aiArticle := context.Article
+//	size := cast.ToString(len(matches))
+//	for index, match := range matches {
+//		aiArticle.ProcessParams = "文章配图:正在下载.[" + cast.ToString(index+1) + "/" + size + "]"
+//		global.GVA_DB.Save(&aiArticle)
+//
+//		// 搜索图片
+//		filePath := ba.SearchAndSave(match[1])
+//
+//		if filePath == "" {
+//			continue
+//		}
+//
+//		if !strings.Contains(filePath, "http") {
+//			filePath = "https://" + filePath
+//		}
+//
+//		wxImgFmt := "<img src=\"%s\">"
+//		wxImgUrl := fmt.Sprintf(wxImgFmt, filePath)
+//
+//		context.Content = strings.ReplaceAll(context.Content, match[1], "\n"+wxImgUrl+"\n")
+//	}
+//
+//	aiArticle.Content = context.Content
+//	global.GVA_DB.Save(&aiArticle)
+//
+//	return nil
+//}
+//
+//func (ba *BaiduAddImage) saveImage(imgUrlList []string) string {
+//	// 通过第一张图片链接下载图片
+//	filePath := ""
+//
+//	for _, imgUrl := range imgUrlList {
+//		ossFilePath, err := ba.downloadImage(imgUrl)
+//		if err != nil {
+//			global.GVA_LOG.Info("downloadImage failed", zap.Any("err", err.Error()))
+//		} else {
+//			filePath = ossFilePath
+//			break
+//		}
+//	}
+//	return filePath
+//}
 
 var ChatSystemMessage = &ChatMessage{
 	Role:    "system",
@@ -450,4 +503,9 @@ func parsePrompt(context *ArticleContext, promptType int) ([]string, error) {
 	}
 
 	return result, err
+}
+
+type AddImgResp struct {
+	Image1Description string `json:"Image1Description"`
+	Image2Description string `json:"Image2Description"`
 }

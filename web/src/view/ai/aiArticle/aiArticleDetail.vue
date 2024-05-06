@@ -42,7 +42,8 @@
               autocomplete="off"
           />
         </el-form-item>
-        <el-form-item label="排版文本">
+
+        <el-form-item label="文章内容">
           <Toolbar
               style="border-bottom: 1px solid #ccc"
               :editor="editorRef"
@@ -56,6 +57,10 @@
               :mode="simple"
               @onCreated="onCreated"
           />
+        </el-form-item>
+
+        <el-form-item label="会话历史">
+          <vue-json-pretty :data="form.context" />
         </el-form-item>
       </el-form>
 
@@ -88,6 +93,7 @@
 
 
 <script setup>
+
 import {getAIArticle, updateArticle} from "@/api/aiArticle";
 import {useRoute} from 'vue-router';
 import {onBeforeUnmount, onMounted, ref, watch} from 'vue';
@@ -95,7 +101,8 @@ import {getOfficialAccountList} from "@/api/officialAccount";
 import {getTopicList} from "@/api/topic";
 import {ElMessage} from "element-plus";
 import {Editor, Toolbar} from '@wangeditor/editor-for-vue'
-
+import VueJsonPretty from 'vue-json-pretty';
+import 'vue-json-pretty/lib/styles.css';
 
 defineOptions({
   name: 'AIArticleDetail'
@@ -108,6 +115,7 @@ const form = ref({
   targetAccountId: '',
   originalContent: '',
   content: '',
+  context: '',
   tags: '',
 })
 
@@ -198,6 +206,7 @@ const getWechatArticle = async () => {
   const res = await getAIArticle({ID: articleId.value})
   if (res.code === 0) {
     form.value = res.data.article
+    form.value.context = JSON.parse(form.value.context)
   }
 }
 
