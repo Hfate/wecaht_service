@@ -60,7 +60,7 @@
         </el-form-item>
 
         <el-form-item label="会话历史">
-          <vue-json-pretty :data="form.context" />
+          <vue-json-pretty :data="form.contextJson" />
         </el-form-item>
       </el-form>
 
@@ -116,6 +116,7 @@ const form = ref({
   originalContent: '',
   content: '',
   context: '',
+  contextJson: '',
   tags: '',
 })
 
@@ -206,7 +207,7 @@ const getWechatArticle = async () => {
   const res = await getAIArticle({ID: articleId.value})
   if (res.code === 0) {
     form.value = res.data.article
-    form.value.context = JSON.parse(form.value.context)
+    form.value.contextJson = JSON.parse(form.value.context)
   }
 }
 
