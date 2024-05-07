@@ -33,10 +33,10 @@ func (ac *ArticleContentHandler) HandleTitle(title string) string {
 func (ac *ArticleContentHandler) Handle(account *ai.OfficialAccount, content string) string {
 
 	// 移除特殊字符
-	content = ac.removeSpecialWord(content)
+	content = utils.RemoveSpecialWord(content)
 
 	// 移除文首文末废话
-	content = ac.removeNonsense(content)
+	content = utils.RemoveNonsense(content)
 
 	//使用模板
 	content = ac.useTemplate(account.AppId, content)
@@ -65,53 +65,6 @@ func (ac *ArticleContentHandler) useTemplate(appId, mdContent string) string {
 	htmlContent = strings.ReplaceAll(htmlContent, "{{.Content}}", md2Html)
 
 	return htmlContent
-}
-
-func (ac *ArticleContentHandler) removeNonsense(content string) string {
-	contentArr := strings.Split(content, "---")
-	maxLength := 0
-	result := ""
-	for _, item := range contentArr {
-		if len(item) > maxLength {
-			result = item
-			maxLength = len(item)
-		}
-	}
-	return result
-}
-
-var removeWords = []string{"标题：", "原创性", "二创", "Prompt", "占位符", "原文素材", "配图", "小标题", "正文"}
-
-func (ac *ArticleContentHandler) removeSpecialWord(content string) string {
-	// 以换行符为分隔符，将文章内容拆分成多行
-	lines := strings.Split(content, "\n")
-
-	// 排除标题行
-	var contentLines []string
-	for _, line := range lines {
-		isContinue := false
-		for _, item := range removeWords {
-			if strings.Contains(line, item) {
-				isContinue = true
-				break
-			}
-		}
-
-		if isContinue {
-			continue
-		}
-
-		contentLines = append(contentLines, line)
-	}
-
-	// 将剩余的行重新连接成一篇文章
-	markdownContent := strings.Join(contentLines, "\n")
-
-	//```markdown
-	markdownContent = strings.ReplaceAll(markdownContent, "```markdown", "")
-	markdownContent = strings.ReplaceAll(markdownContent, "```", "")
-	markdownContent = strings.ReplaceAll(markdownContent, "<li><p>", "<li>")
-	return markdownContent
 }
 
 func (ac *ArticleContentHandler) addRecommendedReading(account *ai.OfficialAccount, htmlContent string) string {

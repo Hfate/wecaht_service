@@ -185,13 +185,14 @@ func (cs *ChatService) Recreation(articleContext *ArticleContext, chatModel conf
 			img1 := cs.SearchAndSave(addImgResp.Image1Description)
 			img2 := cs.SearchAndSave(addImgResp.Image2Description)
 
-			if strings.Contains(img1, "http") {
-				articleContext.Content = "![" + addImgResp.Image1Description + "](" + img1 + ")" + "\n" + articleContext.Content
+			if strings.Contains(img1, "http") && strings.Contains(img2, "http") {
+				articleContext.Content = utils.RemoveSpecialWord(articleContext.Content)
+				articleContext.Content = utils.RemoveNonsense(articleContext.Content)
+				imgLine1 := "![" + addImgResp.Image1Description + "](" + img1 + ")" + "\n"
+				imgLine2 := "![" + addImgResp.Image2Description + "](" + img2 + ")" + "\n"
+				articleContext.Content = utils.InsertTextAtThirds(articleContext.Content, imgLine1, imgLine2)
 			}
 
-			if strings.Contains(img2, "http") {
-				articleContext.Content = articleContext.Content + "\n" + "![" + addImgResp.Image2Description + "](" + img2 + ")"
-			}
 		}
 
 	}

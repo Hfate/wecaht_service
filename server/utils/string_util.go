@@ -18,7 +18,7 @@ func init() {
 	CSSStyleMap["<h2>"] = "<h2 style=\"letter-spacing: normal;text-wrap: wrap;text-align: center;line-height: 1.75;font-family: -apple-system-font, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei UI', 'Microsoft YaHei', Arial, sans-serif;font-size: 1.2em;font-weight: bold;display: table;margin: 4em auto 2em;padding-right: 0.2em;padding-left: 0.2em;background: rgb(15, 76, 129);color: rgb(255, 255, 255);\">"
 	CSSStyleMap["<h3>"] = "<h3 style=\"letter-spacing: normal;text-wrap: wrap;text-align: left;line-height: 1.2;font-family: -apple-system-font, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei UI', 'Microsoft YaHei', Arial, sans-serif;font-size: 1.1em;font-weight: bold;margin-top: 2em;margin-right: 8px;margin-bottom: 0.75em;padding-left: 8px;border-left: 3px solid rgb(15, 76, 129);color: rgb(63, 63, 63);\">"
 	CSSStyleMap["<h4>"] = "<h4 style=\"font-size: 1em;letter-spacing: normal;text-wrap: wrap;text-align: left;line-height: 1.75;font-family: -apple-system-font, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei UI', 'Microsoft YaHei', Arial, sans-serif;font-weight: bold;margin: 2em 8px 0.5em;color: rgb(15, 76, 129);\">"
-	CSSStyleMap["<p>"] = "<p style=\"line-height: 1.75;font-family: -apple-system-font, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei UI', 'Microsoft YaHei', Arial, sans-serif;font-size: 1em;letter-spacing: 0.1em;color: rgb(80, 80, 80);\">"
+	CSSStyleMap["<p>"] = "<p style=\"line-height: 2;margin-top: 24px;font-size: 17px;font-family: -apple-system-font, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei UI', 'Microsoft YaHei', Arial, sans-serif;font-size: 1em;letter-spacing: 0.1em;color: rgb(80, 80, 80);\">"
 	CSSStyleMap["<strong>"] = "<strong style=\"line-height: 1.75;color: rgb(15, 76, 129);\">"
 	CSSStyleMap["<ul>"] = "<ul style=\"font-size: 14px;letter-spacing: normal;text-wrap: wrap;text-align: left;line-height: 1.75;font-family: -apple-system-font, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei UI', 'Microsoft YaHei', Arial, sans-serif;padding-left: 1em;list-style: circle;color: rgb(63, 63, 63);\" class=\"list-paddingleft-1\">"
 	CSSStyleMap["<li>"] = "<li style=\"text-align: left;line-height: 1.75;text-indent: -1em;display: block;margin: 0.2em 8px;\">"
@@ -126,4 +126,73 @@ func RemoveSections(text string) string {
 	cleanedText := regex.ReplaceAllString(text, "")
 
 	return cleanedText
+}
+
+// InsertTextAtThirds 在文本的1/3和2/3位置插入指定的文本
+func InsertTextAtThirds(text string, insertText1, insertText2 string) string {
+	// 将原始文本按行分割
+	lines := strings.Split(text, "\n")
+	// 计算总行数
+	totalLines := len(lines)
+	// 计算1/3和2/3的位置
+	oneThird := totalLines / 3
+	twoThirds := oneThird * 2
+
+	// 在1/3和2/3的位置插入文本
+	if oneThird > 0 {
+		lines = append(lines[:oneThird], append([]string{insertText1}, lines[oneThird:]...)...)
+	}
+	if twoThirds > 0 && twoThirds < totalLines {
+		lines = append(lines[:twoThirds], append([]string{insertText2}, lines[twoThirds:]...)...)
+	}
+
+	// 将行重新组合成字符串，并用换行符连接
+	return strings.Join(lines, "\n")
+}
+
+var removeWords = []string{"标题：", "原创性", "二创", "Prompt", "占位符", "原文素材", "配图", "小标题", "正文"}
+
+func RemoveSpecialWord(content string) string {
+	// 以换行符为分隔符，将文章内容拆分成多行
+	lines := strings.Split(content, "\n")
+
+	// 排除标题行
+	var contentLines []string
+	for _, line := range lines {
+		isContinue := false
+		for _, item := range removeWords {
+			if strings.Contains(line, item) {
+				isContinue = true
+				break
+			}
+		}
+
+		if isContinue {
+			continue
+		}
+
+		contentLines = append(contentLines, line)
+	}
+
+	// 将剩余的行重新连接成一篇文章
+	markdownContent := strings.Join(contentLines, "\n")
+
+	//```markdown
+	markdownContent = strings.ReplaceAll(markdownContent, "```markdown", "")
+	markdownContent = strings.ReplaceAll(markdownContent, "```", "")
+	markdownContent = strings.ReplaceAll(markdownContent, "<li><p>", "<li>")
+	return markdownContent
+}
+
+func RemoveNonsense(content string) string {
+	contentArr := strings.Split(content, "---")
+	maxLength := 0
+	result := ""
+	for _, item := range contentArr {
+		if len(item) > maxLength {
+			result = item
+			maxLength = len(item)
+		}
+	}
+	return result
 }
