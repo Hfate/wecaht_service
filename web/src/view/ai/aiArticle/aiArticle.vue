@@ -256,35 +256,6 @@
                 </el-button>
               </template>
             </el-popover>
-            <el-popover
-                v-model="scope.row.visible"
-                placement="top"
-                width="160"
-            >
-              <p>确定要重写吗？</p>
-              <div style="text-align: right; margin-top: 8px;">
-                <el-button
-                    type="primary"
-                    link
-                    @click="scope.row.visible = false"
-                >取消
-                </el-button>
-                <el-button
-                    type="primary"
-                    @click="recreationWechatAIArticle(scope.row)"
-                >确定
-                </el-button>
-              </div>
-              <template #reference>
-                <el-button
-                    type="primary"
-                    link
-                    icon="delete"
-                    @click="scope.row.visible = true"
-                >重写
-                </el-button>
-              </template>
-            </el-popover>
           </template>
         </el-table-column>
       </el-table>
@@ -529,7 +500,7 @@ onMounted(() => {
   };
 
   // 设置定时器，每3秒调用一次fetchData
-  stop.value = setInterval(fetchData, 5000);
+  stop.value = setInterval(fetchData, 10000);
 
   // 当组件卸载时清除定时器
   onUnmounted(() => {
