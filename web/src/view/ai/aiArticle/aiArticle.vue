@@ -296,8 +296,7 @@ import {
   deleteAIArticlesByIds,
   generateAIArticle,
   getAIArticleList,
-  publishAIArticles,
-  recreationAIArticle
+  publishAIArticles
 } from '@/api/aiArticle'
 
 import {onMounted, onUnmounted, ref, watch} from 'vue'
@@ -477,21 +476,6 @@ const deleteWechatAIArticle = async (row) => {
 }
 
 
-const recreationWechatAIArticle = async (row) => {
-  row.visible = false
-  const res = await recreationAIArticle({ID: row.ID})
-  if (res.code === 0) {
-    ElMessage({
-      type: 'success',
-      message: '改写成功'
-    })
-    if (tableData.value.length === 1 && page.value > 1) {
-      page.value--
-    }
-    getTableData()
-  }
-}
-
 const stop = ref(null); // 用于存储定时器的引用
 onMounted(() => {
   // 定义调用getTableData的函数
@@ -499,7 +483,7 @@ onMounted(() => {
     getTableData();
   };
 
-  // 设置定时器，每3秒调用一次fetchData
+  // 设置定时器，每10秒调用一次fetchData
   stop.value = setInterval(fetchData, 10000);
 
   // 当组件卸载时清除定时器

@@ -256,12 +256,16 @@
             />
           </el-form-item>
           <el-form-item label="css排版">
-            <el-input
+            <el-select
                 v-model.number="form.cssFormat"
-                type="textarea"
-                :rows="30"
-                autocomplete="off"
-            />
+                class="w-56"
+            >
+              <el-option
+                  v-for="item in cssArr"
+                  :value="item.formatName"
+                  :label="item.formatName"
+              />
+            </el-select>
           </el-form-item>
         </el-form>
       </el-scrollbar>
@@ -293,6 +297,7 @@ import {nextTick, ref} from 'vue'
 import {ElMessage} from 'element-plus'
 import {formatDate} from '@/utils/format'
 import {getTopicList} from "@/api/topic";
+import {getCssFormatList} from "@/api/cssFormat";
 
 defineOptions({
   name: 'OfficialAccount'
@@ -312,7 +317,7 @@ const form = ref({
   appSecret: '',
   token: '',
   encodingAesKey: '',
-  cssFormat: ''
+  cssFormat: '',
 })
 
 const page = ref(1)
@@ -320,6 +325,7 @@ const total = ref(0)
 const pageSize = ref(10)
 const tableData = ref([])
 const topicArr = ref([])
+const cssArr = ref([])
 
 // 分页
 const handleSizeChange = (val) => {
@@ -337,6 +343,11 @@ const getTableData = async () => {
   const topicSelect = await getTopicList({page: page.value, pageSize: pageSize.value})
   if (topicSelect.code === 0) {
     topicArr.value = topicSelect.data.list
+  }
+
+  const cssSelect = await getCssFormatList({page: page.value, pageSize: pageSize.value})
+  if (topicSelect.code === 0) {
+    cssArr.value = cssSelect.data.list
   }
 
   const table = await getOfficialAccountList({page: page.value, pageSize: pageSize.value})

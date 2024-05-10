@@ -12,4 +12,5 @@ type RouterGroup struct {
 	TopicRouter
 	FileRouter
 	TemplateRouter
+	CssFormatRouter
 }

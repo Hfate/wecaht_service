@@ -14,4 +14,5 @@ type ServiceGroup struct {
 	WechatService
 	FileService
 	TemplateService
+	CssFormatService
 }

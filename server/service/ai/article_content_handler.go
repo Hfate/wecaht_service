@@ -117,7 +117,9 @@ func (ac *ArticleContentHandler) addCard(account *ai.OfficialAccount, htmlConten
 func (ac *ArticleContentHandler) addCss(htmlContent string, cssFormat string) string {
 	// 添加css
 	if cssFormat != "" {
-		htmlContent = utils.UssCssFormat(htmlContent, cssFormat)
+		cssFormatModel, _ := CssFormatServiceApp.FindByFormatName(cssFormat)
+
+		htmlContent = utils.UssCssFormat(htmlContent, cssFormatModel.CssCode)
 	} else {
 		htmlContent = utils.HtmlAddStyle(htmlContent)
 	}

@@ -14,6 +14,7 @@ type ApiGroup struct {
 	TopicApi
 	FileApi
 	TemplateApi
+	CssFormatApi
 }
 
 var (
@@ -29,4 +30,5 @@ var (
 	hotspotService          = service.ServiceGroupApp.AIServiceGroup.HotspotService
 	fileService             = service.ServiceGroupApp.AIServiceGroup.FileService
 	templateService         = service.ServiceGroupApp.AIServiceGroup.TemplateService
+	cssFormatService        = service.ServiceGroupApp.AIServiceGroup.CssFormatService
 )
