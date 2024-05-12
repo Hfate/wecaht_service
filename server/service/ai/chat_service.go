@@ -139,21 +139,21 @@ func (cs *ChatService) Recreation(articleContext *ArticleContext, chatModel conf
 	//	}
 	//}
 
-	//// 标题创建
-	//chatGptPromptList, err = parsePrompt(articleContext, ai.TitleCreate)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//
-	//for _, chatGptPrompt := range chatGptPromptList {
-	//	aiArticle.ProcessParams = "【" + chatModel.ModelType + "】标题创建prompt执行ing"
-	//	global.GVA_DB.Save(&aiArticle)
-	//	resp, chatMessageHistory, err = ChatServiceApp.ChatWithModel(chatGptPrompt, chatMessageHistory, chatModel)
-	//	if err != nil {
-	//		return nil, err
-	//	}
-	//	articleContext.Title = resp
-	//}
+	// 标题创建
+	chatGptPromptList, err = parsePrompt(articleContext, ai.TitleCreate)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, chatGptPrompt := range chatGptPromptList {
+		aiArticle.ProcessParams = "【" + chatModel.ModelType + "】标题创建prompt执行ing"
+		global.GVA_DB.Save(&aiArticle)
+		resp, chatMessageHistory, err = ChatServiceApp.ChatWithModel(chatGptPrompt, chatMessageHistory, chatModel)
+		if err != nil {
+			return nil, err
+		}
+		articleContext.Title = resp
+	}
 
 	// 文章配图
 	aiArticle.ProcessStatus = ai.ProcessAddImgIng

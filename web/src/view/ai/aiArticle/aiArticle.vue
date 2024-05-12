@@ -146,24 +146,6 @@
             <span>{{ formatDate(scope.row.publishTime) }}</span>
           </template>
         </el-table-column>
-        <!--        <el-table-column-->
-        <!--            align="left"-->
-        <!--            label="阅读量"-->
-        <!--            prop="readNum"-->
-        <!--            width="70"-->
-        <!--        />-->
-        <!--        <el-table-column-->
-        <!--            align="left"-->
-        <!--            label="评论量"-->
-        <!--            prop="commentNum"-->
-        <!--            width="70"-->
-        <!--        />-->
-        <!--        <el-table-column-->
-        <!--            align="left"-->
-        <!--            label="点赞量"-->
-        <!--            prop="likeNum"-->
-        <!--            width="70"-->
-        <!--        />-->
         <el-table-column
             align="left"
             label="创建时间"
@@ -208,12 +190,12 @@
             prop="params"
             width="100"
         />
-        <el-table-column
-            align="left"
-            label="相似度"
-            prop="similarity"
-            width="80"
-        />
+<!--        <el-table-column-->
+<!--            align="left"-->
+<!--            label="相似度"-->
+<!--            prop="similarity"-->
+<!--            width="80"-->
+<!--        />-->
         <el-table-column
             align="left"
             label="操作"
@@ -227,6 +209,35 @@
                 @click="openNewTab('#/layout/ai/aiArticleDetail?id='+scope.row.ID)"
             >详情
             </el-button>
+            <el-popover
+                v-model="scope.row.visible"
+                placement="top"
+                width="160"
+            >
+              <p>确定要发布吗？</p>
+              <div style="text-align: right; margin-top: 8px;">
+                <el-button
+                    type="primary"
+                    link
+                    @click="scope.row.visible = false"
+                >取消
+                </el-button>
+                <el-button
+                    type="primary"
+                    @click="deleteWechatAIArticle(scope.row)"
+                >确定
+                </el-button>
+              </div>
+              <template #reference>
+                <el-button
+                    type="primary"
+                    link
+                    icon="delete"
+                    @click="scope.row.visible = true"
+                >发布
+                </el-button>
+              </template>
+            </el-popover>
             <el-popover
                 v-model="scope.row.visible"
                 placement="top"
@@ -446,6 +457,24 @@ const onDelete = async () => {
 
 const onPublish = async () => {
   const ids = aiAIArticles.value.map(item => item.ID)
+  const res = await publishAIArticles({ids})
+  if (res.code === 0) {
+    ElMessage({
+      type: 'success',
+      message: res.msg
+    })
+    if (tableData.value.length === ids.length && page.value > 1) {
+      page.value--
+    }
+    publishVisible.value = false
+    getTableData()
+  }
+}
+
+const publishWechatAIArticle = async (row) => {
+  const ids = []
+  ids.push(row.ID)
+
   const res = await publishAIArticles({ids})
   if (res.code === 0) {
     ElMessage({
