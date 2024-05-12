@@ -121,6 +121,10 @@ func (ws *WechatService) PublishArticle(dbOfficialAccount *aiModel.OfficialAccou
 
 	draftList := make([]*draft.Article, 0)
 	for _, aiArticle := range aiArticleList {
+		if aiArticle.ArticleStatus == 1 {
+			continue
+		}
+
 		// 搜索封面托片
 		filePath := utils.SearchAndSave(aiArticle.Title)
 

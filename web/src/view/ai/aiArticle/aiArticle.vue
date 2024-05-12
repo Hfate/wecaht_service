@@ -224,7 +224,7 @@
                 </el-button>
                 <el-button
                     type="primary"
-                    @click="deleteWechatAIArticle(scope.row)"
+                    @click="publishWechatAIArticle(scope.row)"
                 >确定
                 </el-button>
               </div>
@@ -346,7 +346,7 @@ const openNewTab = (detailPath) => {
 
 const page = ref(1)
 const total = ref(0)
-const pageSize = ref(50)
+const pageSize = ref(1000)
 const tableData = ref([])
 const searchInfo = ref({})
 const topicArr = ref([])
