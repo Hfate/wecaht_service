@@ -233,10 +233,9 @@ defineOptions({
 const articles = ref([])
 const page = ref(1)
 const total = ref(0)
-const pageSize = ref(10)
+const pageSize = ref(50)
 const tableData = ref([])
 const searchInfo = ref({})
-const files = ref([])
 
 
 const onReset = () => {
@@ -276,13 +275,6 @@ const getTableData = async () => {
 
 getTableData()
 
-const dialogFormVisible = ref(false)
-const type = ref('')
-
-// 批量操作
-const handleSelectionChange = (val) => {
-  articles.value = val
-}
 
 const deleteVisible = ref(false)
 const onDelete = async () => {
@@ -300,7 +292,6 @@ const onDelete = async () => {
     getTableData()
   }
 }
-const downloadVisible = ref(false)
 
 
 const deleteWechatArticle = async (row) => {
