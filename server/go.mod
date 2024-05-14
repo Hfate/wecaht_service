@@ -26,6 +26,7 @@ require (
 	github.com/hashicorp/go-retryablehttp v0.7.5
 	github.com/huaweicloud/huaweicloud-sdk-go-obs v3.21.8+incompatible
 	github.com/jordan-wright/email v0.0.0-20200824153738-3f5bafa1cd84
+	github.com/ledongthuc/pdf v0.0.0-20240201131950-da5b75280b06
 	github.com/mojocn/base64Captcha v1.3.5
 	github.com/otiai10/copy v1.7.0
 	github.com/panjf2000/ants v1.3.0
@@ -171,7 +172,7 @@ require (
 	go.uber.org/multierr v1.9.0 // indirect
 	golang.org/x/arch v0.3.0 // indirect
 	golang.org/x/exp v0.0.0-20230905200255-921286631fa9 // indirect
-	golang.org/x/image v0.11.0 // indirect
+	golang.org/x/image v0.15.0 // indirect
 	golang.org/x/mod v0.14.0 // indirect
 	golang.org/x/net v0.21.0 // indirect
 	golang.org/x/sys v0.17.0 // indirect

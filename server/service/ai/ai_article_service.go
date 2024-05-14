@@ -171,7 +171,7 @@ func (exa *AIArticleService) GenerateArticle(account *ai.OfficialAccount) error 
 			CreateTypes: account.CreateTypes,
 		}
 
-		err = ArticlePipelineApp.Run("", context)
+		err = ArticlePipelineApp.Run(context)
 		if err != nil {
 			return err
 		}

@@ -44,6 +44,8 @@ func (ac *ArticleContentHandler) Handle(account *ai.OfficialAccount, content str
 	// 添加推荐阅读
 	content = ac.addRecommendedReading(account, content)
 
+	content = utils.InsertLineBreaks(content)
+
 	// 添加公众号排版内容
 	content = ac.addCard(account, content)
 

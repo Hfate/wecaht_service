@@ -46,3 +46,14 @@ func TestRemoveMarkedSections(t *testing.T) {
 	// 输出结果
 	fmt.Println(modifiedArticle)
 }
+
+func TestInsertLineBreaks(t *testing.T) {
+	// 示例HTML内容，实际应用中应从提供的网页源代码中获取
+	html := `<p>这是第一段。</p><p>这是第二段。</p>`
+
+	// 修正排版
+	fixedHTML := InsertLineBreaks(html)
+
+	// 打印修正后的HTML内容
+	println(fixedHTML)
+}

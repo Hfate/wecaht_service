@@ -122,23 +122,6 @@ func (cs *ChatService) Recreation(articleContext *ArticleContext, chatModel conf
 		articleContext.Content = resp
 	}
 
-	//if len(articleContext.Content) < 1200 {
-	//	// 文章扩写
-	//	chatGptPromptList, err = parsePrompt(articleContext, ai.ArticleExpansion)
-	//	if err != nil {
-	//		return nil, err
-	//	}
-	//	for index, chatGptPrompt := range chatGptPromptList {
-	//		aiArticle.ProcessParams = "【" + chatModel.ModelType + "】文章扩写:正在执行第" + cast.ToString(index+1) + "条prompt"
-	//		global.GVA_DB.Save(&aiArticle)
-	//		resp, chatMessageHistory, err = ChatServiceApp.ChatWithModel(chatGptPrompt, chatMessageHistory, chatModel)
-	//		if err != nil {
-	//			return nil, err
-	//		}
-	//		articleContext.Content = resp
-	//	}
-	//}
-
 	// 标题创建
 	chatGptPromptList, err = parsePrompt(articleContext, ai.TitleCreate)
 	if err != nil {

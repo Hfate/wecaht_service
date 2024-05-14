@@ -18,13 +18,8 @@ var ArticlePipelineApp = new(ArticlePipeline)
 type ArticlePipeline struct {
 }
 
-func (*ArticlePipeline) Run(model string, context *ArticleContext) error {
-	switch model {
-	case "hotspot":
-		return HotSpotArticlePipelineApp.Write(context)
-	default:
-		return DefaultArticlePipelineApp.Write(context)
-	}
+func (*ArticlePipeline) Run(context *ArticleContext) error {
+	return DefaultArticlePipelineApp.Write(context)
 }
 
 var HotSpotArticlePipelineApp = new(HotSpotArticlePipeline)
