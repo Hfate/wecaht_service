@@ -387,8 +387,9 @@ func (cs *ChatService) ChatWithModel(message string, history []*ChatMessage, cha
 	})
 
 	chatReq := &ChatReq{
-		Model:    model,
-		Messages: history,
+		Model:       model,
+		Messages:    history,
+		Temperature: 0.3,
 	}
 
 	statusCode, respBody, err := utils.PostWithHeaders(apiUrl, utils.Parse2Json(chatReq), map[string]string{
