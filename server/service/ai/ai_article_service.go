@@ -138,7 +138,7 @@ func (exa *AIArticleService) GenerateArticleById(hotspotId uint64, account *ai.O
 		HotspotId: hotspotId,
 	}
 
-	ArticlePipelineApp.Run("hotspot", context)
+	ArticlePipelineApp.Run(context)
 
 	return nil
 }
