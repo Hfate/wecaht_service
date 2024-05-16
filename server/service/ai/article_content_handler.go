@@ -41,7 +41,7 @@ func (ac *ArticleContentHandler) Handle(account *ai.OfficialAccount, content str
 	//使用模板
 	content = ac.useTemplate(account.AppId, content)
 
-	content = utils.InsertLineBreaks(content)
+	//content = utils.InsertLineBreaks(content)
 
 	// 添加推荐阅读
 	content = ac.addRecommendedReading(account, content)
