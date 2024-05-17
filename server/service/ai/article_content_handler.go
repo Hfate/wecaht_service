@@ -86,14 +86,13 @@ func (ac *ArticleContentHandler) addRecommendedReading(account *ai.OfficialAccou
 
 	titleSet := make(map[string]bool)
 
-	recommendList := "<ul style='' class=\"list-paddingleft-1\"><p>"
-
+	recommendList := "<ul style=\"color: rgb(63, 63, 63);\" class=\"list-paddingleft-1 js_darkmode__5\" data-style=\"color: rgb(63, 63, 63);\">"
 	for _, item := range articleList {
 		if titleSet[item.Title] {
 			continue
 		}
 		titleSet[item.Title] = true
-		recommendList += "<li style=\"text-align: justify;line-height: 1.5;\"><p><a href='" + item.Link + "'><span style='font-size: 14px;'>" + item.Title + "</span></a></p></li>"
+		recommendList += "<li style=\"text-align: justify;line-height: 1.15;\"><p><span style=\"font-size: 16px;\"> </span><a href='" + item.Link + "' target=\"_blank\" data-linktype=\"2\"><span style='font-size: 16px;'>" + item.Title + "</span></a></p></li>"
 	}
 	recommendList += "</ul>"
 
