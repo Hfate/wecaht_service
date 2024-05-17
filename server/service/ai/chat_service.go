@@ -397,6 +397,7 @@ func (cs *ChatService) ChatWithModel(message string, history []*ChatMessage, cha
 		Model:       model,
 		Messages:    history,
 		Temperature: 0.3,
+		UseSearch:   true,
 	}
 
 	statusCode, respBody, err := utils.PostWithHeaders(apiUrl, utils.Parse2Json(chatReq), map[string]string{
@@ -432,6 +433,7 @@ type ChatReq struct {
 	Model       string         `json:"model"`
 	Messages    []*ChatMessage `json:"messages"`
 	Temperature float64        `json:"temperature"`
+	UseSearch   bool           `json:"use_search"`
 }
 
 type ChatMessage struct {
