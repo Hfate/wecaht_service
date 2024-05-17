@@ -80,11 +80,6 @@ func (da *DefaultArticlePipeline) Write(context *ArticleContext) error {
 			global.GVA_LOG.Error("文章写作失败", zap.Error(err))
 			continue
 		}
-		// 完成写作
-		if context.Content != "" && len(context.Content) > 1000 && len(context.Params) > 0 {
-			global.GVA_LOG.Info("完成AI创作", zap.String("accountName", context.Account.AccountName), zap.String("title", context.Title))
-			break
-		}
 	}
 
 	return nil

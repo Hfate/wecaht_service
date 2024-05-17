@@ -85,16 +85,17 @@ func (ac *ArticleContentHandler) addRecommendedReading(account *ai.OfficialAccou
 	}
 
 	titleSet := make(map[string]bool)
-	recommendList := "<p>"
+
+	recommendList := "<ul style='' class=\"list-paddingleft-1\"><p>"
 
 	for _, item := range articleList {
 		if titleSet[item.Title] {
 			continue
 		}
 		titleSet[item.Title] = true
-		recommendList += "<a href='" + item.Link + "'>" + item.Title + "</a><br>"
+		recommendList += "<li style=\"text-align: justify;line-height: 1.5;\"><p><a href='" + item.Link + "'><span style='font-size: 14px;'>" + item.Title + "</span></a></p></li>"
 	}
-	recommendList += "</p>"
+	recommendList += "</ul>"
 
 	htmlContent = strings.ReplaceAll(htmlContent, "{{.RecommendList}}", recommendList)
 
