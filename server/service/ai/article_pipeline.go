@@ -4,7 +4,6 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/ai"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils/timeutil"
-	"github.com/spf13/cast"
 	"go.uber.org/zap"
 	"strings"
 	"time"
@@ -176,9 +175,6 @@ func (r *RecreationArticle) Handle(context *ArticleContext) error {
 		err2 = global.GVA_DB.Save(&aiArticle).Error
 		if err2 != nil {
 			global.GVA_LOG.Error("Recreation", zap.Error(err2))
-		} else {
-			// 创作完 直接发草稿箱
-			AIArticleServiceApp.PublishArticle([]string{cast.ToString(aiArticle.ID)})
 		}
 	})
 
