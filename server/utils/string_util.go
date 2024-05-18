@@ -65,6 +65,7 @@ func RemoveQuotes(str string) string {
 }
 
 func RenderMarkdownContent(markdown string) (string, error) {
+	markdown = strings.ReplaceAll(markdown, "\\n", "\n")
 	// 渲染Markdown
 	html := blackfriday.MarkdownCommon([]byte(markdown))
 	return string(html), nil

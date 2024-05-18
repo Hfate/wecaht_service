@@ -92,7 +92,7 @@ func (ac *ArticleContentHandler) addRecommendedReading(account *ai.OfficialAccou
 			continue
 		}
 		titleSet[item.Title] = true
-		recommendList += "<li style=\"text-align: justify;line-height: 1.15;\"><p><span style=\"font-size: 16px;\"> </span><a href='" + item.Link + "' target=\"_blank\" data-linktype=\"2\"><span style='font-size: 16px;'>" + item.Title + "</span></a></p></li>"
+		recommendList += "<li style=\"text-align: justify;line-height: 1.15;\"><p style=\"line-height: 1.15;\"><span style=\"font-size: 16px;\"> </span><a href='" + item.Link + "' target=\"_blank\" data-linktype=\"2\"><span style='font-size: 16px;'>" + item.Title + "</span></a></p></li>"
 	}
 	recommendList += "</ul>"
 
