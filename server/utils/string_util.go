@@ -169,7 +169,7 @@ func InsertTextAtThirds(text string, insertText1, insertText2 string) string {
 	return strings.Join(lines, "\n")
 }
 
-var removeWords = []string{"标题", "重写", "原创性", "二创", "Prompt", "占位符", "原文素材", "配图", "小标题", "正文"}
+var removeWords = []string{"标题", "重写", "原创性", "二创", "Prompt", "占位符", "原文素材", "配图", "小标题", "正文", "重塑文章"}
 
 func RemoveSpecialWord(content string) string {
 	// 以换行符为分隔符，将文章内容拆分成多行
@@ -214,4 +214,19 @@ func RemoveNonsense(content string) string {
 		}
 	}
 	return result
+}
+
+// EstimateReadingTime 预估阅读时长的函数
+func EstimateReadingTime(content string) int {
+	// 将文章内容转换为纯文本并统计单词数量
+	words := strings.Fields(strings.ToLower(strings.TrimSpace(content)))
+	wordCount := len(words)
+
+	// 计算阅读时长（分钟）
+	readingTimeInMinutes := float64(wordCount) / float64(200)
+
+	// 将时长转换为最接近的整数分钟
+	//readingTime := time.Duration(int(readingTimeInMinutes+0.5)) * time.Minute
+
+	return int(readingTimeInMinutes + 0.5)
 }

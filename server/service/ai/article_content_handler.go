@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/ai"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
+	"github.com/spf13/cast"
 	"strings"
 )
 
@@ -67,6 +68,15 @@ func (ac *ArticleContentHandler) useTemplate(appId, mdContent string) string {
 	md2Html, _ := utils.RenderMarkdownContent(mdContent)
 
 	htmlContent = strings.ReplaceAll(htmlContent, "{{.Content}}", md2Html)
+
+	readingTime := utils.EstimateReadingTime(mdContent)
+	readingTime2 := readingTime - 2
+	if readingTime2 < 1 {
+		readingTime2 = 1
+	}
+
+	htmlContent = strings.ReplaceAll(htmlContent, "{{.ReadingTime}}", cast.ToString(readingTime))
+	htmlContent = strings.ReplaceAll(htmlContent, "{{.ReadingTime2}}", cast.ToString(readingTime2))
 
 	return htmlContent
 }

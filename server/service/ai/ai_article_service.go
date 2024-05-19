@@ -179,8 +179,8 @@ func (exa *AIArticleService) GenerateArticle(account *ai.OfficialAccount) error 
 
 	}
 
-	articleList := make([]*ai.AIArticle, 0)
-	global.GVA_DB.Model(&ai.AIArticle{}).Where("batch_id = ?", batchId).Find(&articleList)
+	//articleList := make([]*ai.AIArticle, 0)
+	//global.GVA_DB.Model(&ai.AIArticle{}).Where("batch_id = ?", batchId).Find(&articleList)
 	//if len(articleList) > 0 {
 	//	ids := make([]string, 0)
 	//	for _, item := range articleList {
