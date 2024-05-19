@@ -12,6 +12,8 @@ import (
 func Timer() {
 	//task.SpiderWechatHotArticle()
 
+	//task.ReadPdf(global.GVA_DB)
+
 	// spec 定时任务详细配置参考 https://pkg.go.dev/github.com/robfig/cron?utm_source=godoc
 	go func() {
 		var option []cron.Option

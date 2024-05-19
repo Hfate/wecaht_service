@@ -25,6 +25,8 @@ func (ac *ArticleContentHandler) HandleTitle(title string) string {
 	title = strings.ReplaceAll(title, "*", "")
 	title = strings.ReplaceAll(title, "标题：", "")
 	title = strings.ReplaceAll(title, "#", "")
+	title = strings.ReplaceAll(title, "揭秘：", "")
+	title = strings.ReplaceAll(title, "揭秘", "")
 	title = utils.RemoveBookTitleBrackets(title)
 	title = strings.ReplaceAll(title, "标题建议：", "")
 	return utils.RemoveQuotes(title)
