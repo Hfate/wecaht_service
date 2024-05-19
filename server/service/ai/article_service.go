@@ -38,7 +38,7 @@ func (exa *ArticleService) FindHotArticleByTopic(topic string, portNameList []st
 	err := global.GVA_DB.Model(&ai.Article{}).Where("topic = ?", topic).
 		Where("portal_name not in ?", portNameList).
 		Where("use_times = 0").
-		Where("content != ''").
+		Where("length(content) > 1000").
 		Order("read_num desc,publish_time desc").First(&article).Error
 	return article, err
 }

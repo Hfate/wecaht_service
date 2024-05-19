@@ -163,7 +163,9 @@ func (exa *AIArticleService) GenerateArticle(account *ai.OfficialAccount) error 
 	}
 
 	i := 0
+
 	for i < targetNum && i < 10 {
+
 		context := &ArticleContext{
 			Topic:       account.Topic,
 			Account:     account,
@@ -172,19 +174,27 @@ func (exa *AIArticleService) GenerateArticle(account *ai.OfficialAccount) error 
 		}
 
 		i++
-		err = ArticlePipelineApp.Run(context)
-		if err != nil {
-			return err
-		}
 
+		err = ArticlePipelineApp.Run(context)
+
+		if err != nil {
+
+			continue
+		}
 	}
 
+	//// 创作完成开始自动发布
 	//articleList := make([]*ai.AIArticle, 0)
 	//global.GVA_DB.Model(&ai.AIArticle{}).Where("batch_id = ?", batchId).Find(&articleList)
 	//if len(articleList) > 0 {
+	//
 	//	ids := make([]string, 0)
 	//	for _, item := range articleList {
-	//		ids = append(ids, item.ID)
+	//
+	//		if item.ProcessStatus == ai.ProcessCreated {
+	//			ids = append(ids, item.ID)
+	//		}
+	//
 	//	}
 	//	AIArticleServiceApp.PublishArticle(ids)
 	//}

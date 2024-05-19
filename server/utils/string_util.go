@@ -216,11 +216,21 @@ func RemoveNonsense(content string) string {
 	return result
 }
 
+// countChineseCharacters 统计字符串中中文字符的数量
+func countChineseCharacters(s string) int {
+	count := 0
+	for _, runeValue := range s {
+		if '\u4e00' <= runeValue && runeValue <= '\u9fff' {
+			count++
+		}
+	}
+	return count
+}
+
 // EstimateReadingTime 预估阅读时长的函数
 func EstimateReadingTime(content string) int {
 	// 将文章内容转换为纯文本并统计单词数量
-	words := strings.Fields(strings.ToLower(strings.TrimSpace(content)))
-	wordCount := len(words)
+	wordCount := countChineseCharacters(content)
 
 	// 计算阅读时长（分钟）
 	readingTimeInMinutes := float64(wordCount) / float64(200)

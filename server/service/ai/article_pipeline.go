@@ -136,9 +136,9 @@ func (r *RecreationArticle) Handle(context *ArticleContext) error {
 		AuthorName:        context.Account.DefaultAuthorName,
 		Link:              article.Link,
 		Content:           article.Content,
-		OriginContent:     article.Content,
-		PublishTime:       time.Now(),
-		ProcessParams:     "任务新创建，正在等待执行..",
+		//OriginContent:     article.Content,
+		PublishTime:   time.Now(),
+		ProcessParams: "任务新创建，正在等待执行..",
 	}
 	aiArticle.BASEMODEL = BaseModel()
 	err = global.GVA_DB.Model(&ai.AIArticle{}).Create(aiArticle).Error
@@ -185,6 +185,7 @@ type HotSpotWriteArticle struct {
 }
 
 func (r *HotSpotWriteArticle) Handle(context *ArticleContext) error {
+	batchId := timeutil.GetCurDate() + context.Account.AppId
 
 	hotspotList := make([]ai.Hotspot, 0)
 
@@ -208,9 +209,7 @@ func (r *HotSpotWriteArticle) Handle(context *ArticleContext) error {
 		hotspot.UseTimes = hotspot.UseTimes + 1
 		global.GVA_DB.Save(&hotspot)
 
-		oldTopic := context.Topic
-
-		// 找有没有相关的热点文章素材
+		// 找有相关的热点文章素材
 		article := &ai.Article{}
 
 		err := global.GVA_DB.Model(&ai.Article{}).Where("hotspot_id = ?", hotspot.ID).Last(&article).Error
@@ -221,18 +220,56 @@ func (r *HotSpotWriteArticle) Handle(context *ArticleContext) error {
 
 		context.Content = article.Content
 
-		result, err := ChatModelServiceApp.HotSpotWrite(context)
+		// 生成文章初稿
+		aiArticle := &ai.AIArticle{
+			BatchId:           batchId,
+			Title:             article.Title,
+			TargetAccountName: context.Account.AccountName,
+			TargetAccountId:   context.Account.AppId,
+			Topic:             context.Account.Topic,
+			AuthorName:        context.Account.DefaultAuthorName,
+			Link:              article.Link,
+			Content:           article.Content,
+			//OriginContent:     article.Content,
+			PublishTime:   time.Now(),
+			ProcessParams: "任务新创建，正在等待执行..",
+		}
+		aiArticle.BASEMODEL = BaseModel()
+		err = global.GVA_DB.Model(&ai.AIArticle{}).Create(aiArticle).Error
 		if err != nil {
-			global.GVA_LOG.Info("热点词条创作失败" + hotspot.Headline)
-			context.Topic = oldTopic
-			continue
+			return err
+		}
+
+		context.Title = article.Title
+		context.Content = article.Content
+		context.Link = article.Link
+		context.Article = aiArticle
+
+		aiArticle.ProcessStatus = ai.ProcessCreateIng
+		// 更新进度
+		global.GVA_DB.Save(&aiArticle)
+
+		result, err2 := ChatModelServiceApp.Recreation(context)
+		if err2 != nil {
+			global.GVA_LOG.Error("Recreation", zap.Error(err2))
+			return err2
 		}
 
 		context.Content = result.Content
 		context.Title = result.Title
-		context.Topic = oldTopic
 
-		return nil
+		//
+		aiArticle.Title = ArticleContentHandlerApp.HandleTitle(result.Title)
+		//  处理排版
+		aiArticle.Content = ArticleContentHandlerApp.Handle(context.Account, result.Content)
+
+		// 更新文章内容
+		err2 = global.GVA_DB.Save(&aiArticle).Error
+		if err2 != nil {
+			global.GVA_LOG.Error("Recreation", zap.Error(err2))
+		}
+
+		return err
 	}
 
 	return nil

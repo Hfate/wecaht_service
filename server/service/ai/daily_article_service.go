@@ -126,7 +126,9 @@ func (exa *DailyArticleService) GetDailyArticleList(sysUserAuthorityID uint) (li
 		}
 		articleList = append(articleList, dailyArticleList...)
 		for _, item := range dailyArticleList {
-			portNameList = append(portNameList, item.PortalName)
+			if item.PortalName != "百家号" {
+				portNameList = append(portNameList, item.PortalName)
+			}
 		}
 
 		targetNum := account.TargetNum

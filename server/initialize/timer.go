@@ -56,15 +56,15 @@ func Timer() {
 			fmt.Println("add timer error:", err)
 		}
 
-		//_, err = global.GVA_Timer.AddTaskByFunc("爬取百家号", "@every 5m", func() {
-		//	task.SpiderHotArticle()
-		//	if err != nil {
-		//		fmt.Println("timer error:", err)
-		//	}
-		//}, "爬取百家号", option...)
-		//if err != nil {
-		//	fmt.Println("add timer error:", err)
-		//}
+		_, err = global.GVA_Timer.AddTaskByFunc("爬取百家号", "@every 5m", func() {
+			task.SpiderHotArticle()
+			if err != nil {
+				fmt.Println("timer error:", err)
+			}
+		}, "爬取百家号", option...)
+		if err != nil {
+			fmt.Println("add timer error:", err)
+		}
 
 		_, err = global.GVA_Timer.AddTaskByFunc("定时爬取微信公众号", "@hourly", func() {
 			err = task.WechatSpider(global.GVA_DB)

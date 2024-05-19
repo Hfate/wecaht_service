@@ -190,7 +190,7 @@ func (cs *ChatService) Recreation(articleContext *ArticleContext, chatModel conf
 	// 更新进度
 	global.GVA_DB.Save(&aiArticle)
 
-	go cs.GetSimilarity(aiArticle)
+	//go cs.GetSimilarity(aiArticle)
 
 	articleContext.Params = []string{chatModel.ModelType, "Recreation"}
 
@@ -202,26 +202,26 @@ func (cs *ChatService) Recreation(articleContext *ArticleContext, chatModel conf
 	return articleContext, nil
 }
 
-func (cs *ChatService) GetSimilarity(aiArticle *ai.AIArticle) {
-	req := &SimilarityReq{
-		Text:    aiArticle.OriginContent,
-		Compare: []string{aiArticle.Content},
-	}
-
-	resp, err := SiTongServiceApp.Similarity(req)
-	if err != nil {
-		global.GVA_LOG.Error("GetSimilarity", zap.Error(err))
-		return
-	}
-
-	if resp != nil && len(resp.Results) > 0 {
-		// 更新相似度
-		similarity := resp.Results[0].Similarity
-		aiArticle.Similarity = similarity
-		global.GVA_DB.Save(&aiArticle)
-	}
-
-}
+//func (cs *ChatService) GetSimilarity(aiArticle *ai.AIArticle) {
+//	req := &SimilarityReq{
+//		Text:    aiArticle.OriginContent,
+//		Compare: []string{aiArticle.Content},
+//	}
+//
+//	resp, err := SiTongServiceApp.Similarity(req)
+//	if err != nil {
+//		global.GVA_LOG.Error("GetSimilarity", zap.Error(err))
+//		return
+//	}
+//
+//	if resp != nil && len(resp.Results) > 0 {
+//		// 更新相似度
+//		similarity := resp.Results[0].Similarity
+//		aiArticle.Similarity = similarity
+//		global.GVA_DB.Save(&aiArticle)
+//	}
+//
+//}
 
 func (cs *ChatService) SearchAndSave(keyword string) string {
 	imgUrlList := make([]string, 0)
@@ -462,7 +462,7 @@ type ChatResp struct {
 }
 
 func parsePrompt(context *ArticleContext, promptType int) ([]string, error) {
-	topic := context.Topic
+	topic := context.Account.Topic
 	prompt, err := PromptServiceApp.FindPromptByTopicAndType(topic, promptType)
 	if err != nil {
 		return []string{}, err

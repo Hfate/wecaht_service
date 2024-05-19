@@ -22,19 +22,19 @@ type AIArticle struct {
 	CommentNum        int       `json:"commentNum"`
 	Content           string    `json:"content"`
 	Context           string    `json:"context"`
-	OriginContent     string    `json:"originContent"`
-	Tags              string    `json:"tags"`
-	ArticleStatus     int       `json:"articleStatus"` // 0  刚生成  1 发送至草稿箱  2 发布成功 3 群发成功  4 发布失败
-	ErrMessage        string    `json:"errMessage"`
-	MediaId           string    `json:"mediaId"`
-	PublishId         int64     `json:"publishId"`
-	MsgDataID         int64     `json:"msgDataId"`
-	MsgId             int64     `json:"msgId"`
-	Params            string    `json:"params"`
-	ProcessStatus     int       `json:"processStatus"`
-	ProcessParams     string    `json:"processParams"`
-	Percent           int       `json:"percent"`
-	Similarity        float64   `json:"similarity"`
+	//OriginContent     string    `json:"originContent"`
+	Tags          string  `json:"tags"`
+	ArticleStatus int     `json:"articleStatus"` // 0  刚生成  1 发送至草稿箱  2 发布成功 3 群发成功  4 发布失败
+	ErrMessage    string  `json:"errMessage"`
+	MediaId       string  `json:"mediaId"`
+	PublishId     int64   `json:"publishId"`
+	MsgDataID     int64   `json:"msgDataId"`
+	MsgId         int64   `json:"msgId"`
+	Params        string  `json:"params"`
+	ProcessStatus int     `json:"processStatus"`
+	ProcessParams string  `json:"processParams"`
+	Percent       int     `json:"percent"`
+	Similarity    float64 `json:"similarity"`
 }
 
 func (AIArticle) TableName() string {

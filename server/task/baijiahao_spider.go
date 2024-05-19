@@ -150,6 +150,16 @@ func collectArticle(hotspot ai.Hotspot) []ai.Article {
 			topic = "时事"
 		}
 
+		if topic == "社会新闻" {
+			topic = "时事"
+		}
+
+		readNum := 0
+		if topic == "热门事件" {
+			topic = "时事"
+			readNum = 100000
+		}
+
 		item := ai.Article{
 			Title:       title,
 			Link:        link,
@@ -159,6 +169,7 @@ func collectArticle(hotspot ai.Hotspot) []ai.Article {
 			HotspotId:   cast.ToUint64(hotspot.ID),
 			Topic:       topic,
 			PortalName:  "百家号",
+			ReadNum:     readNum,
 		}
 
 		publishTimeInt, _ := timeutil.StrToTimeStamp(publishTime, "2006-01-02 15:04:05")
