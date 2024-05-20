@@ -76,6 +76,12 @@
         />
         <el-table-column
             align="left"
+            label="流速"
+            prop="avgSpeed"
+            width="120"
+        />
+        <el-table-column
+            align="left"
             label="创建时间"
             width="160"
         >
@@ -180,6 +186,7 @@ const form = ref({
   headlines: '',
   portalName: '',
   link: '',
+  avgSpeed:1,
 })
 
 const page = ref(1)

@@ -6,7 +6,6 @@ import (
 	aiReq "github.com/flipped-aurora/gin-vue-admin/server/model/ai/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
 	systemService "github.com/flipped-aurora/gin-vue-admin/server/service/system"
-	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"github.com/spf13/cast"
 	"go.uber.org/zap"
 	"time"
@@ -15,14 +14,38 @@ import (
 type HotspotService struct {
 }
 
+var HotspotServiceImp = new(HotspotService)
+
 //@function: CreateHotspot
 //@description: 创建热点
 //@param: e model.Hotspot
 //@return: err error
 
-func (exa *HotspotService) CreateHotspot(e ai.Hotspot) (err error) {
-	e.BASEMODEL = global.BASEMODEL{ID: cast.ToString(utils.GenID()), CreatedAt: time.Now(), UpdatedAt: time.Now()}
-	err = global.GVA_DB.Create(&e).Error
+func (exa *HotspotService) CreateHotspot(list []*ai.Hotspot) (err error) {
+	if len(list) == 0 {
+		return nil
+	}
+	for _, item := range list {
+		old := &ai.Hotspot{}
+		global.GVA_DB.Model(&ai.Hotspot{}).Where("headline=?", item.Headline).Find(&old)
+		if old != nil {
+			diffNum := item.Trending - old.Trending
+			oldDiffTime := old.UpdatedAt.Sub(old.CreatedAt).Minutes()
+			oldSpeed := float64(old.AvgSpeed)
+			oldDiffNum := oldSpeed * oldDiffTime
+
+			newDiffTime := time.Now().Sub(old.CreatedAt).Minutes()
+
+			newSpeed := (float64(diffNum) + oldDiffNum) / newDiffTime
+
+			old.Trending = item.Trending
+			old.AvgSpeed = int(newSpeed)
+
+		} else {
+			global.GVA_DB.Model(&ai.Hotspot{}).Create(item)
+		}
+	}
+
 	return err
 }
 

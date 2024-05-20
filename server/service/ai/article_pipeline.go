@@ -4,6 +4,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/ai"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils/timeutil"
+	"github.com/spf13/cast"
 	"go.uber.org/zap"
 	"strings"
 	"time"
@@ -113,42 +114,31 @@ type RecreationArticle struct {
 func (r *RecreationArticle) Handle(context *ArticleContext) error {
 	batchId := timeutil.GetCurDate() + context.Account.AppId
 
-	article := ai.DailyArticle{}
-	err := global.GVA_DB.Where("batch_id = ?", batchId).Where("use_times=0").Order("publish_time desc").Last(&article).Error
-	if err != nil {
-		return err
-	}
-
-	// 更新使用次数
-	article.UseTimes = article.UseTimes + 1
-	err = global.GVA_DB.Save(&article).Error
-	if err != nil {
-		return err
-	}
+	title, content, link := r.FindArticleContent(context.Account)
 
 	// 生成文章初稿
 	aiArticle := &ai.AIArticle{
 		BatchId:           batchId,
-		Title:             article.Title,
+		Title:             title,
 		TargetAccountName: context.Account.AccountName,
 		TargetAccountId:   context.Account.AppId,
 		Topic:             context.Account.Topic,
 		AuthorName:        context.Account.DefaultAuthorName,
-		Link:              article.Link,
-		Content:           article.Content,
+		Link:              link,
+		Content:           content,
 		//OriginContent:     article.Content,
 		PublishTime:   time.Now(),
 		ProcessParams: "任务新创建，正在等待执行..",
 	}
 	aiArticle.BASEMODEL = BaseModel()
-	err = global.GVA_DB.Model(&ai.AIArticle{}).Create(aiArticle).Error
+	err := global.GVA_DB.Model(&ai.AIArticle{}).Create(aiArticle).Error
 	if err != nil {
 		return err
 	}
 
-	context.Title = article.Title
-	context.Content = article.Content
-	context.Link = article.Link
+	context.Title = title
+	context.Content = content
+	context.Link = link
 	context.Article = aiArticle
 
 	PoolServiceApp.SubmitBizTask(func() {
@@ -179,6 +169,68 @@ func (r *RecreationArticle) Handle(context *ArticleContext) error {
 	})
 
 	return err
+}
+
+func (r *RecreationArticle) FindArticleContent(account *ai.OfficialAccount) (string, string, string) {
+	title, content, link := "", "", ""
+	if account.Topic == "时事" {
+		title, content, link = r.FindHotArticleContent()
+
+		if title != "" {
+			return title, content, link
+		}
+
+	}
+
+	batchId := timeutil.GetCurDate() + account.AppId
+
+	article := ai.DailyArticle{}
+	err := global.GVA_DB.Where("batch_id = ?", batchId).Where("use_times=0").Order("publish_time desc").Last(&article).Error
+	if err != nil {
+		return title, content, link
+	}
+
+	// 更新使用次数
+	article.UseTimes = article.UseTimes + 1
+	err = global.GVA_DB.Save(&article).Error
+	if err != nil {
+		return title, content, link
+	}
+
+	return article.Title, article.Content, article.Link
+}
+
+func (r *RecreationArticle) FindHotArticleContent() (string, string, string) {
+	hotspotList := make([]ai.Hotspot, 0)
+	err := global.GVA_DB.Where("topic = ?", "时事").Where("use_times=0").Order("created_at desc ,trending desc").Limit(200).Find(&hotspotList).Error
+	if err != nil {
+		return "", "", ""
+	}
+
+	for _, hotspot := range hotspotList {
+		articleList := make([]*ai.Article, 0)
+		err = global.GVA_DB.Model(&ai.Article{}).Where("hotspot_id = ?", hotspot.ID).Limit(2).Find(&articleList).Error
+
+		if err == nil && len(articleList) == 2 {
+			content := ""
+
+			for index, item := range articleList {
+				content += "第" + cast.ToString(index+1) + "篇文章：\n"
+				content += item.Content
+
+				// 更新使用次数
+				item.UseTimes = item.UseTimes + 1
+				err = global.GVA_DB.Save(&item).Error
+			}
+
+			hotspot.UseTimes = 1
+			global.GVA_DB.Save(&hotspot)
+
+			return hotspot.Headline, content, hotspot.Link
+		}
+	}
+
+	return "", "", ""
 }
 
 type HotSpotWriteArticle struct {

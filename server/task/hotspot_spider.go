@@ -23,6 +23,8 @@ func HotspotSpider(db *gorm.DB) error {
 
 	spiderBaiduHeadline(db)
 
+	//db.Exec("UPDATE hotspot SET avg_speed = CASE  WHEN TIMESTAMPDIFF(MINUTE, created_at, updated_at) = 0 THEN 0\n                    ELSE trending / NULLIF(TIMESTAMPDIFF(MINUTE, created_at, updated_at), 0)\n    END\nWHERE trending IS NOT NULL AND updated_at IS NOT NULL AND created_at IS NOT NULL;")
+
 	return nil
 }
 
@@ -70,12 +72,7 @@ func spiderBaiduHeadline(db *gorm.DB) {
 		return
 	}
 
-	err = db.Where("link in ?", linkUrlList).Unscoped().Delete(&ai.Hotspot{}).Error
-	if err != nil {
-		return
-	}
-
-	err = db.Create(&hotspotList).Error
+	err = ai2.HotspotServiceImp.CreateHotspot(hotspotList)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -110,12 +107,7 @@ func spiderWeiboHeadline(db *gorm.DB) {
 		hotspotList = append(hotspotList, hotspot)
 	}
 
-	err = db.Where("link in ?", urlList).Unscoped().Delete(&ai.Hotspot{}).Error
-	if err != nil {
-		return
-	}
-
-	err = db.Create(&hotspotList).Error
+	err = ai2.HotspotServiceImp.CreateHotspot(hotspotList)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -164,16 +156,7 @@ func spiderToutiaoHeadline(db *gorm.DB) {
 		hotspotList = append(hotspotList, hotspot)
 	}
 
-	err = db.Where("link in ?", urlList).Unscoped().Delete(&ai.Hotspot{}).Error
-	if err != nil {
-		return
-	}
-	err = db.Where("headline in ?", headlineList).Unscoped().Delete(&ai.Hotspot{}).Error
-	if err != nil {
-		return
-	}
-
-	err = db.Create(&hotspotList).Error
+	err = ai2.HotspotServiceImp.CreateHotspot(hotspotList)
 	if err != nil {
 		fmt.Println(err)
 	}

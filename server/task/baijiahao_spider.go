@@ -163,7 +163,7 @@ func collectArticle(hotspot ai.Hotspot) []ai.Article {
 		item := ai.Article{
 			Title:       title,
 			Link:        link,
-			Comment:     content,
+			Content:     content,
 			AuthorName:  author,
 			PublishTime: publishTime,
 			HotspotId:   cast.ToUint64(hotspot.ID),
