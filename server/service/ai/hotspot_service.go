@@ -28,7 +28,7 @@ func (exa *HotspotService) CreateHotspot(list []*ai.Hotspot) (err error) {
 	for _, item := range list {
 		old := &ai.Hotspot{}
 		global.GVA_DB.Model(&ai.Hotspot{}).Where("headline=?", item.Headline).Find(&old)
-		if old != nil {
+		if old != nil && old.ID != "" {
 			diffNum := item.Trending - old.Trending
 			oldDiffTime := old.UpdatedAt.Sub(old.CreatedAt).Minutes()
 			oldSpeed := float64(old.AvgSpeed)
