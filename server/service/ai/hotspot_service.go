@@ -41,6 +41,8 @@ func (exa *HotspotService) CreateHotspot(list []*ai.Hotspot) (err error) {
 			old.Trending = item.Trending
 			old.AvgSpeed = int(newSpeed)
 
+			global.GVA_DB.Save(old)
+
 		} else {
 			global.GVA_DB.Model(&ai.Hotspot{}).Create(item)
 		}
