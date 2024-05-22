@@ -91,6 +91,15 @@
         </el-table-column>
         <el-table-column
             align="left"
+            label="更新时间"
+            width="160"
+        >
+          <template #default="scope">
+            <span>{{ formatDate(scope.row.UpdatedAt) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column
+            align="left"
             label="操作"
             min-width="160"
         >
