@@ -51,12 +51,13 @@ func (exa *AIArticleService) PublishArticle(ids []string) error {
 		batchAIArticleMap[item.BatchId] = append(batchAIArticleMap[item.BatchId], item)
 	}
 
-	go func() {
-		for _, list := range batchAIArticleMap {
-			err = exa.Publish1Article(list)
+	for _, list := range batchAIArticleMap {
+		subList := list
+		go func() {
+			err = exa.Publish1Article(subList)
 			if err != nil {
 
-				for _, item := range list {
+				for _, item := range subList {
 
 					global.GVA_LOG.Error("发布失败!", zap.Error(err), zap.String("item", item.Title))
 					item.ArticleStatus = 4
@@ -66,9 +67,9 @@ func (exa *AIArticleService) PublishArticle(ids []string) error {
 				}
 
 			}
+		}()
 
-		}
-	}()
+	}
 
 	return err
 }
