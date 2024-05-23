@@ -39,6 +39,16 @@ func Timer() {
 		//	fmt.Println("add timer error:", err)
 		//}
 
+		_, err = global.GVA_Timer.AddTaskByFunc("热点创作", "@every 5m", func() {
+			err = task.HotspotCreate(global.GVA_DB)
+			if err != nil {
+				fmt.Println("timer error:", err)
+			}
+		}, "热点创作", option...)
+		if err != nil {
+			fmt.Println("add timer error:", err)
+		}
+
 		_, err = global.GVA_Timer.AddTaskByFunc("定时任务标识", "@every 5m", func() {
 			err = task.HotspotSpider(global.GVA_DB)
 			if err != nil {

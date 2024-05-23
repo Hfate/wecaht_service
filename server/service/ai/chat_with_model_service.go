@@ -2,6 +2,7 @@ package ai
 
 import (
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
+	"github.com/flipped-aurora/gin-vue-admin/server/model/ai"
 )
 
 var ChatModelServiceApp = new(ChatModelService)
@@ -23,14 +24,15 @@ func (*ChatModelService) Recreation(context *ArticleContext) (*ArticleContext, e
 	return nil, nil
 }
 
-func (*ChatModelService) HotSpotWrite(context *ArticleContext) (*ArticleContext, error) {
+func (*ChatModelService) HotSpotWrite(account *ai.OfficialAccount, headLine string) (*ArticleContext, error) {
 
 	chatModels := global.GVA_CONFIG.ChatModels
 
 	for _, chatModel := range chatModels {
 		// 可以通过 WithModel 指定模型
-		result, err := ChatServiceApp.HotSpotWrite(context, chatModel)
-		if err == nil && len(context.Params) > 0 {
+		result, err := ChatServiceApp.HotSpotWrite(account, headLine, chatModel)
+		if err == nil && len(result.Content) > 1000 {
+
 			return result, nil
 		}
 	}
