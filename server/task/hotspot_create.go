@@ -15,28 +15,32 @@ func HotspotCreate(db *gorm.DB) error {
 	startOfDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
 	hotspotList := make([]*ai.Hotspot, 0)
 
-	db.Model(&ai.Hotspot{}).Where("avg_speed>1000000").Where("use_times=0").Where("created_at>?", startOfDay).Limit(5).Find(&hotspotList)
+	accountList := make([]*ai.OfficialAccount, 0)
+	db.Model(&ai.OfficialAccount{}).Where("topic=?", "热点").Find(&accountList)
 
-	account := &ai.OfficialAccount{}
-	db.Model(&ai.OfficialAccount{}).Where("topic=?", "热点").Last(&account)
+	limit := len(accountList)
 
-	articleList := make([]ai.AIArticle, 0)
-	for _, hotspot := range hotspotList {
+	db.Model(&ai.Hotspot{}).Where("avg_speed>1000000").Where("use_times=0").Where("created_at>?", startOfDay).Limit(limit).Find(&hotspotList)
+
+	for index, hotspot := range hotspotList {
 
 		hotspot.UseTimes = 1
 		db.Save(hotspot)
 
+		account := accountList[index]
+
 		result, err := ai2.ChatModelServiceApp.HotSpotWrite(account, hotspot.Headline)
 
+		articleList := make([]ai.AIArticle, 0)
 		if err == nil && len(result.Content) > 1000 {
 			articleList = append(articleList, ai.AIArticle{
 				Title:   result.Title,
 				Content: result.Content,
 			})
+
+			ai2.WechatServiceApp.PublishArticle(account, articleList)
 		}
 	}
-
-	ai2.WechatServiceApp.PublishArticle(account, articleList)
 
 	return nil
 }
