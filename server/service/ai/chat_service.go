@@ -87,7 +87,25 @@ func (cs *ChatService) HotSpotWrite(account *ai.OfficialAccount, headLine string
 			return nil, err
 		}
 
-		context.Content = resp
+		resp = strings.ReplaceAll(resp, "```json", "")
+		resp = strings.ReplaceAll(resp, "```", "")
+
+		addImgResp := &AddImgResp{}
+
+		err = utils.JsonStrToStruct(resp, addImgResp)
+		if err == nil && addImgResp.Image1Description != "" && addImgResp.Image2Description != "" {
+			img1 := cs.SearchAndSave(addImgResp.Image1Description)
+			img2 := cs.SearchAndSave(addImgResp.Image2Description)
+
+			if strings.Contains(img1, "http") && strings.Contains(img2, "http") {
+				context.Content = utils.RemoveSpecialWord(context.Content)
+				context.Content = utils.RemoveNonsense(context.Content)
+				imgLine1 := "\n" + "![" + addImgResp.Image1Description + "](" + img1 + ")" + "\n"
+				imgLine2 := "\n" + "![" + addImgResp.Image2Description + "](" + img2 + ")" + "\n"
+				context.Content = utils.InsertTextAtThirds(context.Content, imgLine1, imgLine2)
+			}
+
+		}
 	}
 
 	context.Params = []string{chatModel.ModelType, "HotSpotWrite"}
