@@ -99,6 +99,7 @@ type ArticleContext struct {
 	Article     *ai.AIArticle
 	Title       string
 	Content     string
+	Comment     string
 	Topic       string
 	HotspotId   uint64
 	Link        string
@@ -114,18 +115,18 @@ type RecreationArticle struct {
 func (r *RecreationArticle) Handle(context *ArticleContext) error {
 	batchId := timeutil.GetCurDate() + context.Account.AppId
 
-	title, content, link := r.FindArticleContent(context.Account)
+	dailyArticle := r.FindArticleContent(context.Account)
 
 	// 生成文章初稿
 	aiArticle := &ai.AIArticle{
 		BatchId:           batchId,
-		Title:             title,
+		Title:             dailyArticle.Title,
 		TargetAccountName: context.Account.AccountName,
 		TargetAccountId:   context.Account.AppId,
 		Topic:             context.Account.Topic,
 		AuthorName:        context.Account.DefaultAuthorName,
-		Link:              link,
-		Content:           content,
+		Link:              dailyArticle.Link,
+		Content:           dailyArticle.Content,
 		//OriginContent:     article.Content,
 		PublishTime:   time.Now(),
 		ProcessParams: "任务新创建，正在等待执行..",
@@ -136,9 +137,10 @@ func (r *RecreationArticle) Handle(context *ArticleContext) error {
 		return err
 	}
 
-	context.Title = title
-	context.Content = content
-	context.Link = link
+	context.Title = dailyArticle.Title
+	context.Content = dailyArticle.Content
+	context.Comment = dailyArticle.Comment
+	context.Link = dailyArticle.Link
 	context.Article = aiArticle
 
 	PoolServiceApp.SubmitBizTask(func() {
@@ -171,13 +173,17 @@ func (r *RecreationArticle) Handle(context *ArticleContext) error {
 	return err
 }
 
-func (r *RecreationArticle) FindArticleContent(account *ai.OfficialAccount) (string, string, string) {
-	title, content, link := "", "", ""
+func (r *RecreationArticle) FindArticleContent(account *ai.OfficialAccount) ai.DailyArticle {
+
 	if account.Topic == "时事" {
-		title, content, link = r.FindHotArticleContent()
+		title, content, link := r.FindHotArticleContent()
 
 		if title != "" {
-			return title, content, link
+			return ai.DailyArticle{
+				Title:   title,
+				Content: content,
+				Link:    link,
+			}
 		}
 
 	}
@@ -187,17 +193,17 @@ func (r *RecreationArticle) FindArticleContent(account *ai.OfficialAccount) (str
 	article := ai.DailyArticle{}
 	err := global.GVA_DB.Where("batch_id = ?", batchId).Where("use_times=0").Order("publish_time desc").Last(&article).Error
 	if err != nil {
-		return title, content, link
+		return ai.DailyArticle{}
 	}
 
 	// 更新使用次数
 	article.UseTimes = article.UseTimes + 1
 	err = global.GVA_DB.Save(&article).Error
 	if err != nil {
-		return title, content, link
+		return ai.DailyArticle{}
 	}
 
-	return article.Title, article.Content, article.Link
+	return article
 }
 
 func (r *RecreationArticle) FindHotArticleContent() (string, string, string) {
