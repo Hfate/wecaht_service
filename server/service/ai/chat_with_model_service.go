@@ -32,6 +32,10 @@ func (*ChatModelService) HotSpotWrite(account *ai.OfficialAccount, headLine stri
 		// 可以通过 WithModel 指定模型
 		result, err := ChatServiceApp.HotSpotWrite(account, headLine, chatModel)
 		if err == nil && len(result.Content) > 1000 {
+			//
+			result.Title = ArticleContentHandlerApp.HandleTitle(result.Title)
+			//
+			result.Content = ArticleContentHandlerApp.Handle(account, result.Content)
 
 			return result, nil
 		}

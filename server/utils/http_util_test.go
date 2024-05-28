@@ -49,6 +49,11 @@ func TestGet(t *testing.T) {
 }
 
 func TestGetStr(t *testing.T) {
-	result, _ := NormalGetStr("http://image.baidu.com/search/flip?tn=baiduimage&ie=utf-8&word=美女&ct=201326592&v=flip")
-	fmt.Println(result)
+	url := "https://www.toutiao.com/api/pc/list/feed?category=pc_user_hot&token=MS4wLjABAAAAr_zcfm3YFy9BoJZXSYYaF5tjwp1DdkLA99wjEIdVq8ycFKr6kjzOJS8M-kxAMyxk&aid=24&app_name=toutiao_web&msToken=Gy9EPMXVa5SzYZyduGXGo7aZdoJIIA1XJFjJGxxdWO9tm6GeWxMfLx0IiGV_46EkRrd-rec25QRwKgBfTomRxsBiYUjmNemJYrtrGwZv9zzrisJO1ks6&a_bogus=mXm0Q5gfDEIpXDyZ53cLfY3qV1-3Y%2Fxy0t9bMDhqmV30X639HMPh9exoB4Jvq6gjLG%2FlIeSjy4hJT3eMxQVyA3vI7WmKlIOd-g00te%2FQ5xSSs1XytLXgJUvomktRCFn25k1UEKihowBHFb82AdAJ5kIlO62kFobyifELtRg%3D"
+	cookieList := make([]*http.Cookie, 0)
+	ck1 := &http.Cookie{Name: "tt_webid", Value: "7373714042701547060"}
+	cookieList = append(cookieList, ck1)
+	ret, _ := GetWithCookie(url, cookieList)
+	fmt.Println(ret)
+
 }
