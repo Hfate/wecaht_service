@@ -113,64 +113,34 @@ type RecreationArticle struct {
 }
 
 func (r *RecreationArticle) Handle(context *ArticleContext) error {
-	batchId := timeutil.GetCurDate() + context.Account.AppId
 
-	dailyArticle := r.FindArticleContent(context.Account)
+	aiArticle := context.Article
 
-	// 生成文章初稿
-	aiArticle := &ai.AIArticle{
-		BatchId:           batchId,
-		Title:             dailyArticle.Title,
-		TargetAccountName: context.Account.AccountName,
-		TargetAccountId:   context.Account.AppId,
-		Topic:             context.Account.Topic,
-		AuthorName:        context.Account.DefaultAuthorName,
-		Link:              dailyArticle.Link,
-		Content:           dailyArticle.Content,
-		//OriginContent:     article.Content,
-		PublishTime:   time.Now(),
-		ProcessParams: "任务新创建，正在等待执行..",
-	}
-	aiArticle.BASEMODEL = BaseModel()
-	err := global.GVA_DB.Model(&ai.AIArticle{}).Create(aiArticle).Error
-	if err != nil {
-		return err
+	aiArticle.ProcessStatus = ai.ProcessCreateIng
+	// 更新进度
+	global.GVA_DB.Save(&aiArticle)
+
+	result, err2 := ChatModelServiceApp.Recreation(context)
+	if err2 != nil {
+		global.GVA_LOG.Error("Recreation", zap.Error(err2))
+		return err2
 	}
 
-	context.Title = dailyArticle.Title
-	context.Content = dailyArticle.Content
-	context.Comment = dailyArticle.Comment
-	context.Link = dailyArticle.Link
-	context.Article = aiArticle
+	context.Content = result.Content
+	context.Title = result.Title
 
-	PoolServiceApp.SubmitBizTask(func() {
+	//
+	aiArticle.Title = ArticleContentHandlerApp.HandleTitle(result.Title)
+	//  处理排版
+	aiArticle.Content = ArticleContentHandlerApp.Handle(context.Account, result.Content)
 
-		aiArticle.ProcessStatus = ai.ProcessCreateIng
-		// 更新进度
-		global.GVA_DB.Save(&aiArticle)
+	// 更新文章内容
+	err2 = global.GVA_DB.Save(&aiArticle).Error
+	if err2 != nil {
+		global.GVA_LOG.Error("Recreation", zap.Error(err2))
+	}
 
-		result, err2 := ChatModelServiceApp.Recreation(context)
-		if err2 != nil {
-			global.GVA_LOG.Error("Recreation", zap.Error(err2))
-			return
-		}
-
-		context.Content = result.Content
-		context.Title = result.Title
-
-		//
-		aiArticle.Title = ArticleContentHandlerApp.HandleTitle(result.Title)
-		//  处理排版
-		aiArticle.Content = ArticleContentHandlerApp.Handle(context.Account, result.Content)
-
-		// 更新文章内容
-		err2 = global.GVA_DB.Save(&aiArticle).Error
-		if err2 != nil {
-			global.GVA_LOG.Error("Recreation", zap.Error(err2))
-		}
-	})
-
-	return err
+	return nil
 }
 
 func (r *RecreationArticle) FindArticleContent(account *ai.OfficialAccount) ai.DailyArticle {

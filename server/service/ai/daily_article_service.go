@@ -104,6 +104,10 @@ func (exa *DailyArticleService) GetDailyArticleList(sysUserAuthorityID uint) (li
 		return
 	}
 
+	return exa.List()
+}
+
+func (exa *DailyArticleService) List() (list interface{}, total int64, err error) {
 	var articleList []ai.DailyArticle
 
 	// 获取所有的公众号

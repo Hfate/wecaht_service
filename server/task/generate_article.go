@@ -7,6 +7,9 @@ import (
 )
 
 func GenerateArticle() {
+
+	service.ServiceGroupApp.AIServiceGroup.DailyArticleService.List()
+
 	err := service.ServiceGroupApp.AIServiceGroup.AIArticleService.GenerateDailyArticle()
 	if err != nil {
 		global.GVA_LOG.Error("生成文章失败", zap.Error(err))

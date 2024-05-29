@@ -13,6 +13,7 @@ import (
 	"github.com/spf13/cast"
 	"go.uber.org/zap"
 	"sort"
+	"sync"
 	"time"
 )
 
@@ -165,9 +166,37 @@ func (exa *AIArticleService) GenerateArticle(account *ai.OfficialAccount) error 
 
 	i := 0
 
+	w := &sync.WaitGroup{}
+
 	for i < targetNum && i < 10 {
 
+		dailyArticle := exa.FindArticleContent(account)
+
+		// 生成文章初稿
+		aiArticle := &ai.AIArticle{
+			BatchId:           batchId,
+			Title:             dailyArticle.Title,
+			TargetAccountName: account.AccountName,
+			TargetAccountId:   account.AppId,
+			Topic:             account.Topic,
+			AuthorName:        account.DefaultAuthorName,
+			Link:              dailyArticle.Link,
+			Content:           dailyArticle.Content,
+			//OriginContent:     article.Content,
+			PublishTime:   time.Now(),
+			ProcessParams: "任务新创建，正在等待执行..",
+		}
+		aiArticle.BASEMODEL = BaseModel()
+		err = global.GVA_DB.Model(&ai.AIArticle{}).Create(aiArticle).Error
+		if err != nil {
+			return err
+		}
+
 		context := &ArticleContext{
+			Title:       dailyArticle.Title,
+			Content:     dailyArticle.Content,
+			Comment:     dailyArticle.Comment,
+			Article:     aiArticle,
 			Topic:       account.Topic,
 			Account:     account,
 			Params:      []string{},
@@ -176,31 +205,103 @@ func (exa *AIArticleService) GenerateArticle(account *ai.OfficialAccount) error 
 
 		i++
 
-		err = ArticlePipelineApp.Run(context)
+		w.Add(1)
+		PoolServiceApp.SubmitBizTask(func() {
 
-		if err != nil {
+			defer w.Done()
+			err = ArticlePipelineApp.Run(context)
+			if err != nil {
+				return
+			}
+		})
 
-			continue
+	}
+
+	w.Wait()
+
+	//// 创作完成开始自动发布
+	articleList := make([]*ai.AIArticle, 0)
+	global.GVA_DB.Model(&ai.AIArticle{}).Where("batch_id = ?", batchId).Find(&articleList)
+	if len(articleList) > 0 {
+
+		ids := make([]string, 0)
+		for _, item := range articleList {
+
+			if item.ProcessStatus == ai.ProcessCreated {
+				ids = append(ids, item.ID)
+			}
+
+		}
+		AIArticleServiceApp.PublishArticle(ids)
+	}
+
+	return nil
+}
+
+func (exa *AIArticleService) FindArticleContent(account *ai.OfficialAccount) ai.DailyArticle {
+
+	if account.Topic == "时事" {
+		title, content, link := exa.FindHotArticleContent()
+
+		if title != "" {
+			return ai.DailyArticle{
+				Title:   title,
+				Content: content,
+				Link:    link,
+			}
+		}
+
+	}
+
+	batchId := timeutil.GetCurDate() + account.AppId
+
+	article := ai.DailyArticle{}
+	err := global.GVA_DB.Where("batch_id = ?", batchId).Where("use_times=0").Order("publish_time desc").Last(&article).Error
+	if err != nil {
+		return ai.DailyArticle{}
+	}
+
+	// 更新使用次数
+	article.UseTimes = article.UseTimes + 1
+	err = global.GVA_DB.Save(&article).Error
+	if err != nil {
+		return ai.DailyArticle{}
+	}
+
+	return article
+}
+
+func (exa *AIArticleService) FindHotArticleContent() (string, string, string) {
+	hotspotList := make([]ai.Hotspot, 0)
+	err := global.GVA_DB.Where("topic = ?", "时事").Where("use_times=0").Order("created_at desc ,trending desc").Limit(200).Find(&hotspotList).Error
+	if err != nil {
+		return "", "", ""
+	}
+
+	for _, hotspot := range hotspotList {
+		articleList := make([]*ai.Article, 0)
+		err = global.GVA_DB.Model(&ai.Article{}).Where("hotspot_id = ?", hotspot.ID).Limit(2).Find(&articleList).Error
+
+		if err == nil && len(articleList) == 2 {
+			content := ""
+
+			for index, item := range articleList {
+				content += "第" + cast.ToString(index+1) + "篇文章：\n"
+				content += item.Content
+
+				// 更新使用次数
+				item.UseTimes = item.UseTimes + 1
+				err = global.GVA_DB.Save(&item).Error
+			}
+
+			hotspot.UseTimes = 1
+			global.GVA_DB.Save(&hotspot)
+
+			return hotspot.Headline, content, hotspot.Link
 		}
 	}
 
-	//// 创作完成开始自动发布
-	//articleList := make([]*ai.AIArticle, 0)
-	//global.GVA_DB.Model(&ai.AIArticle{}).Where("batch_id = ?", batchId).Find(&articleList)
-	//if len(articleList) > 0 {
-	//
-	//	ids := make([]string, 0)
-	//	for _, item := range articleList {
-	//
-	//		if item.ProcessStatus == ai.ProcessCreated {
-	//			ids = append(ids, item.ID)
-	//		}
-	//
-	//	}
-	//	AIArticleServiceApp.PublishArticle(ids)
-	//}
-
-	return nil
+	return "", "", ""
 }
 
 // GenerateDailyArticle 生成每日文章
