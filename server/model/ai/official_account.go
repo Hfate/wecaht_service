@@ -20,6 +20,7 @@ type OfficialAccount struct {
 	CreateTypes       string `json:"createTypes"`
 	CssFormat         string `json:"cssFormat"`
 	NeedOpenComment   uint   `json:"needOpenComment"`
+	IsPublish         int    `json:"isPublish"`
 }
 
 func (OfficialAccount) TableName() string {

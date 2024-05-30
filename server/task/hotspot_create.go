@@ -13,14 +13,19 @@ func HotspotCreate(db *gorm.DB) error {
 
 	// 设置时间为当天的开始，即00:00:00
 	startOfDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
-	hotspotList := make([]*ai.Hotspot, 0)
 
 	accountList := make([]*ai.OfficialAccount, 0)
-	db.Model(&ai.OfficialAccount{}).Where("topic=?", "热点").Find(&accountList)
+	db.Model(&ai.OfficialAccount{}).Where("topic=?", "热点").Where("is_publish=0").Limit(1).Find(&accountList)
 
 	limit := len(accountList)
 
-	db.Model(&ai.Hotspot{}).Where("avg_speed>1000000").Where("use_times=0").Where("created_at>?", startOfDay).Limit(limit).Find(&hotspotList)
+	if limit == 0 {
+		// 重置
+		db.Model(&ai.OfficialAccount{}).Where("is_publish = 1").Update("is_publish", "0")
+	}
+
+	hotspotList := make([]*ai.Hotspot, 0)
+	db.Model(&ai.Hotspot{}).Where("avg_speed>900000").Where("use_times=0").Where("created_at>?", startOfDay).Limit(limit).Find(&hotspotList)
 
 	for index, hotspot := range hotspotList {
 
@@ -40,6 +45,9 @@ func HotspotCreate(db *gorm.DB) error {
 
 			ai2.WechatServiceApp.PublishArticle(account, articleList)
 		}
+
+		account.IsPublish = 1
+		db.Save(account)
 	}
 
 	return nil
