@@ -171,7 +171,8 @@ func InsertTextAtThirds(text string, insertText1, insertText2 string) string {
 	return strings.Join(lines, "\n")
 }
 
-var removeWords = []string{"标题", "重写", "原创性", "二创", "Prompt", "占位符", "原文素材", "配图", "小标题", "正文", "重塑文章"}
+var removeWords = []string{"标题", "重写", "原创性", "二创", "Prompt", "占位符", "原文素材",
+	"配图", "小标题", "正文", "重塑文章", "结尾", "结语"}
 
 func RemoveSpecialWord(content string) string {
 	// 以换行符为分隔符，将文章内容拆分成多行

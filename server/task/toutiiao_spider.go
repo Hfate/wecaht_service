@@ -5,84 +5,110 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/ai"
 	ai2 "github.com/flipped-aurora/gin-vue-admin/server/service/ai"
+	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils/timeutil"
 	"github.com/gocolly/colly/v2"
+	"github.com/spf13/cast"
 	"go.uber.org/zap"
-	"net/url"
 	"strings"
 	"time"
 )
 
-func collectToutiaoArticle() []ai.Article {
+func CollectToutiaoArticle() {
 	collector := colly.NewCollector(
 		colly.UserAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"),
 	)
-
-	collector.SetRequestTimeout(time.Second * 60)
 
 	subCollector := colly.NewCollector(
 		colly.UserAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"),
 	)
 
+	collector.SetRequestTimeout(time.Second * 60)
+	subCollector.SetRequestTimeout(time.Second * 60)
+
 	// 请求发起时回调,一般用来设置请求头等
 	collector.OnRequest(func(request *colly.Request) {
-		request.Headers.Set("Cookie", global.GVA_CONFIG.QianFan.Cookie)
-		fmt.Println("----> 开始请求了")
+		request.Headers.Set("Cookie", "__ac_nonce=0665c7753007e1cb7a608; _ga_QEHZPBE5HH=GS1.1.1717331872.5.1.1717335891.0.0.0; __ac_signature=_02B4Z6wo00f01RGuJyQAAIDDrCEMzB4yQDkRiiOAACI6ygmk--UIXy5rYsqsj77ZsKNZ1BUBXNjXmFRHWTmse5fovWgCM2ZCcr7uLGHU11lH73Ic9X7qRlSym7LE36oEZb12cjvPbtdyGBKFd1; __ac_referer=__ac_blank; msToken=CmnfAvSofZoACxNZrC_KTPsiwKryd4S0Yq-ProVEXgDhKVI4Bc31IuLl34lxYGu_VO_XkrNAYQtKNmaMzfrVGvDQc2kYbk42cobWHsMN; ttwid=1%7CjJhV-ZQBbp-rRPiTpQX02ojxAnJzbXA3xow5e5Q7iTA%7C1717335892%7Cb3e97916cc5efc25a7706234d6b4810ae649450704a42f890f87091b690f756d")
+	})
+
+	resultMap := make(map[string]*ai.Article)
+	// 请求完成后回调
+	collector.OnResponse(func(response *colly.Response) {
+		respStr := string(response.Body)
+		feedResp := &FeedResp{}
+		utils.JsonStrToStruct(respStr, feedResp)
+
+		if len(feedResp.Data) > 0 {
+			for _, item := range feedResp.Data {
+				feedConet := &FeedContent{}
+				utils.JsonStrToStruct(item.Content, feedConet)
+				if feedConet.ReadCount > 100000 {
+
+					topic := ""
+					if feedConet.UserInfo.UserAuthInfo != "" {
+						userAuthInfo := &UserAuthInfo{}
+						utils.JsonStrToStruct(feedConet.UserInfo.UserAuthInfo, userAuthInfo)
+						authInfo := userAuthInfo.AuthInfo
+						authInfo = strings.ReplaceAll(authInfo, "领域创作者", "")
+						authInfo = strings.ReplaceAll(authInfo, "优质", "")
+						topic = authInfo
+					}
+
+					resultMap[feedConet.ArticleUrl] = &ai.Article{
+						PortalName:  "今日头条",
+						PublishTime: timeutil.Format(int64(feedConet.PublishTime)*1000, timeutil.DateTimeLong),
+						ReadNum:     feedConet.ReadCount,
+						LikeNum:     feedConet.LikeCount,
+						Link:        feedConet.ArticleUrl,
+						Topic:       topic,
+						Title:       feedConet.Title,
+					}
+
+					subCollector.Visit(feedConet.ArticleUrl)
+				}
+			}
+		}
+
 	})
 
 	// 请求发起时回调,一般用来设置请求头等
 	subCollector.OnRequest(func(request *colly.Request) {
-		request.Headers.Set("Cookie", global.GVA_CONFIG.QianFan.Cookie)
-		fmt.Println(request.URL.Path + "----> 开始请求了")
-	})
-
-	// 请求完成后回调
-	collector.OnResponse(func(response *colly.Response) {
-		fmt.Println("----> 开始返回了")
+		request.Headers.Set("Cookie", "__ac_nonce=0665c7753007e1cb7a608; _ga_QEHZPBE5HH=GS1.1.1717331872.5.1.1717335891.0.0.0; __ac_signature=_02B4Z6wo00f01RGuJyQAAIDDrCEMzB4yQDkRiiOAACI6ygmk--UIXy5rYsqsj77ZsKNZ1BUBXNjXmFRHWTmse5fovWgCM2ZCcr7uLGHU11lH73Ic9X7qRlSym7LE36oEZb12cjvPbtdyGBKFd1; __ac_referer=__ac_blank; msToken=CmnfAvSofZoACxNZrC_KTPsiwKryd4S0Yq-ProVEXgDhKVI4Bc31IuLl34lxYGu_VO_XkrNAYQtKNmaMzfrVGvDQc2kYbk42cobWHsMN; ttwid=1%7CjJhV-ZQBbp-rRPiTpQX02ojxAnJzbXA3xow5e5Q7iTA%7C1717335892%7Cb3e97916cc5efc25a7706234d6b4810ae649450704a42f890f87091b690f756d")
 	})
 
 	// 请求完成后回调
 	subCollector.OnResponse(func(response *colly.Response) {
-		global.GVA_LOG.Info(response.Request.URL.Path+"----> 开始返回了",
-			zap.Int("status_code", response.StatusCode),
-			zap.Int("content_length", len(response.Body)))
+
 	})
 
-	result := make([]ai.Article, 0)
+	collectSize := 0
+	subCollector.OnHTML("div.article-content", func(element *colly.HTMLElement) {
 
-	collectNum := 0
+		url := element.Request.URL.String()
 
-	// 定义一个回调函数，处理页面响应
-	collector.OnHTML("h3", func(e *colly.HTMLElement) {
-		articleUrl := e.ChildAttr("a", "href")
+		author := element.ChildText(".name")
+		content := element.ChildText(".syl-article-base")
+		//
+		author = strings.TrimSpace(author)
+		content = strings.TrimSpace(content)
 
-		if strings.Contains(articleUrl, "baijiahao") && collectNum <= 3 {
-			// 解析URL
-			parsedURL, err := url.Parse(articleUrl)
-			if err != nil {
-				fmt.Println("Error parsing URL:", err)
-				return
-			}
+		groupUrl := strings.ReplaceAll(url, "article", "group")
+		groupUrl = strings.ReplaceAll(groupUrl, "www.", "")
+		item := resultMap[groupUrl]
 
-			// 更改URL的协议为http
-			parsedURL.Scheme = "http"
-
-			// 解析查询参数
-			queryParams := parsedURL.Query()
-
-			// 删除特定的查询参数wfr
-			queryParams.Del("wfr")
-
-			// 更新URL的查询参数
-			parsedURL.RawQuery = queryParams.Encode()
-
-			// 访问文章URL
-			subCollector.Visit(parsedURL.String())
-
-			time.Sleep(3 * time.Second)
-
-			collectNum++
+		if item == nil {
+			return
 		}
+
+		item.Content = content
+		item.AuthorName = author
+		item.Link = url
+
+		item.BASEMODEL = ai2.BaseModel()
+
+		global.GVA_DB.Create(item)
+
+		collectSize++
 
 	})
 
@@ -91,307 +117,342 @@ func collectToutiaoArticle() []ai.Article {
 		fmt.Printf("发生错误了:%v", err)
 	})
 
-	// 提取标题
-	subCollector.OnHTML("div.EaCvy", func(element *colly.HTMLElement) {
-		link := element.Request.URL.String()
-
-		title := element.ChildText(".sKHSJ")
-		author := element.ChildText("._2gGWi")
-		publishTime := element.ChildText("._2sjh9")
-		content := element.ChildText("._18p7x")
-		//
-		title = strings.TrimSpace(title) // 移除多余的空格
-		author = strings.TrimSpace(author)
-		publishTime = strings.TrimSpace(publishTime)
-		content = strings.TrimSpace(content)
-
-		topic := "时事"
-
-		readNum := 0
-
-		item := ai.Article{
-			Title:       title,
-			Link:        link,
-			Content:     content,
-			AuthorName:  author,
-			PublishTime: publishTime,
-			Topic:       topic,
-			PortalName:  "百家号",
-			ReadNum:     readNum,
-		}
-
-		publishTimeInt, _ := timeutil.StrToTimeStamp(publishTime, "2006-01-02 15:04:05")
-		// 发布时间需大于今年
-		if publishTimeInt < timeutil.GetYearStartTime(int64(time.Now().Year())) {
-			return
-		}
-
-		item.BASEMODEL = ai2.BaseModel()
-
-		// 将文章添加到结果切片中
-		result = append(result, item)
-	})
-
 	//encodedParam := url.QueryEscape(hotspot.Headline)
 
-	err := collector.Visit("https://www.toutiao.com/article/7373941840820568610")
+	err := collector.Visit("https://lf.snssdk.com/api/news/feed/v200/")
 	if err != nil {
 		global.GVA_LOG.Error("collectArticle", zap.Error(err))
 	}
 
-	return result
+	fmt.Println("头条爬取完成【" + cast.ToString(collectSize) + "】")
 }
 
-type ToutiaoArticleList struct {
-	HasMore bool   `json:"has_more"`
-	Message string `json:"message"`
-	Data    []struct {
-		Abstract       string `json:"abstract"`
-		AggrType       int    `json:"aggr_type"`
-		ArticleSubType int    `json:"article_sub_type"`
-		ArticleType    int    `json:"article_type"`
-		ArticleUrl     string `json:"article_url"`
-		ArticleVersion int    `json:"article_version"`
-		BanComment     bool   `json:"ban_comment"`
-		BehotTime      int    `json:"behot_time"`
-		BuryCount      int    `json:"bury_count"`
-		BuryStyleShow  int    `json:"bury_style_show"`
-		CellCtrls      struct {
-			CellFlag        int `json:"cell_flag"`
-			CellHeight      int `json:"cell_height"`
-			CellLayoutStyle int `json:"cell_layout_style"`
-		} `json:"cell_ctrls"`
-		CellFlag          int    `json:"cell_flag"`
-		CellLayoutStyle   int    `json:"cell_layout_style"`
-		CellType          int    `json:"cell_type"`
-		CommentCount      int    `json:"comment_count"`
-		CommonRawData     string `json:"common_raw_data"`
-		ContentDecoration string `json:"content_decoration"`
-		ControlMeta       struct {
-			Modify struct {
-				Hide       bool   `json:"hide"`
+type UserAuthInfo struct {
+	Thread struct {
+		AuthType string `json:"auth_type"`
+		AuthInfo string `json:"auth_info"`
+	} `json:"thread"`
+	AuthType  string `json:"auth_type"`
+	AuthInfo  string `json:"auth_info"`
+	OtherAuth struct {
+		Interest string `json:"interest"`
+	} `json:"other_auth"`
+}
+
+type FeedContent struct {
+	ReadCount     int         `json:"read_count"`
+	BehotTime     int         `json:"behot_time"`
+	DetailContent string      `json:"detail_content"`
+	Tip           int         `json:"tip"`
+	GroupIdStr    string      `json:"group_id_str"`
+	SmallImage    interface{} `json:"small_image"`
+	ForwardInfo   struct {
+		ForwardCount int `json:"forward_count"`
+	} `json:"forward_info"`
+	ShowPortrait    bool   `json:"show_portrait"`
+	TagId           int64  `json:"tag_id"`
+	ShareCount      int    `json:"share_count"`
+	ItemId          int64  `json:"item_id"`
+	Cursor          int64  `json:"cursor"`
+	Url             string `json:"url"`
+	SourceOpenUrl   string `json:"source_open_url"`
+	BanDanmaku      bool   `json:"ban_danmaku"`
+	GroupSource     int    `json:"group_source"`
+	SourceIconStyle int    `json:"source_icon_style"`
+	CommonRawData   struct {
+	} `json:"common_raw_data"`
+	UserInfo struct {
+		AvatarUrl       string `json:"avatar_url"`
+		Name            string `json:"name"`
+		Description     string `json:"description"`
+		UserId          int64  `json:"user_id"`
+		UserVerified    bool   `json:"user_verified"`
+		VerifiedContent string `json:"verified_content"`
+		Follow          bool   `json:"follow"`
+		FollowerCount   int    `json:"follower_count"`
+		Schema          string `json:"schema"`
+		LiveInfoType    int    `json:"live_info_type"`
+		UserAuthInfo    string `json:"user_auth_info"`
+	} `json:"user_info"`
+	AggrType              int  `json:"aggr_type"`
+	HasM3U8Video          bool `json:"has_m3u8_video"`
+	BanComment            int  `json:"ban_comment"`
+	NeedClientImprRecycle int  `json:"need_client_impr_recycle"`
+	CommentCount          int  `json:"comment_count"`
+	ItemCell              struct {
+		ImageList struct {
+		} `json:"imageList"`
+		ShareInfo struct {
+			CoverImage struct {
+				Uri       string   `json:"uri"`
+				Height    int      `json:"height"`
+				ImageType int      `json:"imageType"`
+				Url       string   `json:"url"`
+				Width     int      `json:"width"`
+				UrlList   []string `json:"urlList"`
+			} `json:"coverImage"`
+			ShareType struct {
+				Wx    int `json:"wx"`
+				Qq    int `json:"qq"`
+				Qzone int `json:"qzone"`
+				Pyq   int `json:"pyq"`
+			} `json:"shareType"`
+			WeixinCoverImage struct {
+				Width     int      `json:"width"`
+				UrlList   []string `json:"urlList"`
+				Uri       string   `json:"uri"`
+				Height    int      `json:"height"`
+				ImageType int      `json:"imageType"`
+				Url       string   `json:"url"`
+			} `json:"weixinCoverImage"`
+			TokenType int    `json:"tokenType"`
+			ShareURL  string `json:"shareURL"`
+			Title     string `json:"title"`
+		} `json:"shareInfo"`
+		CellCtrl struct {
+			CellLayoutStyle  int    `json:"cellLayoutStyle"`
+			CellType         int    `json:"cellType"`
+			GroupFlags       int    `json:"groupFlags"`
+			BuryStyleShow    int    `json:"buryStyleShow"`
+			TopShortTitle    string `json:"topShortTitle"`
+			ArticleImageType int    `json:"articleImageType"`
+			CellFlag         int    `json:"cellFlag"`
+		} `json:"cellCtrl"`
+		VideoInfo struct {
+		} `json:"videoInfo"`
+		ActionCtrl struct {
+			BanBury               bool `json:"banBury"`
+			BanDigg               bool `json:"banDigg"`
+			BanDanmaku            bool `json:"banDanmaku"`
+			PreloadWeb            int  `json:"preloadWeb"`
+			NeedClientImprRecycle bool `json:"needClientImprRecycle"`
+			IgnoreWebTransform    bool `json:"ignoreWebTransform"`
+			ActionList            []struct {
+				Action int `json:"action"`
+			} `json:"actionList"`
+			BanComment  bool `json:"banComment"`
+			ShowDislike bool `json:"showDislike"`
+			FilterWord  []struct {
+				Id         string `json:"id"`
 				Name       string `json:"name"`
-				Permission bool   `json:"permission"`
-				Tips       string `json:"tips"`
-			} `json:"modify"`
-			Remove struct {
-				Hide       bool   `json:"hide"`
-				Name       string `json:"name"`
-				Permission bool   `json:"permission"`
-				Tips       string `json:"tips"`
-			} `json:"remove"`
-			Share struct {
-				Hide       bool   `json:"hide"`
-				Name       string `json:"name"`
-				Permission bool   `json:"permission"`
-				Tips       string `json:"tips"`
-			} `json:"share"`
-		} `json:"control_meta"`
-		Cursor         int64  `json:"cursor"`
-		DataType       int    `json:"data_type"`
-		DiggCount      int    `json:"digg_count"`
-		DisplayUrl     string `json:"display_url"`
-		ForumExtraData string `json:"forum_extra_data"`
-		ForwardInfo    struct {
-			ForwardCount int `json:"forward_count"`
-		} `json:"forward_info"`
-		GallaryImageCount int    `json:"gallary_image_count"`
-		GroupFlags        int    `json:"group_flags"`
-		GroupId           string `json:"group_id"`
-		GroupSource       int    `json:"group_source"`
-		GroupType         int    `json:"group_type"`
-		HasImage          bool   `json:"has_image"`
-		HasM3U8Video      bool   `json:"has_m3u8_video"`
-		HasMp4Video       bool   `json:"has_mp4_video"`
-		HasVideo          bool   `json:"has_video"`
-		Hot               int    `json:"hot"`
-		Id                string `json:"id"`
-		ImageList         []struct {
-			Height  int    `json:"height"`
-			Uri     string `json:"uri"`
+				IsSelected bool   `json:"isSelected"`
+			} `json:"filterWord"`
+			ActionBar struct {
+				ActionSettingList []struct {
+					ActionType   int `json:"actionType"`
+					StyleSetting struct {
+						Text            string `json:"text"`
+						IconKey         string `json:"iconKey"`
+						LayoutDirection int    `json:"layoutDirection"`
+					} `json:"styleSetting"`
+				} `json:"actionSettingList"`
+			} `json:"actionBar"`
+		} `json:"actionCtrl"`
+		ItemCounter struct {
+			VideoWatchCount int `json:"videoWatchCount"`
+			TextCount       int `json:"textCount"`
+			CommentCount    int `json:"commentCount"`
+			DiggCount       int `json:"diggCount"`
+			ReadCount       int `json:"readCount"`
+			ShareCount      int `json:"shareCount"`
+			ForwardCount    int `json:"forwardCount"`
+			ShowCount       int `json:"showCount"`
+			RepinCount      int `json:"repinCount"`
+		} `json:"itemCounter"`
+		TagInfo struct {
+			Label string `json:"label"`
+		} `json:"tagInfo"`
+		ArticleClassification struct {
+			ArticleType        int  `json:"articleType"`
+			GroupSource        int  `json:"groupSource"`
+			AggrType           int  `json:"aggrType"`
+			Level              int  `json:"level"`
+			IsSubject          bool `json:"isSubject"`
+			BizTag             int  `json:"bizTag"`
+			IsForAudioPlaylist bool `json:"isForAudioPlaylist"`
+			ArticleSubType     int  `json:"articleSubType"`
+			BizID              int  `json:"bizID"`
+			IsStick            bool `json:"isStick"`
+		} `json:"articleClassification"`
+		ArticleBase struct {
+			ItemStatus int    `json:"itemStatus"`
+			GidStr     string `json:"gidStr"`
+		} `json:"articleBase"`
+		ThreadCustom struct {
+		} `json:"threadCustom"`
+		Extra struct {
+			Ping                   string `json:"ping"`
+			IsThreadWaterfallTuwen string `json:"is_thread_waterfall_tuwen"`
+		} `json:"extra"`
+	} `json:"itemCell"`
+	ItemVersion   int    `json:"item_version"`
+	AllowDownload bool   `json:"allow_download"`
+	ArticleUrl    string `json:"article_url"`
+	FilterWords   []struct {
+		Id         string `json:"id"`
+		Name       string `json:"name"`
+		IsSelected bool   `json:"is_selected"`
+	} `json:"filter_words"`
+	BuryCount   int  `json:"bury_count"`
+	ShowDislike bool `json:"show_dislike"`
+	IsKeyVideo  bool `json:"is_key_video"`
+	ShareInfo   struct {
+		ShareUrl   string `json:"share_url"`
+		Title      string `json:"title"`
+		CoverImage struct {
 			Url     string `json:"url"`
+			Width   int    `json:"width"`
 			UrlList []struct {
 				Url string `json:"url"`
 			} `json:"url_list"`
-			Width int `json:"width"`
-		} `json:"image_list"`
-		IsOriginal bool `json:"is_original"`
-		ItemCell   struct {
-			ActionCtrl struct {
-				ActionBar struct {
-					ActionSettingList []struct {
-						ActionType   int `json:"actionType"`
-						StyleSetting struct {
-							IconKey         string `json:"iconKey"`
-							LayoutDirection int    `json:"layoutDirection"`
-							Text            string `json:"text"`
-						} `json:"styleSetting"`
-					} `json:"actionSettingList"`
-				} `json:"actionBar"`
-				BanBury     bool `json:"banBury"`
-				BanComment  bool `json:"banComment"`
-				BanDigg     bool `json:"banDigg"`
-				ControlMeta struct {
-					Modify struct {
-						Permission bool   `json:"permission"`
-						Tips       string `json:"tips"`
-					} `json:"modify"`
-					Remove struct {
-						Permission bool   `json:"permission"`
-						Tips       string `json:"tips"`
-					} `json:"remove"`
-					Share struct {
-						Permission bool   `json:"permission"`
-						Tips       string `json:"tips"`
-					} `json:"share"`
-				} `json:"controlMeta"`
-			} `json:"actionCtrl"`
-			ArticleBase struct {
-				GidStr     string `json:"gidStr"`
-				ItemStatus int    `json:"itemStatus"`
-			} `json:"articleBase"`
-			ArticleClassification struct {
-				AggrType           int  `json:"aggrType"`
-				ArticleSubType     int  `json:"articleSubType"`
-				ArticleType        int  `json:"articleType"`
-				BizID              int  `json:"bizID"`
-				BizTag             int  `json:"bizTag"`
-				GroupSource        int  `json:"groupSource"`
-				IsForAudioPlaylist bool `json:"isForAudioPlaylist"`
-				IsOriginal         bool `json:"isOriginal"`
-				IsSubject          bool `json:"isSubject"`
-				Level              int  `json:"level"`
-			} `json:"articleClassification"`
-			CellCtrl struct {
-				BuryStyleShow   int    `json:"buryStyleShow"`
-				CellFlag        int    `json:"cellFlag"`
-				CellLayoutStyle int    `json:"cellLayoutStyle"`
-				CellType        int    `json:"cellType"`
-				CellUIType      string `json:"cellUIType"`
-				GroupFlags      int    `json:"groupFlags"`
-			} `json:"cellCtrl"`
-			Extra struct {
-				Ping string `json:"ping"`
-			} `json:"extra"`
-			ImageList struct {
-			} `json:"imageList"`
-			ItemCounter struct {
-				CommentCount    int `json:"commentCount"`
-				DiggCount       int `json:"diggCount"`
-				ForwardCount    int `json:"forwardCount"`
-				ReadCount       int `json:"readCount"`
-				RepinCount      int `json:"repinCount"`
-				ShareCount      int `json:"shareCount"`
-				ShowCount       int `json:"showCount"`
-				TextCount       int `json:"textCount"`
-				VideoWatchCount int `json:"videoWatchCount"`
-				BuryCount       int `json:"buryCount,omitempty"`
-			} `json:"itemCounter"`
-			LocationInfo struct {
-				PublishLocInfo string `json:"publishLocInfo"`
-			} `json:"locationInfo"`
-			ShareInfo struct {
-				ShareControl struct {
-					IsHighQuality bool `json:"isHighQuality"`
-				} `json:"shareControl,omitempty"`
-				ShareURL string `json:"shareURL"`
-			} `json:"shareInfo"`
-			TagInfo struct {
-			} `json:"tagInfo"`
-			VideoInfo struct {
-			} `json:"videoInfo"`
-		} `json:"itemCell"`
-		ItemCellDebug  interface{} `json:"itemCellDebug"`
-		ItemId         string      `json:"item_id"`
-		ItemIdStr      string      `json:"item_id_str"`
-		ItemVersion    int         `json:"item_version"`
-		LabelStyle     int         `json:"label_style"`
-		LargeImageList []struct {
-			Height  int    `json:"height"`
-			Uri     string `json:"uri"`
+			Uri    string `json:"uri"`
+			Height int    `json:"height"`
+		} `json:"cover_image"`
+		ShareType struct {
+			Wx    int `json:"wx"`
+			Qq    int `json:"qq"`
+			Qzone int `json:"qzone"`
+			Pyq   int `json:"pyq"`
+		} `json:"share_type"`
+		WeixinCoverImage struct {
 			Url     string `json:"url"`
+			Width   int    `json:"width"`
 			UrlList []struct {
 				Url string `json:"url"`
 			} `json:"url_list"`
-			Width int `json:"width"`
-		} `json:"large_image_list"`
-		Level     int `json:"level"`
-		LikeCount int `json:"like_count"`
-		LogPb     struct {
-			CellLayoutStyle string `json:"cell_layout_style"`
-			GroupIdStr      string `json:"group_id_str"`
-			GroupSource     string `json:"group_source"`
-			ImprId          string `json:"impr_id"`
-			IsFollowing     string `json:"is_following"`
-			IsYaowen        string `json:"is_yaowen"`
-		} `json:"log_pb"`
-		LynxServer struct {
-		} `json:"lynx_server"`
-		MiddleImage struct {
-			Height  int    `json:"height"`
-			Uri     string `json:"uri"`
-			Url     string `json:"url"`
-			UrlList []struct {
-				Url string `json:"url"`
-			} `json:"url_list"`
-			Width int `json:"width"`
-		} `json:"middle_image"`
-		NatantLevel int    `json:"natant_level"`
-		PreloadWeb  int    `json:"preload_web"`
-		PublishTime int    `json:"publish_time"`
-		ReadCount   int    `json:"read_count"`
-		RebackFlag  int    `json:"reback_flag"`
-		RepinCount  int    `json:"repin_count"`
-		RepinTime   int    `json:"repin_time"`
-		ReqId       string `json:"req_id"`
-		ShareUrl    string `json:"share_url"`
-		ShowMore    struct {
-			Title string `json:"title"`
-			Url   string `json:"url"`
-		} `json:"show_more"`
-		Source         string  `json:"source"`
-		SubjectGroupId int     `json:"subject_group_id"`
-		Tag            string  `json:"tag,omitempty"`
-		TagId          float64 `json:"tag_id"`
-		Tip            int     `json:"tip"`
-		Title          string  `json:"title"`
-		Url            string  `json:"url"`
-		UserBury       int     `json:"user_bury"`
-		UserDigg       int     `json:"user_digg"`
-		UserInfo       struct {
-			AvatarUrl       string `json:"avatar_url"`
-			Description     string `json:"description"`
-			Follow          bool   `json:"follow"`
-			Name            string `json:"name"`
-			UserAuthInfo    string `json:"user_auth_info"`
-			UserId          string `json:"user_id"`
-			UserVerified    bool   `json:"user_verified"`
-			VerifiedContent string `json:"verified_content"`
-		} `json:"user_info"`
-		UserLike        int `json:"user_like"`
-		UserRepin       int `json:"user_repin"`
-		UserRepinTime   int `json:"user_repin_time"`
-		VideoDetailInfo struct {
-			DetailVideoLargeImage struct {
-				Height  int    `json:"height"`
-				Uri     string `json:"uri"`
-				Url     string `json:"url"`
-				UrlList []struct {
-					Url string `json:"url"`
-				} `json:"url_list"`
-				Width int `json:"width"`
-			} `json:"detail_video_large_image"`
-			DirectPlay       int    `json:"direct_play"`
-			GroupFlags       int    `json:"group_flags"`
-			ShowPgcSubscribe int    `json:"show_pgc_subscribe"`
-			VideoId          string `json:"video_id"`
-		} `json:"video_detail_info"`
-		VideoDuration int    `json:"video_duration"`
-		VideoId       string `json:"video_id,omitempty"`
-		VideoStyle    int    `json:"video_style"`
+			Uri    string `json:"uri"`
+			Height int    `json:"height"`
+		} `json:"weixin_cover_image"`
+		TokenType  int `json:"token_type"`
+		OnSuppress int `json:"on_suppress"`
+	} `json:"share_info"`
+	HasMp4Video       int    `json:"has_mp4_video"`
+	DiggCount         int    `json:"digg_count"`
+	LikeCount         int    `json:"like_count"`
+	FeedTitle         string `json:"feed_title"`
+	ContentDecoration string `json:"content_decoration"`
+	ArticleVersion    int    `json:"article_version"`
+	UserVerified      int    `json:"user_verified"`
+	MediaName         string `json:"media_name"`
+	RepinCount        int    `json:"repin_count"`
+	CellType          int    `json:"cell_type"`
+	Hot               int    `json:"hot"`
+	ActionList        []struct {
+		Action int    `json:"action"`
+		Desc   string `json:"desc"`
+		Extra  struct {
+		} `json:"extra"`
+	} `json:"action_list"`
+	BanImmersive int `json:"ban_immersive"`
+	VideoStyle   int `json:"video_style"`
+	OptionalData struct {
+		BanDownload       string `json:"ban_download"`
+		YunyuType         string `json:"yunyu_type"`
+		KeynewsExpireTime string `json:"keynews_expire_time"`
+	} `json:"optional_data"`
+	ArticleType  int `json:"article_type"`
+	UgcRecommend struct {
+		Activity string `json:"activity"`
+		Reason   string `json:"reason"`
+	} `json:"ugc_recommend"`
+	ShareType          int    `json:"share_type"`
+	XiRelated          bool   `json:"xi_related"`
+	IgnoreWebTransform int    `json:"ignore_web_transform"`
+	PublishTime        int    `json:"publish_time"`
+	DisplayUrl         string `json:"display_url"`
+	Level              int    `json:"level"`
+	ShareUrl           string `json:"share_url"`
+	LabelStyle         int    `json:"label_style"`
+	ArticleSubType     int    `json:"article_sub_type"`
+	Label              string `json:"label"`
+	IsStick            bool   `json:"is_stick"`
+	VerifiedContent    string `json:"verified_content"`
+	GroupId            int64  `json:"group_id"`
+	CellFlag           int    `json:"cell_flag"`
+	MediaInfo          struct {
+		AvatarUrl       string `json:"avatar_url"`
+		Name            string `json:"name"`
+		UserVerified    bool   `json:"user_verified"`
+		MediaId         int64  `json:"media_id"`
+		UserId          int64  `json:"user_id"`
+		VerifiedContent string `json:"verified_content"`
+		IsStarUser      bool   `json:"is_star_user"`
+		RecommendReason string `json:"recommend_reason"`
+		RecommendType   int    `json:"recommend_type"`
+		Follow          bool   `json:"follow"`
+	} `json:"media_info"`
+	StickStyle      int         `json:"stick_style"`
+	Abstract        string      `json:"abstract"`
+	Rid             string      `json:"rid"`
+	InteractionData string      `json:"interaction_data"`
+	CellLayoutStyle int         `json:"cell_layout_style"`
+	RawAdData       interface{} `json:"raw_ad_data"`
+	UserRepin       int         `json:"user_repin"`
+	Source          string      `json:"source"`
+	LogPb           struct {
+		GroupSource     string `json:"group_source"`
+		UiStyle         string `json:"ui_style"`
+		LogpbGroupId    string `json:"logpb_group_id"`
+		CellLayoutStyle string `json:"cell_layout_style"`
+		IsFollowing     string `json:"is_following"`
+		IsYaowen        string `json:"is_yaowen"`
+		ImprId          string `json:"impr_id"`
+		AuthorId        string `json:"author_id"`
+		SentinelType    string `json:"sentinel_type"`
+		DItemDataSource string `json:"d_item_data_source"`
+		IsPortraitShown string `json:"is_portrait_shown"`
+	} `json:"log_pb"`
+	ContentHash         string `json:"content_hash"`
+	Title               string `json:"title"`
+	BuryStyleShow       int    `json:"bury_style_show"`
+	ShowPortraitArticle bool   `json:"show_portrait_article"`
+	HasVideo            bool   `json:"has_video"`
+	IsSubject           bool   `json:"is_subject"`
+	ShowMaxLine         int    `json:"show_max_line"`
+}
+
+type FeedResp struct {
+	Data []struct {
+		Content string `json:"content"`
+		Code    string `json:"code"`
 	} `json:"data"`
-	Next struct {
-		MaxBehotTime int `json:"max_behot_time"`
-	} `json:"next"`
-	Offset int `json:"offset"`
+	SubEntranceList   []interface{} `json:"sub_entrance_list"`
+	Errno             int           `json:"errno"`
+	Message           string        `json:"message"`
+	TotalNumber       int           `json:"total_number"`
+	HasMore           bool          `json:"has_more"`
+	LoginStatus       int           `json:"login_status"`
+	ShowEtStatus      int           `json:"show_et_status"`
+	PostContentHint   string        `json:"post_content_hint"`
+	HasMoreToRefresh  bool          `json:"has_more_to_refresh"`
+	ActionToLastStick int           `json:"action_to_last_stick"`
+	SubEntranceStyle  int           `json:"sub_entrance_style"`
+	FeedFlag          int           `json:"feed_flag"`
+	Tips              struct {
+		Type            string `json:"type"`
+		DisplayDuration int    `json:"display_duration"`
+		DisplayInfo     string `json:"display_info"`
+		DisplayTemplate string `json:"display_template"`
+		OpenUrl         string `json:"open_url"`
+		WebUrl          string `json:"web_url"`
+		DownloadUrl     string `json:"download_url"`
+		AppName         string `json:"app_name"`
+		PackageName     string `json:"package_name"`
+		StreamRespCnt   int    `json:"stream_resp_cnt"`
+	} `json:"tips"`
+	FollowRecommendTips  string `json:"follow_recommend_tips"`
+	HideTopcellCount     int    `json:"hide_topcell_count"`
+	IsUseBytedanceStream bool   `json:"is_use_bytedance_stream"`
+	GetOfflinePool       bool   `json:"get_offline_pool"`
+	ApiBaseInfo          struct {
+		InfoType       int    `json:"info_type"`
+		AppExtraParams string `json:"app_extra_params"`
+	} `json:"api_base_info"`
+	ShowLastRead      bool `json:"show_last_read"`
+	LastResponseExtra struct {
+		Data string `json:"data"`
+	} `json:"last_response_extra"`
+	Offset int    `json:"offset"`
+	Tail   string `json:"tail"`
+	Extra  string `json:"extra"`
 }
