@@ -110,15 +110,6 @@ github.com/aws/aws-sdk-go/service/sso/ssoiface
 github.com/aws/aws-sdk-go/service/ssooidc
 github.com/aws/aws-sdk-go/service/sts
 github.com/aws/aws-sdk-go/service/sts/stsiface
-# github.com/baidubce/bce-qianfan-sdk/go/qianfan v0.0.2
-## explicit; go 1.18
-github.com/baidubce/bce-qianfan-sdk/go/qianfan
-# github.com/baidubce/bce-sdk-go v0.9.164
-## explicit; go 1.11
-github.com/baidubce/bce-sdk-go/auth
-github.com/baidubce/bce-sdk-go/http
-github.com/baidubce/bce-sdk-go/util
-github.com/baidubce/bce-sdk-go/util/log
 # github.com/bradfitz/gomemcache v0.0.0-20220106215444-fb4bf637b56d
 ## explicit; go 1.12
 github.com/bradfitz/gomemcache/memcache
@@ -757,14 +748,6 @@ github.com/twitchyliquid64/golang-asm/unsafeheader
 # github.com/ugorji/go/codec v1.2.11
 ## explicit; go 1.11
 github.com/ugorji/go/codec
-# github.com/unidoc/pkcs7 v0.2.0
-## explicit; go 1.11
-# github.com/unidoc/timestamp v0.0.0-20200412005513-91597fd3793a
-## explicit; go 1.11
-# github.com/unidoc/unipdf/v3 v3.58.0
-## explicit; go 1.18
-# github.com/unidoc/unitype v0.4.0
-## explicit; go 1.15
 # github.com/unrolled/secure v1.13.0
 ## explicit; go 1.13
 github.com/unrolled/secure
@@ -955,8 +938,6 @@ golang.org/x/tools/go/buildutil
 golang.org/x/tools/go/internal/cgo
 golang.org/x/tools/go/loader
 golang.org/x/tools/internal/versions
-# golang.org/x/xerrors v0.0.0-20231012003039-104605ab7028
-## explicit; go 1.18
 # google.golang.org/appengine v1.6.7
 ## explicit; go 1.11
 google.golang.org/appengine/internal
