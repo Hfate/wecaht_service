@@ -22,6 +22,7 @@ func HotspotCreate(db *gorm.DB) error {
 	if limit == 0 {
 		// 重置
 		db.Model(&ai.OfficialAccount{}).Where("is_publish = 1").Update("is_publish", "0")
+		db.Model(&ai.OfficialAccount{}).Where("topic=?", "热点").Where("is_publish=0").Limit(1).Find(&accountList)
 	}
 
 	hotspotList := make([]*ai.Hotspot, 0)

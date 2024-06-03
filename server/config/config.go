@@ -8,7 +8,7 @@ type Server struct {
 	Kimi       Kimi        `mapstructure:"kimi" json:"kimi" yaml:"kimi"`
 	Dajiala    Dajiala     `mapstructure:"dajiala" json:"dajiala" yaml:"dajiala"`
 	ChatModels []ChatModel `mapstructure:"chat-models" json:"chat-models" yaml:"chat-models"`
-	QianFan    QianFan     `mapstructure:"qianfan" json:"qianfan" yaml:"qianfan"`
+	Baidu      Baidu       `mapstructure:"baidu" json:"baidu" yaml:"baidu"`
 	Mongo      Mongo       `mapstructure:"mongo" json:"mongo" yaml:"mongo"`
 	Email      Email       `mapstructure:"email" json:"email" yaml:"email"`
 	System     System      `mapstructure:"system" json:"system" yaml:"system"`

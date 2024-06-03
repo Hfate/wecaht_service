@@ -21,7 +21,7 @@ func SpiderHotArticle() {
 	hotspotList := make([]ai.Hotspot, 0)
 	twoHourAgo := timeutil.AddHours(timeutil.GetCurTime(), -10)
 
-	err := global.GVA_DB.Where("created_at > ?", twoHourAgo).Where("spider_num=0").Find(&hotspotList).Error
+	err := global.GVA_DB.Where("created_at > ?", twoHourAgo).Where("avg_speed>900000").Where("spider_num=0").Find(&hotspotList).Error
 
 	if err != nil {
 		global.GVA_LOG.Error("SpiderHotArticle", zap.Error(err))
@@ -65,13 +65,13 @@ func collectArticle(hotspot ai.Hotspot) []ai.Article {
 
 	// 请求发起时回调,一般用来设置请求头等
 	collector.OnRequest(func(request *colly.Request) {
-		request.Headers.Set("Cookie", global.GVA_CONFIG.QianFan.Cookie)
+		request.Headers.Set("Cookie", global.GVA_CONFIG.Baidu.Cookie)
 		fmt.Println("----> 开始请求了")
 	})
 
 	// 请求发起时回调,一般用来设置请求头等
 	subCollector.OnRequest(func(request *colly.Request) {
-		request.Headers.Set("Cookie", global.GVA_CONFIG.QianFan.Cookie)
+		request.Headers.Set("Cookie", global.GVA_CONFIG.Baidu.Cookie)
 		fmt.Println(request.URL.Path + "----> 开始请求了")
 	})
 

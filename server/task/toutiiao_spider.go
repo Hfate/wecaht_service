@@ -53,9 +53,16 @@ func CollectToutiaoArticle() {
 						topic = authInfo
 					}
 
+					publishTime := int64(feedConet.PublishTime) * 1000
+					curTime := timeutil.GetCurTime()
+					sevenDayBefore := timeutil.AddDays(curTime, -7)
+					if publishTime < sevenDayBefore {
+						continue
+					}
+
 					resultMap[feedConet.ArticleUrl] = &ai.Article{
 						PortalName:  "今日头条",
-						PublishTime: timeutil.Format(int64(feedConet.PublishTime)*1000, timeutil.DateTimeLong),
+						PublishTime: timeutil.Format(publishTime, timeutil.DateTimeLong),
 						ReadNum:     feedConet.ReadCount,
 						LikeNum:     feedConet.LikeCount,
 						Link:        feedConet.ArticleUrl,
@@ -107,6 +114,14 @@ func CollectToutiaoArticle() {
 
 		global.GVA_DB.Create(item)
 
+		curTime := timeutil.GetCurTime()
+		startOfDay := timeutil.GetDateStartTime(curTime)
+		publishTime, _ := timeutil.StrToTimeStamp(item.PublishTime, timeutil.DateTimeLong)
+
+		if publishTime > startOfDay {
+			PublishArticle(item)
+		}
+
 		collectSize++
 
 	})
@@ -124,6 +139,60 @@ func CollectToutiaoArticle() {
 	}
 
 	fmt.Println("头条爬取完成【" + cast.ToString(collectSize) + "】")
+}
+
+func PublishArticle(article *ai.Article) {
+	topic := article.Topic
+
+	accountList := make([]*ai.OfficialAccount, 0)
+	global.GVA_DB.Model(&ai.OfficialAccount{}).Where("topic=?", topic).Where("is_publish=0").Limit(1).Find(&accountList)
+
+	if len(accountList) == 0 {
+		topic = "热点"
+		global.GVA_DB.Model(&ai.OfficialAccount{}).Where("topic=?", topic).Where("is_publish=0").Limit(1).Find(&accountList)
+	}
+
+	if len(accountList) > 0 {
+		account := accountList[0]
+		batchId := timeutil.GetCurDate() + account.AppId
+
+		global.GVA_DB.Where("batch_id=?", batchId).Delete(&ai.DailyArticle{})
+
+		aiDailyArticle := ai.DailyArticle{
+			Title:             article.Title,
+			PortalName:        article.PortalName,
+			Topic:             article.Topic,
+			AuthorName:        article.AuthorName,
+			Tags:              article.Tags,
+			Content:           article.Content,
+			BatchId:           batchId,
+			ReadNum:           article.ReadNum,
+			LikeNum:           article.LikeNum,
+			CommentNum:        article.CommentNum,
+			Link:              article.Link,
+			UseTimes:          0,
+			HotspotId:         article.HotspotId,
+			TargetAccountId:   account.AppId,
+			TargetAccountName: account.AccountName,
+		}
+		aiDailyArticle.BASEMODEL = ai2.BaseModel()
+
+		article.UseTimes = 1
+		global.GVA_DB.Save(article)
+
+		global.GVA_DB.Model(&ai.DailyArticle{}).Create(&aiDailyArticle)
+
+		account.IsPublish = 1
+		global.GVA_DB.Save(account)
+
+		if topic == "热点" {
+			account.Topic = "时事"
+		}
+
+		// 改写文章
+		ai2.AIArticleServiceApp.GenerateArticle(account)
+	}
+
 }
 
 type UserAuthInfo struct {

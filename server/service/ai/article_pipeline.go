@@ -246,8 +246,6 @@ func (r *HotSpotWriteArticle) Handle(context *ArticleContext) error {
 			continue
 		}
 
-		context.Content = article.Content
-
 		// 生成文章初稿
 		aiArticle := &ai.AIArticle{
 			BatchId:           batchId,

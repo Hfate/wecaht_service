@@ -273,7 +273,7 @@ func (exa *AIArticleService) FindArticleContent(account *ai.OfficialAccount) ai.
 
 func (exa *AIArticleService) FindHotArticleContent() (string, string, string) {
 	hotspotList := make([]ai.Hotspot, 0)
-	err := global.GVA_DB.Where("topic = ?", "时事").Where("use_times=0").Order("created_at desc ,trending desc").Limit(200).Find(&hotspotList).Error
+	err := global.GVA_DB.Where("topic = ?", "时事").Where("use_times=0").Where("avg_speed>900000").Order("created_at desc ,trending desc").Limit(10).Find(&hotspotList).Error
 	if err != nil {
 		return "", "", ""
 	}
@@ -286,7 +286,7 @@ func (exa *AIArticleService) FindHotArticleContent() (string, string, string) {
 			content := ""
 
 			for index, item := range articleList {
-				content += "第" + cast.ToString(index+1) + "篇文章：\n"
+				content += "\n【第" + cast.ToString(index+1) + "篇文章】：\n"
 				content += item.Content
 
 				// 更新使用次数
