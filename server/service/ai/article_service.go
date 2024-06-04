@@ -196,6 +196,7 @@ func (exa *ArticleService) GetArticleStats(sysUserAuthorityID uint) (list interf
 		" where use_times = 0" +
 		" and deleted_at is null" +
 		" and topic != ''" +
+		" and length(topic)<10" +
 		" group by topic").Scan(&result).Error
 
 	return result, err

@@ -3,14 +3,12 @@ package initialize
 import (
 	"fmt"
 	"github.com/flipped-aurora/gin-vue-admin/server/task"
-
 	"github.com/robfig/cron/v3"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 )
 
 func Timer() {
-	//task.CollectToutiaoArticle()
 
 	// spec 定时任务详细配置参考 https://pkg.go.dev/github.com/robfig/cron?utm_source=godoc
 	go func() {

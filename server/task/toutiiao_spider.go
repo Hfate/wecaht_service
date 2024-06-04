@@ -53,9 +53,13 @@ func CollectToutiaoArticle() {
 						topic = authInfo
 					}
 
+					if topic == "" {
+						topic = "时事"
+					}
+
 					publishTime := int64(feedConet.PublishTime) * 1000
 					curTime := timeutil.GetCurTime()
-					sevenDayBefore := timeutil.AddDays(curTime, -7)
+					sevenDayBefore := timeutil.AddDays(curTime, -3)
 					if publishTime < sevenDayBefore {
 						continue
 					}
@@ -106,12 +110,17 @@ func CollectToutiaoArticle() {
 			return
 		}
 
+		var count int64
+		global.GVA_DB.Model(&ai.Article{}).Where("link=?", url).Count(&count)
+		if count > 0 {
+			return
+		}
+
 		item.Content = content
 		item.AuthorName = author
 		item.Link = url
 
 		item.BASEMODEL = ai2.BaseModel()
-
 		global.GVA_DB.Create(item)
 
 		curTime := timeutil.GetCurTime()
