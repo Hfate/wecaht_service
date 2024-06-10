@@ -172,7 +172,8 @@ func (exa *AIArticleService) GenerateArticle(account *ai.OfficialAccount) error 
 
 		dailyArticle := exa.FindArticleContent(account)
 
-		if dailyArticle.Title == "" {
+		if dailyArticle.Content == "" {
+			i++
 			continue
 		}
 
