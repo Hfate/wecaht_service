@@ -33,10 +33,9 @@ func (exa *ArticleService) FindLimit5ByPortalName(portalName string) []*ai.Artic
 	return result
 }
 
-func (exa *ArticleService) FindHotArticleByTopic(topic string, portNameList []string) (ai.Article, error) {
+func (exa *ArticleService) FindHotArticleByTopic(topic string) (ai.Article, error) {
 	var article ai.Article
 	err := global.GVA_DB.Model(&ai.Article{}).Where("topic = ?", topic).
-		Where("portal_name not in ?", portNameList).
 		Where("use_times = 0").
 		Order("read_num desc,publish_time desc").First(&article).Error
 	return article, err

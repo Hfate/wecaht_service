@@ -6,5 +6,5 @@ import (
 
 func Test_collectToutiaoArticle(t *testing.T) {
 
-	CollectGaoKaoArticle()
+	AnySpider()
 }

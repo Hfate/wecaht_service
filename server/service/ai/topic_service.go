@@ -104,3 +104,11 @@ func (exa *TopicService) GetTopicList(sysUserAuthorityID uint, info request.Page
 	}
 	return result, err
 }
+
+func (exa *TopicService) List() []string {
+	result := make([]string, 0)
+
+	global.GVA_DB.Model(&ai.Topic{}).Select("topic").Where("1=1").Find(&result)
+
+	return result
+}

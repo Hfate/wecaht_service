@@ -172,6 +172,10 @@ func (exa *AIArticleService) GenerateArticle(account *ai.OfficialAccount) error 
 
 		dailyArticle := exa.FindArticleContent(account)
 
+		if dailyArticle.Title == "" {
+			continue
+		}
+
 		// 生成文章初稿
 		aiArticle := &ai.AIArticle{
 			BatchId:           batchId,

@@ -43,19 +43,7 @@ func CollectToutiaoArticle() {
 				utils.JsonStrToStruct(item.Content, feedConet)
 				if feedConet.ReadCount > 100000 {
 
-					topic := ""
-					if feedConet.UserInfo.UserAuthInfo != "" {
-						userAuthInfo := &UserAuthInfo{}
-						utils.JsonStrToStruct(feedConet.UserInfo.UserAuthInfo, userAuthInfo)
-						authInfo := userAuthInfo.AuthInfo
-						authInfo = strings.ReplaceAll(authInfo, "领域创作者", "")
-						authInfo = strings.ReplaceAll(authInfo, "优质", "")
-						topic = authInfo
-					}
-
-					if topic == "" {
-						topic = "时事"
-					}
+					topic := parseTopic(feedConet.UserInfo.UserAuthInfo)
 
 					publishTime := int64(feedConet.PublishTime) * 1000
 					curTime := timeutil.GetCurTime()
@@ -148,6 +136,29 @@ func CollectToutiaoArticle() {
 	}
 
 	fmt.Println("头条爬取完成【" + cast.ToString(collectSize) + "】")
+}
+
+func parseTopic(userAuthInfoStr string) string {
+	result := "时事"
+	if userAuthInfoStr != "" {
+		userAuthInfo := &UserAuthInfo{}
+		utils.JsonStrToStruct(userAuthInfoStr, userAuthInfo)
+		authInfo := userAuthInfo.AuthInfo
+		authInfo = strings.ReplaceAll(authInfo, "领域创作者", "")
+		authInfo = strings.ReplaceAll(authInfo, "优质", "")
+		result = authInfo
+	}
+
+	topicList := ai2.TopicServiceApp.List()
+
+	for _, topic := range topicList {
+		if strings.Contains(result, topic) {
+			result = topic
+			return result
+		}
+	}
+
+	return result
 }
 
 func PublishArticle(article *ai.Article) {
