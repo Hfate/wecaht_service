@@ -86,29 +86,29 @@ services:
 
 
 
-  # web服务
-  web:
-    build:
-      context: ./web
-      # 指定dockerfile启动容器
-      dockerfile: ./Dockerfile
-    # 自定义容器名
-    container_name: gva-web
-    # 容器启动失败是否重启
-    restart: always
-    # 映射端口
-    ports:
-      - '80:80'
-    # web服务依赖于server服务
-    depends_on:
-      - server
-    command: [ 'nginx-debug', '-g', 'daemon off;' ]
-    environment:
-      - TZ=Asia/Shanghai
-    networks:
-      network:
-        # 在network网络下的容器内部的Ipv4地址
-        ipv4_address: 177.7.0.11
+#  # web服务
+#  web:
+#    build:
+#      context: ./web
+#      # 指定dockerfile启动容器
+#      dockerfile: ./Dockerfile
+#    # 自定义容器名
+#    container_name: gva-web
+#    # 容器启动失败是否重启
+#    restart: always
+#    # 映射端口
+#    ports:
+#      - '80:80'
+#    # web服务依赖于server服务
+#    depends_on:
+#      - server
+#    command: [ 'nginx-debug', '-g', 'daemon off;' ]
+#    environment:
+#      - TZ=Asia/Shanghai
+#    networks:
+#      network:
+#        # 在network网络下的容器内部的Ipv4地址
+#        ipv4_address: 177.7.0.11
 
   # server服务
   server:

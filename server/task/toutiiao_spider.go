@@ -14,7 +14,105 @@ import (
 	"time"
 )
 
+func CollectToutiao2() {
+	hotspotList := make([]ai.Hotspot, 0)
+	twoHourAgo := timeutil.AddHours(timeutil.GetCurTime(), -10)
+
+	err := global.GVA_DB.Where("created_at > ?", twoHourAgo).Where("avg_speed>500000").Where("spider_num=0").Find(&hotspotList).Error
+
+	if err != nil {
+		global.GVA_LOG.Error("SpiderHotArticle", zap.Error(err))
+		return
+	}
+
+	for _, item := range hotspotList {
+		if strings.Contains(item.Link, "toutiao") {
+			content := spiderToutiaoHotspot(item.Headline, item.Link)
+			if len(content) > 500 {
+
+				article := &ai.Article{
+					PortalName:  "今日头条",
+					PublishTime: timeutil.Format(timeutil.GetCurTime(), timeutil.DateTimeLong),
+					ReadNum:     item.Trending,
+					Link:        item.Link,
+					Topic:       item.Topic,
+					Title:       item.Headline,
+					Content:     content,
+				}
+
+				article.BASEMODEL = ai2.BaseModel()
+				global.GVA_DB.Create(article)
+
+				item.SpiderNum = 1
+				global.GVA_DB.Save(item)
+			}
+
+		}
+		time.Sleep(3 * time.Second)
+	}
+}
+
+func spiderToutiaoHotspot(title, link string) string {
+	collector := colly.NewCollector(
+		colly.UserAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"),
+	)
+
+	collector.SetRequestTimeout(time.Second * 60)
+
+	// 请求发起时回调,一般用来设置请求头等
+	collector.OnRequest(func(request *colly.Request) {
+		request.Headers.Set("Cookie", "__ac_nonce=0665c7753007e1cb7a608; _ga_QEHZPBE5HH=GS1.1.1717331872.5.1.1717335891.0.0.0; __ac_signature=_02B4Z6wo00f01RGuJyQAAIDDrCEMzB4yQDkRiiOAACI6ygmk--UIXy5rYsqsj77ZsKNZ1BUBXNjXmFRHWTmse5fovWgCM2ZCcr7uLGHU11lH73Ic9X7qRlSym7LE36oEZb12cjvPbtdyGBKFd1; __ac_referer=__ac_blank; msToken=CmnfAvSofZoACxNZrC_KTPsiwKryd4S0Yq-ProVEXgDhKVI4Bc31IuLl34lxYGu_VO_XkrNAYQtKNmaMzfrVGvDQc2kYbk42cobWHsMN; ttwid=1%7CjJhV-ZQBbp-rRPiTpQX02ojxAnJzbXA3xow5e5Q7iTA%7C1717335892%7Cb3e97916cc5efc25a7706234d6b4810ae649450704a42f890f87091b690f756d")
+	})
+
+	result := ""
+	index := 1
+	collector.OnHTML("div.feed-card-article-l", func(element *colly.HTMLElement) {
+		aLink := element.DOM.ChildrenFiltered("a")
+		jumpLink, _ := aLink.Attr("href")
+
+		if strings.Contains(jumpLink, "article") {
+			subCollector := colly.NewCollector(
+				colly.UserAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"),
+			)
+			subCollector.SetRequestTimeout(time.Second * 60)
+			subCollector.OnRequest(func(request *colly.Request) {
+				request.Headers.Set("Cookie", "__ac_nonce=0665c7753007e1cb7a608; _ga_QEHZPBE5HH=GS1.1.1717331872.5.1.1717335891.0.0.0; __ac_signature=_02B4Z6wo00f01RGuJyQAAIDDrCEMzB4yQDkRiiOAACI6ygmk--UIXy5rYsqsj77ZsKNZ1BUBXNjXmFRHWTmse5fovWgCM2ZCcr7uLGHU11lH73Ic9X7qRlSym7LE36oEZb12cjvPbtdyGBKFd1; __ac_referer=__ac_blank; msToken=CmnfAvSofZoACxNZrC_KTPsiwKryd4S0Yq-ProVEXgDhKVI4Bc31IuLl34lxYGu_VO_XkrNAYQtKNmaMzfrVGvDQc2kYbk42cobWHsMN; ttwid=1%7CjJhV-ZQBbp-rRPiTpQX02ojxAnJzbXA3xow5e5Q7iTA%7C1717335892%7Cb3e97916cc5efc25a7706234d6b4810ae649450704a42f890f87091b690f756d")
+			})
+
+			subCollector.OnHTML("div.article-content", func(element *colly.HTMLElement) {
+				content := element.ChildText(".syl-article-base")
+				content = strings.TrimSpace(content)
+
+				result += "第" + cast.ToString(index) + "篇文章\n\n\n\n"
+
+				result += content
+
+				result += "\n\n"
+			})
+			subCollector.Visit(jumpLink)
+
+			subCollector.Wait()
+
+			index++
+		}
+	})
+
+	err := collector.Visit(link)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Println("title:" + title + ";collectorSize:" + cast.ToString(index))
+
+	return result
+}
+
 func CollectToutiaoArticle() {
+	CollectToutiao1()
+	CollectToutiao2()
+}
+
+func CollectToutiao1() {
 	collector := colly.NewCollector(
 		colly.UserAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"),
 	)
@@ -134,8 +232,6 @@ func CollectToutiaoArticle() {
 	if err != nil {
 		global.GVA_LOG.Error("collectArticle", zap.Error(err))
 	}
-
-	fmt.Println("头条爬取完成【" + cast.ToString(collectSize) + "】")
 }
 
 func parseTopic(userAuthInfoStr string) string {
