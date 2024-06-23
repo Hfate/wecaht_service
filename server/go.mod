@@ -1,6 +1,6 @@
 module github.com/flipped-aurora/gin-vue-admin/server
 
-go 1.21
+go 1.20
 
 require (
 	github.com/PuerkitoBio/goquery v1.9.2
