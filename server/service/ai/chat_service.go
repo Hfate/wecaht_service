@@ -35,12 +35,82 @@ func (cs *ChatService) GetKeyWord(title string, chatModel config.ChatModel) stri
 	chatMessageHistory := []*ChatMessage{ChatSystemMessage}
 
 	resp, chatMessageHistory, err := ChatServiceApp.ChatWithModel(chatGptPrompt, chatMessageHistory, chatModel)
-	if err != nil || len(resp) > 10 {
+	if err != nil || len(resp) > 10 || resp == "" {
 		resp = "夜晚的城市"
 	}
 
 	return resp
 }
+
+//func (cs *ChatService) HotSpotWrite(account *ai.OfficialAccount, headLine string, chatModel config.ChatModel) (*ArticleContext, error) {
+//	context := &ArticleContext{
+//		Account: account,
+//		Topic:   headLine,
+//	}
+//	chatGptPromptList, err := parsePrompt(context, ai.ContentRecreation)
+//	if err != nil {
+//		return &ArticleContext{}, err
+//	}
+//
+//	chatMessageHistory := []*ChatMessage{ChatSystemMessage}
+//	resp := ""
+//
+//	for _, chatGptPrompt := range chatGptPromptList {
+//		resp, chatMessageHistory, err = ChatServiceApp.ChatWithModel(chatGptPrompt, chatMessageHistory, chatModel)
+//		if err != nil {
+//			return nil, err
+//		}
+//		context.Content = resp
+//	}
+//
+//	chatGptPromptList, err = parsePrompt(context, ai.TitleCreate)
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	for _, chatGptPrompt := range chatGptPromptList {
+//		resp, chatMessageHistory, err = ChatServiceApp.ChatWithModel(chatGptPrompt, chatMessageHistory, chatModel)
+//		if err != nil {
+//			return nil, err
+//		}
+//		context.Title = resp
+//	}
+//
+//	chatGptPromptList, err = parsePrompt(context, ai.AddImage)
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	for _, chatGptPrompt := range chatGptPromptList {
+//		resp, chatMessageHistory, err = ChatServiceApp.ChatWithModel(chatGptPrompt, chatMessageHistory, chatModel)
+//		if err != nil {
+//			return nil, err
+//		}
+//
+//		resp = strings.ReplaceAll(resp, "```json", "")
+//		resp = strings.ReplaceAll(resp, "```", "")
+//
+//		addImgResp := &AddImgResp{}
+//
+//		err = utils.JsonStrToStruct(resp, addImgResp)
+//		if err == nil && addImgResp.Image1Description != "" && addImgResp.Image2Description != "" {
+//			img1 := cs.SearchAndSave(addImgResp.Image1Description)
+//			img2 := cs.SearchAndSave(addImgResp.Image2Description)
+//
+//			if strings.Contains(img1, "http") && strings.Contains(img2, "http") {
+//				context.Content = utils.RemoveSpecialWord(context.Content)
+//				context.Content = utils.RemoveNonsense(context.Content)
+//				imgLine1 := "\n" + "![" + addImgResp.Image1Description + "](" + img1 + ")" + "\n"
+//				imgLine2 := "\n" + "![" + addImgResp.Image2Description + "](" + img2 + ")" + "\n"
+//				context.Content = utils.InsertTextAtThirds(context.Content, imgLine1, imgLine2)
+//			}
+//
+//		}
+//	}
+//
+//	context.Params = []string{chatModel.ModelType, "HotSpotWrite"}
+//	return context, nil
+//}
 
 func (cs *ChatService) HotSpotWrite(account *ai.OfficialAccount, headLine string, chatModel config.ChatModel) (*ArticleContext, error) {
 	context := &ArticleContext{
@@ -52,11 +122,10 @@ func (cs *ChatService) HotSpotWrite(account *ai.OfficialAccount, headLine string
 		return &ArticleContext{}, err
 	}
 
-	chatMessageHistory := []*ChatMessage{ChatSystemMessage}
+	chatMessageHistory := []*CozeChatMessage{}
 	resp := ""
-
 	for _, chatGptPrompt := range chatGptPromptList {
-		resp, chatMessageHistory, err = ChatServiceApp.ChatWithModel(chatGptPrompt, chatMessageHistory, chatModel)
+		resp, chatMessageHistory, err = ChatWithCozeServiceApp.ChatWithCoze(chatGptPrompt, chatMessageHistory)
 		if err != nil {
 			return nil, err
 		}
@@ -69,7 +138,7 @@ func (cs *ChatService) HotSpotWrite(account *ai.OfficialAccount, headLine string
 	}
 
 	for _, chatGptPrompt := range chatGptPromptList {
-		resp, chatMessageHistory, err = ChatServiceApp.ChatWithModel(chatGptPrompt, chatMessageHistory, chatModel)
+		resp, chatMessageHistory, err = ChatWithCozeServiceApp.ChatWithCoze(chatGptPrompt, chatMessageHistory)
 		if err != nil {
 			return nil, err
 		}
@@ -82,7 +151,7 @@ func (cs *ChatService) HotSpotWrite(account *ai.OfficialAccount, headLine string
 	}
 
 	for _, chatGptPrompt := range chatGptPromptList {
-		resp, chatMessageHistory, err = ChatServiceApp.ChatWithModel(chatGptPrompt, chatMessageHistory, chatModel)
+		resp, chatMessageHistory, err = ChatWithCozeServiceApp.ChatWithCoze(chatGptPrompt, chatMessageHistory)
 		if err != nil {
 			return nil, err
 		}

@@ -42,73 +42,73 @@ services:
   #        ipv4_address: 177.7.0.16
 
 
-#  glm-free-api:
-#    container_name: glm-free-api
-#    image: vinlic/glm-free-api:latest
-#    restart: always
-#    ports:
-#      - "7000:8000"
-#    environment:
-#      - TZ=Asia/Shanghai
-#    networks:
-#      network:
-#        # 在network网络下的容器内部的Ipv4地址
-#        ipv4_address: 177.7.0.17
-#
-#  metaso-free-api:
-#    container_name: metaso-free-api
-#    image: vinlic/metaso-free-api:latest
-#    restart: always
-#    ports:
-#      - "6000:8000"
-#    environment:
-#      - TZ=Asia/Shanghai
-#    networks:
-#      network:
-#        # 在network网络下的容器内部的Ipv4地址
-#        ipv4_address: 177.7.0.18
-#
-#
-#  step-free-api:
-#    container_name: step-free-api
-#    image: vinlic/step-free-api:latest
-#    restart: always
-#    ports:
-#      - "5000:8000"
-#    environment:
-#      - TZ=Asia/Shanghai
-#    networks:
-#      network:
-#        # 在network网络下的容器内部的Ipv4地址
-#        ipv4_address: 177.7.0.19
+  #  glm-free-api:
+  #    container_name: glm-free-api
+  #    image: vinlic/glm-free-api:latest
+  #    restart: always
+  #    ports:
+  #      - "7000:8000"
+  #    environment:
+  #      - TZ=Asia/Shanghai
+  #    networks:
+  #      network:
+  #        # 在network网络下的容器内部的Ipv4地址
+  #        ipv4_address: 177.7.0.17
+  #
+  #  metaso-free-api:
+  #    container_name: metaso-free-api
+  #    image: vinlic/metaso-free-api:latest
+  #    restart: always
+  #    ports:
+  #      - "6000:8000"
+  #    environment:
+  #      - TZ=Asia/Shanghai
+  #    networks:
+  #      network:
+  #        # 在network网络下的容器内部的Ipv4地址
+  #        ipv4_address: 177.7.0.18
+  #
+  #
+  #  step-free-api:
+  #    container_name: step-free-api
+  #    image: vinlic/step-free-api:latest
+  #    restart: always
+  #    ports:
+  #      - "5000:8000"
+  #    environment:
+  #      - TZ=Asia/Shanghai
+  #    networks:
+  #      network:
+  #        # 在network网络下的容器内部的Ipv4地址
+  #        ipv4_address: 177.7.0.19
 
 
 
 
 
-#  # web服务
-#  web:
-#    build:
-#      context: ./web
-#      # 指定dockerfile启动容器
-#      dockerfile: ./Dockerfile
-#    # 自定义容器名
-#    container_name: gva-web
-#    # 容器启动失败是否重启
-#    restart: always
-#    # 映射端口
-#    ports:
-#      - '80:80'
-#    # web服务依赖于server服务
-#    depends_on:
-#      - server
-#    command: [ 'nginx-debug', '-g', 'daemon off;' ]
-#    environment:
-#      - TZ=Asia/Shanghai
-#    networks:
-#      network:
-#        # 在network网络下的容器内部的Ipv4地址
-#        ipv4_address: 177.7.0.11
+  # web服务
+  web:
+    build:
+      context: ./web
+      # 指定dockerfile启动容器
+      dockerfile: ./Dockerfile
+    # 自定义容器名
+    container_name: gva-web
+    # 容器启动失败是否重启
+    restart: always
+    # 映射端口
+    ports:
+      - '80:80'
+    # web服务依赖于server服务
+    depends_on:
+      - server
+    command: [ 'nginx-debug', '-g', 'daemon off;' ]
+    environment:
+      - TZ=Asia/Shanghai
+    networks:
+      network:
+        # 在network网络下的容器内部的Ipv4地址
+        ipv4_address: 177.7.0.11
 
   # server服务
   server:

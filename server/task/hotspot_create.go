@@ -26,7 +26,7 @@ func HotspotCreate(db *gorm.DB) error {
 	}
 
 	hotspotList := make([]*ai.Hotspot, 0)
-	db.Model(&ai.Hotspot{}).Where("avg_speed>900000").Where("use_times=0").Where("created_at>?", startOfDay).Limit(limit).Find(&hotspotList)
+	db.Model(&ai.Hotspot{}).Where("avg_speed>500000").Where("use_times=0").Where("created_at>?", startOfDay).Limit(limit).Find(&hotspotList)
 
 	for index, hotspot := range hotspotList {
 

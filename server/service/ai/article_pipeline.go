@@ -23,40 +23,6 @@ func (*ArticlePipeline) Run(context *ArticleContext) error {
 	return DefaultArticlePipelineApp.Write(context)
 }
 
-var HotSpotArticlePipelineApp = new(HotSpotArticlePipeline)
-
-type HotSpotArticlePipeline struct {
-	ArticleWriteHandleList []ArticleWriteHandle
-}
-
-func (da *HotSpotArticlePipeline) init() {
-	da.ArticleWriteHandleList = []ArticleWriteHandle{
-		&HotSpotWriteArticle{},
-	}
-}
-
-func (da *HotSpotArticlePipeline) Write(context *ArticleContext) error {
-	// 初始化
-	da.init()
-
-	size := len(da.ArticleWriteHandleList)
-
-	for i := 0; i < size; i++ {
-		handle := da.ArticleWriteHandleList[i]
-		err := handle.Handle(context)
-		if err != nil {
-			continue
-		}
-		// 完成写作
-		if context.Content != "" && len(context.Content) > 500 {
-			global.GVA_LOG.Info("完成AI创作", zap.String("AccountName", context.Account.AccountName), zap.String("title", context.Title))
-			break
-		}
-	}
-
-	return nil
-}
-
 var DefaultArticlePipelineApp = new(DefaultArticlePipeline)
 
 type DefaultArticlePipeline struct {

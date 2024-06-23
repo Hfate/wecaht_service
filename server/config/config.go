@@ -31,6 +31,7 @@ type Server struct {
 	AwsS3      AwsS3      `mapstructure:"aws-s3" json:"aws-s3" yaml:"aws-s3"`
 
 	Excel Excel `mapstructure:"excel" json:"excel" yaml:"excel"`
+	Coze  Coze  `mapstructure:"coze" json:"coze" yaml:"coze"`
 
 	// 跨域配置
 	Cors CORS `mapstructure:"cors" json:"cors" yaml:"cors"`
