@@ -30,10 +30,10 @@ func init() {
 	//CSSStyleMap["</p></li>"] = "</span></p></li>"
 
 	//CSSStyleMap["<strong>"] = "<strong style=\"background: linear-gradient(to right,rgb(73, 200, 149),rgb(38, 198, 218));color: white;white-space: pre-wrap;border-width: 0.25em 0;display: inline;font-weight: normal;padding: 2px 4px 2px 4px;\">"
-	CSSStyleMap["<p>"] = "<p style=\"margin: 15px 10px; max-width: 100%; min-height: 1em; white-space: pre-wrap; color: rgb(137, 137, 137); text-align: justify; line-height: 2; box-sizing: border-box !important; word-wrap: break-word !important; \"><span line-height: 2 style=\"color: rgb(43, 43, 43); line-height: 28px;letter-spacing:1px;font-size:15px;font-family: PingfangSC-LIGHT,sans-serif;\">"
+	CSSStyleMap["<p>"] = "<p style=\"margin: 15px 10px; max-width: 100%; min-height: 1em; white-space: pre-wrap; text-align: justify; line-height: 2; box-sizing: border-box !important; word-wrap: break-word !important; \"><span line-height: 2 style=\"line-height: 28px;letter-spacing:1px;font-size:17px;\">"
 	CSSStyleMap["</p>"] = "</span></p>"
 	CSSStyleMap["<span>"] = "<span style=\"max-width: 100%; line-height: 28px; box-sizing: border-box !important; word-wrap: break-word !important;letter-spacing:1px;font-size:15px;font-family: PingfangSC-LIGHT,sans-serif;\">"
-	CSSStyleMap["<blockquote>"] = "<p style=\"box-sizing: border-box;margin-left: 35px;margin-right: 35px;line-height: 40px;padding: 10px;color:#2b3835;padding-right: 10px;padding-left: 10px;text-align: center;box-sizing: border-box;font-size: 18px;font-family: PingfangSC-LIGHT,sans-serif;\"><span style=\"background:linear-gradient(to bottom, rgb(255, 255, 254) 60%,rgba(52, 191, 136, 0.49) 40%);\">"
+	CSSStyleMap["<blockquote>"] = "<p style=\"box-sizing: border-box;margin-left: 35px;margin-right: 35px;line-height: 40px;padding: 10px;color:#2b3835;padding-right: 10px;padding-left: 10px;text-align: center;box-sizing: border-box;font-size: 18px;\"><span style=\"background:linear-gradient(to bottom, rgb(255, 255, 254) 60%,rgba(52, 191, 136, 0.49) 40%);\">"
 	CSSStyleMap["</blockquote>"] = "</p>"
 }
 
