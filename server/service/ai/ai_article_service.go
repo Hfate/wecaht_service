@@ -218,6 +218,7 @@ func (exa *AIArticleService) GenerateArticle(account *ai.OfficialAccount) error 
 			if err != nil {
 				return
 			}
+
 		})
 
 	}

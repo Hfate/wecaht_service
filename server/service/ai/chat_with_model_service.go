@@ -11,14 +11,11 @@ type ChatModelService struct {
 }
 
 func (*ChatModelService) Recreation(context *ArticleContext) (*ArticleContext, error) {
-	chatModels := global.GVA_CONFIG.ChatModels
 
-	for _, chatModel := range chatModels {
-		// 可以通过 WithModel 指定模型
-		result, err := ChatServiceApp.Recreation(context, chatModel)
-		if err == nil && len(context.Params) > 0 && len(context.Content) > 300 {
-			return result, nil
-		}
+	// 可以通过 WithModel 指定模型
+	result, err := ChatServiceApp.Recreation(context)
+	if err == nil && len(context.Params) > 0 && len(context.Content) > 300 {
+		return result, nil
 	}
 
 	return nil, nil
@@ -26,20 +23,17 @@ func (*ChatModelService) Recreation(context *ArticleContext) (*ArticleContext, e
 
 func (*ChatModelService) HotSpotWrite(account *ai.OfficialAccount, headLine string) (*ArticleContext, error) {
 
-	chatModels := global.GVA_CONFIG.ChatModels
+	// 可以通过 WithModel 指定模型
+	result, err := ChatServiceApp.HotSpotWrite(account, headLine)
+	if err == nil && len(result.Content) > 1000 {
+		//
+		result.Title = ArticleContentHandlerApp.HandleTitle(result.Title)
+		//
+		result.Content = ArticleContentHandlerApp.Handle(account, result.Content)
 
-	for _, chatModel := range chatModels {
-		// 可以通过 WithModel 指定模型
-		result, err := ChatServiceApp.HotSpotWrite(account, headLine, chatModel)
-		if err == nil && len(result.Content) > 1000 {
-			//
-			result.Title = ArticleContentHandlerApp.HandleTitle(result.Title)
-			//
-			result.Content = ArticleContentHandlerApp.Handle(account, result.Content)
-
-			return result, nil
-		}
+		return result, nil
 	}
+
 	return nil, nil
 }
 

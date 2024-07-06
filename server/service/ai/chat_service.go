@@ -42,77 +42,7 @@ func (cs *ChatService) GetKeyWord(title string, chatModel config.ChatModel) stri
 	return resp
 }
 
-//func (cs *ChatService) HotSpotWrite(account *ai.OfficialAccount, headLine string, chatModel config.ChatModel) (*ArticleContext, error) {
-//	context := &ArticleContext{
-//		Account: account,
-//		Topic:   headLine,
-//	}
-//	chatGptPromptList, err := parsePrompt(context, ai.ContentRecreation)
-//	if err != nil {
-//		return &ArticleContext{}, err
-//	}
-//
-//	chatMessageHistory := []*ChatMessage{ChatSystemMessage}
-//	resp := ""
-//
-//	for _, chatGptPrompt := range chatGptPromptList {
-//		resp, chatMessageHistory, err = ChatServiceApp.ChatWithModel(chatGptPrompt, chatMessageHistory, chatModel)
-//		if err != nil {
-//			return nil, err
-//		}
-//		context.Content = resp
-//	}
-//
-//	chatGptPromptList, err = parsePrompt(context, ai.TitleCreate)
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	for _, chatGptPrompt := range chatGptPromptList {
-//		resp, chatMessageHistory, err = ChatServiceApp.ChatWithModel(chatGptPrompt, chatMessageHistory, chatModel)
-//		if err != nil {
-//			return nil, err
-//		}
-//		context.Title = resp
-//	}
-//
-//	chatGptPromptList, err = parsePrompt(context, ai.AddImage)
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	for _, chatGptPrompt := range chatGptPromptList {
-//		resp, chatMessageHistory, err = ChatServiceApp.ChatWithModel(chatGptPrompt, chatMessageHistory, chatModel)
-//		if err != nil {
-//			return nil, err
-//		}
-//
-//		resp = strings.ReplaceAll(resp, "```json", "")
-//		resp = strings.ReplaceAll(resp, "```", "")
-//
-//		addImgResp := &AddImgResp{}
-//
-//		err = utils.JsonStrToStruct(resp, addImgResp)
-//		if err == nil && addImgResp.Image1Description != "" && addImgResp.Image2Description != "" {
-//			img1 := cs.SearchAndSave(addImgResp.Image1Description)
-//			img2 := cs.SearchAndSave(addImgResp.Image2Description)
-//
-//			if strings.Contains(img1, "http") && strings.Contains(img2, "http") {
-//				context.Content = utils.RemoveSpecialWord(context.Content)
-//				context.Content = utils.RemoveNonsense(context.Content)
-//				imgLine1 := "\n" + "![" + addImgResp.Image1Description + "](" + img1 + ")" + "\n"
-//				imgLine2 := "\n" + "![" + addImgResp.Image2Description + "](" + img2 + ")" + "\n"
-//				context.Content = utils.InsertTextAtThirds(context.Content, imgLine1, imgLine2)
-//			}
-//
-//		}
-//	}
-//
-//	context.Params = []string{chatModel.ModelType, "HotSpotWrite"}
-//	return context, nil
-//}
-
-func (cs *ChatService) HotSpotWrite(account *ai.OfficialAccount, headLine string, chatModel config.ChatModel) (*ArticleContext, error) {
+func (cs *ChatService) HotSpotWrite(account *ai.OfficialAccount, headLine string) (*ArticleContext, error) {
 	context := &ArticleContext{
 		Account: account,
 		Topic:   headLine,
@@ -125,7 +55,7 @@ func (cs *ChatService) HotSpotWrite(account *ai.OfficialAccount, headLine string
 	chatMessageHistory := []*CozeChatMessage{}
 	resp := ""
 	for _, chatGptPrompt := range chatGptPromptList {
-		resp, chatMessageHistory, err = ChatWithCozeServiceApp.ChatWithCoze(chatGptPrompt, chatMessageHistory)
+		resp, chatMessageHistory, err = ChatWithCozeServiceApp.ChatWithCoze(chatGptPrompt, global.GVA_CONFIG.Coze.HotBotId, chatMessageHistory)
 		if err != nil {
 			return nil, err
 		}
@@ -138,7 +68,7 @@ func (cs *ChatService) HotSpotWrite(account *ai.OfficialAccount, headLine string
 	}
 
 	for _, chatGptPrompt := range chatGptPromptList {
-		resp, chatMessageHistory, err = ChatWithCozeServiceApp.ChatWithCoze(chatGptPrompt, chatMessageHistory)
+		resp, chatMessageHistory, err = ChatWithCozeServiceApp.ChatWithCoze(chatGptPrompt, global.GVA_CONFIG.Coze.HotBotId, chatMessageHistory)
 		if err != nil {
 			return nil, err
 		}
@@ -151,7 +81,7 @@ func (cs *ChatService) HotSpotWrite(account *ai.OfficialAccount, headLine string
 	}
 
 	for _, chatGptPrompt := range chatGptPromptList {
-		resp, chatMessageHistory, err = ChatWithCozeServiceApp.ChatWithCoze(chatGptPrompt, chatMessageHistory)
+		resp, chatMessageHistory, err = ChatWithCozeServiceApp.ChatWithCoze(chatGptPrompt, global.GVA_CONFIG.Coze.HotBotId, chatMessageHistory)
 		if err != nil {
 			return nil, err
 		}
@@ -177,11 +107,11 @@ func (cs *ChatService) HotSpotWrite(account *ai.OfficialAccount, headLine string
 		}
 	}
 
-	context.Params = []string{chatModel.ModelType, "HotSpotWrite"}
+	context.Params = []string{"HotSpotWrite"}
 	return context, nil
 }
 
-func (cs *ChatService) Recreation(articleContext *ArticleContext, chatModel config.ChatModel) (*ArticleContext, error) {
+func (cs *ChatService) Recreation(articleContext *ArticleContext) (*ArticleContext, error) {
 	starTime := timeutil.GetCurTime()
 
 	// 重置进度
@@ -198,14 +128,15 @@ func (cs *ChatService) Recreation(articleContext *ArticleContext, chatModel conf
 		return &ArticleContext{}, err
 	}
 
-	chatMessageHistory := []*ChatMessage{ChatSystemMessage}
+	chatMessageHistory := []*CozeChatMessage{}
+
 	resp := ""
 
 	size := cast.ToString(len(chatGptPromptList))
 	for index, chatGptPrompt := range chatGptPromptList {
-		aiArticle.ProcessParams = "【" + chatModel.ModelType + "】文章改写:prompt执行进度[" + cast.ToString(index+1) + "/" + size + "]"
+		aiArticle.ProcessParams = "【扣子】文章改写:prompt执行进度[" + cast.ToString(index+1) + "/" + size + "]"
 		global.GVA_DB.Save(&aiArticle)
-		resp, chatMessageHistory, err = ChatServiceApp.ChatWithModel(chatGptPrompt, chatMessageHistory, chatModel)
+		resp, chatMessageHistory, err = ChatWithCozeServiceApp.ChatWithCoze(chatGptPrompt, global.GVA_CONFIG.Coze.RecreationBotId, chatMessageHistory)
 		if err != nil {
 			return nil, err
 		}
@@ -220,9 +151,9 @@ func (cs *ChatService) Recreation(articleContext *ArticleContext, chatModel conf
 		}
 
 		for _, chatGptPrompt := range chatGptPromptList {
-			aiArticle.ProcessParams = "【" + chatModel.ModelType + "】标题创建prompt执行ing"
+			aiArticle.ProcessParams = "【扣子】标题创建prompt执行ing"
 			global.GVA_DB.Save(&aiArticle)
-			resp, chatMessageHistory, err = ChatServiceApp.ChatWithModel(chatGptPrompt, chatMessageHistory, chatModel)
+			resp, chatMessageHistory, err = ChatWithCozeServiceApp.ChatWithCoze(chatGptPrompt, global.GVA_CONFIG.Coze.RecreationBotId, chatMessageHistory)
 			if err != nil {
 				return nil, err
 			}
@@ -243,9 +174,9 @@ func (cs *ChatService) Recreation(articleContext *ArticleContext, chatModel conf
 
 	size = cast.ToString(len(chatGptPromptList))
 	for index, chatGptPrompt := range chatGptPromptList {
-		aiArticle.ProcessParams = "【" + chatModel.ModelType + "】文章配图:prompt执行进度[" + cast.ToString(index+1) + "/" + size + "]"
+		aiArticle.ProcessParams = "【扣子】文章配图:prompt执行进度[" + cast.ToString(index+1) + "/" + size + "]"
 		global.GVA_DB.Save(&aiArticle)
-		resp, chatMessageHistory, err = ChatServiceApp.ChatWithModel(chatGptPrompt, chatMessageHistory, chatModel)
+		resp, chatMessageHistory, err = ChatWithCozeServiceApp.ChatWithCoze(chatGptPrompt, global.GVA_CONFIG.Coze.RecreationBotId, chatMessageHistory)
 		if err != nil {
 			return nil, err
 		}
@@ -275,7 +206,7 @@ func (cs *ChatService) Recreation(articleContext *ArticleContext, chatModel conf
 	aiArticle.ProcessStatus = ai.ProcessCreated
 	aiArticle.ProcessParams = "创作完成"
 	aiArticle.Percent = 100
-	aiArticle.Params = chatModel.ModelType + "," + "Recreation"
+	aiArticle.Params = "【扣子】," + "Recreation"
 	aiArticle.Content = articleContext.Content
 	aiArticle.Context = utils.Parse2Json(chatMessageHistory)
 
@@ -284,7 +215,7 @@ func (cs *ChatService) Recreation(articleContext *ArticleContext, chatModel conf
 
 	//go cs.GetSimilarity(aiArticle)
 
-	articleContext.Params = []string{chatModel.ModelType, "Recreation"}
+	articleContext.Params = []string{"扣子", "Recreation"}
 
 	endTime := timeutil.GetCurTime()
 

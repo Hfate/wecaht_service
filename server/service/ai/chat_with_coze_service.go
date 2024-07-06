@@ -12,7 +12,7 @@ type ChatWithCozeService struct {
 
 var ChatWithCozeServiceApp = &ChatWithCozeService{}
 
-func (cwc *ChatWithCozeService) ChatWithCoze(message string, history []*CozeChatMessage) (string, []*CozeChatMessage, error) {
+func (cwc *ChatWithCozeService) ChatWithCoze(message string, botId string, history []*CozeChatMessage) (string, []*CozeChatMessage, error) {
 	header := make(map[string]string)
 	header["Authorization"] = "Bearer " + global.GVA_CONFIG.Coze.AccessToken
 	//header["Content-Type"] = "application/json"
@@ -24,7 +24,7 @@ func (cwc *ChatWithCozeService) ChatWithCoze(message string, history []*CozeChat
 	//refreshToken := chatModel.RefreshToken
 
 	chatReq := &CozeChatReq{
-		BotId:       global.GVA_CONFIG.Coze.BotId,
+		BotId:       botId,
 		User:        cast.ToString(utils.GenID()),
 		Query:       message,
 		Stream:      false,
