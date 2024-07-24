@@ -9,8 +9,8 @@ import (
 var bizPool *ants.Pool
 
 func init() {
-	// 初始化协程池   每次仅允许1个并发上传下载
-	bizPool, _ = ants.NewPool(4, ants.WithPanicHandler(panicHandler))
+	//
+	bizPool, _ = ants.NewPool(2, ants.WithPanicHandler(panicHandler))
 }
 
 func BizPool() *ants.Pool {
