@@ -12,8 +12,6 @@ import (
 func Timer() {
 	//task.AnySpider()
 
-	service.ServiceGroupApp.AIServiceGroup.WechatService.PublisherSettlement()
-
 	//task.HotspotCreate(global.GVA_DB)
 	// spec 定时任务详细配置参考 https://pkg.go.dev/github.com/robfig/cron?utm_source=godoc
 	go func() {
@@ -63,6 +61,13 @@ func Timer() {
 		_, err = global.GVA_Timer.AddTaskByFunc("定时重置对标账号标记", "@every 5h", func() {
 			task.ResetSpider(global.GVA_DB)
 		}, "定时重置对标账号标记", option...)
+		if err != nil {
+			fmt.Println("add timer error:", err)
+		}
+
+		_, err = global.GVA_Timer.AddTaskByFunc("爬取结算数据", "@every 5h", func() {
+			service.ServiceGroupApp.AIServiceGroup.WechatService.PublisherSettlement()
+		}, "爬取结算数据", option...)
 		if err != nil {
 			fmt.Println("add timer error:", err)
 		}
