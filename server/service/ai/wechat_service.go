@@ -32,6 +32,51 @@ func init() {
 	wc.SetCache(memoryCache)
 }
 
+func (*WechatService) PublisherSettlement() {
+	list, _ := OfficialAccountServiceApp.List()
+	wechatSettlementList := make([]*aiModel.WechatSettlement, 0)
+	for _, item := range list {
+		cfg := &offConfig.Config{
+			AppID:          item.AppId,
+			AppSecret:      item.AppSecret,
+			Token:          item.Token,
+			EncodingAESKey: item.EncodingAESKey,
+		}
+		officialAccount := wc.GetOfficialAccount(cfg)
+		settlementList, err := officialAccount.GetDataCube().GetPublisherSettlement("2024-08-01", "2024-09-01", 0, 10)
+		if err != nil {
+			global.GVA_LOG.Error("PublisherSettlement", zap.String("err", err.Error()))
+			continue
+		}
+
+		if len(settlementList.SettlementList) > 0 {
+			for _, set := range settlementList.SettlementList {
+				wechatSettlementList = append(wechatSettlementList, &aiModel.WechatSettlement{
+					BASEMODEL:      BaseModel(),
+					AccountName:    item.AccountName,
+					AccountId:      item.AccountId,
+					Date:           set.Date,
+					Zone:           set.Zone,
+					Month:          set.Month,
+					Order:          set.Order,
+					SettStatus:     set.SettStatus,
+					SettledRevenue: set.SettledRevenue,
+					SettNo:         set.SettNo,
+					MailSendCnt:    set.MailSendCnt,
+					SlotRevenue:    utils.Parse2Json(set.SlotRevenue),
+				})
+			}
+
+			err2 := global.GVA_DB.Model(&aiModel.WechatSettlement{}).Create(wechatSettlementList).Error
+			if err2 != nil {
+				global.GVA_LOG.Error("PublisherSettlement", zap.String("err", err2.Error()))
+				continue
+			}
+		}
+
+	}
+}
+
 func (*WechatService) ServeWechat(rw http.ResponseWriter, req *http.Request) {
 
 	serverList := WechatServiceApp.ServeList(rw, req)
