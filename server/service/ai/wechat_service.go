@@ -33,6 +33,14 @@ func init() {
 }
 
 func (*WechatService) PublisherSettlement() {
+
+	defer func() {
+		if err := recover(); err != nil {
+			global.GVA_LOG.Error("PublisherSettlement", zap.Any("err", err))
+			return
+		}
+	}()
+
 	list, _ := OfficialAccountServiceApp.List()
 
 	global.GVA_LOG.Info("PublisherSettlement", zap.Int("account-length", len(list)))
@@ -73,7 +81,7 @@ func (*WechatService) PublisherSettlement() {
 				})
 			}
 
-			global.GVA_DB.Where("1=1").Where("account_id=?", item.AccountId).Delete(&aiModel.WechatSettlement{})
+			global.GVA_DB.Where("account_id=?", item.AccountId).Delete(&aiModel.WechatSettlement{})
 
 			err2 := global.GVA_DB.Model(&aiModel.WechatSettlement{}).Create(wechatSettlementList).Error
 			if err2 != nil {
