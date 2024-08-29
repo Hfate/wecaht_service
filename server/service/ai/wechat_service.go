@@ -45,7 +45,6 @@ func (*WechatService) PublisherSettlement() {
 
 	global.GVA_LOG.Info("PublisherSettlement", zap.Int("account-length", len(list)))
 
-	wechatSettlementList := make([]*aiModel.WechatSettlement, 0)
 	for _, item := range list {
 		cfg := &offConfig.Config{
 			AppID:          item.AppId,
@@ -63,6 +62,7 @@ func (*WechatService) PublisherSettlement() {
 		global.GVA_LOG.Info("PublisherSettlement", zap.String("AccountName", item.AccountName),
 			zap.String("resp", utils.Parse2Json(settlementList)), zap.Int("length-settlementList", len(settlementList.SettlementList)))
 
+		wechatSettlementList := make([]*aiModel.WechatSettlement, 0)
 		if len(settlementList.SettlementList) > 0 {
 			for _, set := range settlementList.SettlementList {
 				wechatSettlementList = append(wechatSettlementList, &aiModel.WechatSettlement{
