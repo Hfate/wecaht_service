@@ -43,9 +43,9 @@ func (*WechatService) PublisherSettlement() {
 			EncodingAESKey: item.EncodingAESKey,
 		}
 		officialAccount := wc.GetOfficialAccount(cfg)
-		settlementList, err := officialAccount.GetDataCube().GetPublisherSettlement("2024-08-01", "2024-09-01", 0, 10)
+		settlementList, err := officialAccount.GetDataCube().GetPublisherSettlement("2024-01-01", "2024-09-01", 0, 10)
 		if err != nil {
-			global.GVA_LOG.Error("PublisherSettlement", zap.String("err", err.Error()))
+			global.GVA_LOG.Error("PublisherSettlement", zap.String("AccountName", item.AccountName), zap.String("err", err.Error()))
 			continue
 		}
 
@@ -66,6 +66,8 @@ func (*WechatService) PublisherSettlement() {
 					SlotRevenue:    utils.Parse2Json(set.SlotRevenue),
 				})
 			}
+
+			global.GVA_DB.Where("1=1").Delete(&aiModel.WechatSettlement{})
 
 			err2 := global.GVA_DB.Model(&aiModel.WechatSettlement{}).Create(wechatSettlementList).Error
 			if err2 != nil {

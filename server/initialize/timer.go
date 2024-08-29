@@ -65,7 +65,7 @@ func Timer() {
 			fmt.Println("add timer error:", err)
 		}
 
-		_, err = global.GVA_Timer.AddTaskByFunc("爬取结算数据", "@every 5h", func() {
+		_, err = global.GVA_Timer.AddTaskByFunc("爬取结算数据", "@every 5m", func() {
 			service.ServiceGroupApp.AIServiceGroup.WechatService.PublisherSettlement()
 		}, "爬取结算数据", option...)
 		if err != nil {
