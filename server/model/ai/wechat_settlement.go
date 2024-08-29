@@ -10,11 +10,11 @@ type WechatSettlement struct {
 	Zone           string `json:"zone"`
 	Month          string `json:"month"`
 	Order          int    `json:"order"`
-	SettStatus     int    `json:"sett_status"`
-	SettledRevenue int    `json:"settled_revenue"`
-	SettNo         string `json:"sett_no"`
-	MailSendCnt    string `json:"mail_send_cnt"`
-	SlotRevenue    string `json:"slot_revenue"`
+	SettStatus     int    `json:"settStatus"`
+	SettledRevenue int    `json:"settledRevenue"`
+	SettNo         string `json:"settNo"`
+	MailSendCnt    string `json:"mailSendCnt"`
+	SlotRevenue    string `json:"slotRevenue"`
 }
 
 func (WechatSettlement) TableName() string {
