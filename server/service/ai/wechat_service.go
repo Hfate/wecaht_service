@@ -49,6 +49,8 @@ func (*WechatService) PublisherSettlement() {
 			continue
 		}
 
+		global.GVA_LOG.Error("PublisherSettlement", zap.String("AccountName", item.AccountName), zap.String("resp", utils.Parse2Json(settlementList)))
+
 		if len(settlementList.SettlementList) > 0 {
 			for _, set := range settlementList.SettlementList {
 				wechatSettlementList = append(wechatSettlementList, &aiModel.WechatSettlement{
