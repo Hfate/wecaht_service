@@ -34,6 +34,9 @@ func init() {
 
 func (*WechatService) PublisherSettlement() {
 	list, _ := OfficialAccountServiceApp.List()
+
+	global.GVA_LOG.Info("PublisherSettlement", zap.Int("account-length", len(list)))
+
 	wechatSettlementList := make([]*aiModel.WechatSettlement, 0)
 	for _, item := range list {
 		cfg := &offConfig.Config{
@@ -43,13 +46,13 @@ func (*WechatService) PublisherSettlement() {
 			EncodingAESKey: item.EncodingAESKey,
 		}
 		officialAccount := wc.GetOfficialAccount(cfg)
-		settlementList, err := officialAccount.GetDataCube().GetPublisherSettlement("2024-01-01", "2024-09-01", 0, 10)
+		settlementList, err := officialAccount.GetDataCube().GetPublisherSettlement("2024-01-01", "2024-09-01", 1, 100)
 		if err != nil {
 			global.GVA_LOG.Error("PublisherSettlement", zap.String("AccountName", item.AccountName), zap.String("err", err.Error()))
 			continue
 		}
 
-		global.GVA_LOG.Error("PublisherSettlement", zap.String("AccountName", item.AccountName), zap.String("resp", utils.Parse2Json(settlementList)))
+		global.GVA_LOG.Info("PublisherSettlement", zap.String("AccountName", item.AccountName), zap.String("resp", utils.Parse2Json(settlementList)))
 
 		if len(settlementList.SettlementList) > 0 {
 			for _, set := range settlementList.SettlementList {
