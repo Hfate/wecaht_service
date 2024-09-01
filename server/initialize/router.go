@@ -95,6 +95,7 @@ func Routers() *gin.Engine {
 		systemRouter.InitSysDictionaryDetailRouter(PrivateGroup) // 字典详情管理
 		systemRouter.InitAuthorityBtnRouterRouter(PrivateGroup)  // 字典详情管理
 		systemRouter.InitSysExportTemplateRouter(PrivateGroup)   // 导出模板
+		aiRouter.InitSettlementRouter(PrivateGroup)              // 计算管理
 		aiRouter.InitPortalRouter(PrivateGroup)                  // 门户网站管理
 		aiRouter.InitPromptRouter(PrivateGroup)                  // prompt管理
 		aiRouter.InitArticleRouter(PrivateGroup)                 // 文章管理

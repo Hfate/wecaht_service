@@ -13,4 +13,5 @@ type RouterGroup struct {
 	FileRouter
 	TemplateRouter
 	CssFormatRouter
+	SettlementRouter
 }

@@ -1,6 +1,7 @@
 package ai
 
 type ServiceGroup struct {
+	WechatSettlementService
 	PortalService
 	ArticleService
 	DailyArticleService
