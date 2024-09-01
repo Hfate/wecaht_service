@@ -26,7 +26,7 @@ func (exa *WechatSettlementService) GetSettlementList(info request.PageInfo) (li
 	if err != nil {
 		return settlementList, total, err
 	} else {
-		err = db.Limit(limit).Offset(offset).Order("updated_at desc").Find(&settlementList).Error
+		err = db.Limit(limit).Offset(offset).Order("date desc,account_id desc").Find(&settlementList).Error
 	}
 	return settlementList, total, err
 }
