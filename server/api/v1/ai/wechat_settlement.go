@@ -45,3 +45,29 @@ func (e *SettlementApi) GetSettlementList(c *gin.Context) {
 		PageSize: pageInfo.PageSize,
 	}, "获取成功", c)
 }
+
+// Download
+// @Tags      Article
+// @Summary   分页获取权限文章列表
+// @Security  ApiKeyAuth
+// @accept    application/json
+// @Produce   application/json
+// @Param     data  query     request.PageInfo                                        true  "页码, 每页大小"
+// @Success   200   {object}  response.Response{data=response.PageResult,msg=string}  ""
+// @Router    /settlement/download [get]
+func (e *SettlementApi) Download(c *gin.Context) {
+	var pageInfo request.PageInfo
+	err := c.ShouldBindQuery(&pageInfo)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	err = utils.Verify(pageInfo, utils.PageInfoVerify)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+
+	pageInfo.PageSize = 10000
+	settlementService.Download(c, pageInfo)
+}

@@ -13,5 +13,7 @@ func (e *SettlementRouter) InitSettlementRouter(Router *gin.RouterGroup) {
 	settlementApi := v1.ApiGroupApp.AIApiGroup.SettlementApi
 	{
 		settlementRouterWithoutRecord.GET("list", settlementApi.GetSettlementList) // 获取结算列表
+		settlementRouterWithoutRecord.GET("download", settlementApi.Download)      // 获取结算列表
+
 	}
 }

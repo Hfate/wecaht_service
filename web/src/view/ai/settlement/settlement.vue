@@ -1,6 +1,38 @@
 <template>
   <div>
 
+    <div class="gva-search-box">
+      <el-form
+          :inline="true"
+          :model="searchInfo"
+      >
+        <el-form-item label="公众号">
+          <el-input
+              v-model="searchInfo.Title"
+          />
+        </el-form-item>
+
+        <el-form-item>
+          <el-button
+              type="primary"
+              icon="search"
+              @click="onSubmit"
+          >查询
+          </el-button>
+          <el-button
+              icon="refresh"
+              @click="onReset"
+          >重置
+          </el-button>
+          <el-button
+              icon="download"
+              @click="onDownload"
+          >下载
+          </el-button>
+        </el-form-item>
+      </el-form>
+    </div>
+
     <div class="gva-table-box">
 
       <el-table
@@ -66,6 +98,8 @@
 <script setup>
 import {getSettlementList} from '@/api/settle'
 import {ref} from 'vue'
+import axios from "axios";
+import {saveAs} from 'file-saver'
 
 defineOptions({
   name: 'CssFormat'
@@ -128,6 +162,42 @@ const formatSettStatus = (status) => {
       return '-';
   }
 };
+
+const searchInfo = ref({})
+
+const onReset = () => {
+  searchInfo.value = {}
+}
+// 条件搜索前端看此方法
+const onSubmit = () => {
+  page.value = 1
+  pageSize.value = 10
+
+  getTableData()
+}
+
+// 条件搜索前端看此方法
+const onDownload = () => {
+  page.value = 1
+  pageSize.value = 200
+  downloadSettlement()
+}
+
+const downloadSettlement = async () => {
+  // 发起 GET 请求并传递参数
+  axios.get(import.meta.env.VITE_BASE_API + '/settlement/download', {
+    params: {page: page.value, pageSize: pageSize.value, ...searchInfo.value,},
+    responseType: 'blob'
+  }).then(response => {
+    // 将服务器返回的二进制数据保存为 Blob 对象
+    const blob = new Blob([response.data], {type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+
+    // 使用 file-saver 库将 Blob 对象保存为本地文件
+    saveAs(blob, 'settlement.xlsx');
+  }).catch(error => {
+    console.error('Failed to download Excel file:', error);
+  });
+}
 
 </script>
 

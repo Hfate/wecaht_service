@@ -53,7 +53,7 @@ func (*WechatService) PublisherSettlement() {
 			EncodingAESKey: item.EncodingAESKey,
 		}
 		officialAccount := wc.GetOfficialAccount(cfg)
-		settlementList, err := officialAccount.GetDataCube().GetPublisherSettlement("2024-01-01", "2024-09-01", 1, 100)
+		settlementList, err := officialAccount.GetDataCube().GetPublisherSettlement("2024-01-01", "2024-12-31", 1, 100)
 		if err != nil {
 			global.GVA_LOG.Error("PublisherSettlement", zap.String("AccountName", item.AccountName), zap.Any("err", err))
 			continue
